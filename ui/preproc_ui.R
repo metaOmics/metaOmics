@@ -51,7 +51,6 @@ preproc_ui <- function(id, label= "preprocessing data") {
         ##########################
         h4("Configuring Metadata"),
         selectInput(ns("dtype"), "Type of Data", study.dtype),
-        selectInput(ns("ntype"), "Numeric Nature", study.ntype),
         textInput(ns("studyName"), "Study Name:", "some study"),
         actionButton(ns('saveStudy'), 'save single study', icon=icon("save"))
       ),

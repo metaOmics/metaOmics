@@ -9,9 +9,15 @@ saved_data_server <- function(input, output, session) {
   output$table <- DT::renderDataTable(DT::datatable({
     datasets$names
     studies <- load_studies()
+    cat(file=stderr(), "1\n")
     if(length(studies) > 0) {
       metas <- lapply(studies, function(x) {
-        c(x@dtype, x@ntype, x@stype, dim(x@dataset))
+        nrows <- nrow(x@datasets[[1]])
+        ncols <- 0
+        for(d in x@datasets) {
+          ncols <- ncols + ncol(d)
+        }
+        c(x@dtype, x@ntype, x@stype, nrows, ncols)
       })
       n <- length(metas)
       metas <- unlist(metas)

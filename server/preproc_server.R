@@ -29,7 +29,7 @@ preproc_server <- function(input, output, session) {
       updateSelectizeInput(session, "dtype", selected=study@dtype)
       updateSelectizeInput(session, "ntype", selected=study@ntype)
       updateSelectizeInput(session, "stype", selected=study@stype)
-      dataset <- study@dataset
+      dataset <- do.call(cbind, study@datasets)
     }
     itype <- input$id.type
     if (itype  != id.type[["Gene Symbol"]]) {
@@ -86,13 +86,13 @@ preproc_server <- function(input, output, session) {
   ##########################
   observeEvent(input$saveStudy, {
     if (!is.null(datasetInput())) {
+      cat(file=stderr(), input$dtype, ntype(input$dtype),"\n")
       study <- new("Study",
         name=input$studyName,
-        ntype=input$ntype,
-        stype=study.stype[["single study"]],
         dtype=input$dtype,
-        dataset=as.matrix(datasetInput())
+        datasets=list(as.matrix(datasetInput()))
       )
+      cat(file=stderr(), cat(show(study)))
       saveRDS(study, file=paste(dataset.dir, input$studyName, sep="/"))
       session$sendCustomMessage(type = 'simpleAlert',
         message = paste("study saved:", input$studyName)
@@ -104,5 +104,4 @@ preproc_server <- function(input, output, session) {
       )
     }
   })
-
 }
