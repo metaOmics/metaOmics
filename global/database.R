@@ -61,17 +61,17 @@ setGeneric("ntype", function(object) {
 
 setMethod("ntype", signature("Study"), function(object){
   switch(object@dtype,
-    "microarray"=study.ntype[["continuous"]],
-    "RNAseq"    =study.ntype[["discrete"]],
-    "RNAseqFPKM"=study.ntype[["continuous"]]
+    "microarray"   = study.ntype[["continuous"]],
+    "RNAseq-count" = study.ntype[["discrete"]],
+    "RNAseq-FPKM"  = study.ntype[["continuous"]]
   )
 })
 
 setMethod("ntype", signature("character"), function(object){
   switch(object,
-    "microarray"=study.ntype[["continuous"]],
-    "RNAseq"     =study.ntype[["discrete"]],
-    "RNAseqFPKM" =study.ntype[["continuous"]]
+    "microarray"   = study.ntype[["continuous"]],
+    "RNAseq-count" = study.ntype[["discrete"]],
+    "RNAseq-FPKM"  = study.ntype[["continuous"]]
   )
 })
 

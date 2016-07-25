@@ -2,8 +2,8 @@ dataset.dir <- "data/.dataset"
 
 study.dtype <- list(
   "microarray"="microarray",
-  "RNA sequence"="RNAseq",
-  "RNA sequence FPKM"="RNAseqFPKM"
+  "RNA sequence count"="RNAseq-count",
+  "RNA sequence FPKM"="RNAseq-FPKM"
 )
 
 study.stype <- list(
