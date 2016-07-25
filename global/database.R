@@ -32,6 +32,11 @@ setMethod("initialize", "Study",
   }
 )
 
+setMethod("as.matrix", signature("Study"),
+  definition=function(x, ...) {
+    do.call(cbind, x@datasets)
+  }
+)
 
 setGeneric("stype", function(object) {
   standardGeneric("stype")
@@ -93,6 +98,28 @@ load_studies <- function() {
   for (f in datasets) {
     studies <- c(studies, load_study(f))
   }
+  names(studies) <- lapply(studies, function(s) s@name )
   studies
 }
 
+dataset_meta <- function() {
+  studies <- load_studies()
+  if(length(studies) > 0) {
+    metas <- lapply(studies, function(x) {
+      nrows <- nrow(x@datasets[[1]])
+      ncols <- 0
+      for(d in x@datasets) {
+        ncols <- ncols + ncol(d)
+      }
+      c(x@dtype, x@ntype, x@stype, nrows, ncols)
+    })
+    n <- length(metas)
+    metas <- unlist(metas)
+    dim(metas) <- c(5, n)
+    metas <- t(metas)
+    colnames(metas) <- c("data type", "numeric nature", "study type", 
+                         "features", "sample size")
+    rownames(metas) <- unlist(lapply(studies, function(x) x@name))
+    as.data.frame(metas)
+  }
+}
