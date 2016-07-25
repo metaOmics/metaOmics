@@ -42,8 +42,8 @@ preproc_ui <- function(id, label= "preprocessing data") {
         # Annotation             #
         ##########################
         h4("Annotation"),
-        selectInput(ns("ID.type"), "ID type", ID.type),
-        uiOutput(ns("ID.type.option")),
+        selectInput(ns("id.type"), "ID type", id.type),
+        uiOutput(ns("id.type.option")),
         tags$hr(),
 
         ##########################

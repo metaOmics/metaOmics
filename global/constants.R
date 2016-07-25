@@ -16,7 +16,7 @@ study.ntype <- list(
   "discrete"="discrete"
 )
 
-ID.type <- list(
+id.type <- list(
   "Gene Symbol"="GeneSymbol",
   "Probe ID"="ProbeID",
   "Reference Sequence ID"="RefSeqID",

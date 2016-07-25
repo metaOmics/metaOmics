@@ -15,15 +15,13 @@ preproc_server <- function(input, output, session) {
   # Choosing / Upload Data #
   ##########################
   datasetInput <- reactive({
+    dataset <- NULL
     if (input$dataset == "") {
       inFile <- input$file
-      if (is.null(inFile)) {
-        NULL
-      } else {
+      if (!is.null(inFile)) {
         dataset <- ReadExpr(inFile$datapath, header=input$header,
           sep=input$sep, quote=input$quote, log=input$log)
         updateTextInput(session, "studyName", value=inFile$name)
-        as.data.frame(dataset)
       }
     } else {
       study <- load_study(input$dataset)
@@ -31,8 +29,19 @@ preproc_server <- function(input, output, session) {
       updateSelectizeInput(session, "dtype", selected=study@dtype)
       updateSelectizeInput(session, "ntype", selected=study@ntype)
       updateSelectizeInput(session, "stype", selected=study@stype)
-      as.data.frame(study@dataset)
+      dataset <- study@dataset
     }
+    itype <- input$id.type
+    if (itype  != id.type[["Gene Symbol"]]) {
+      ip <- input$platform
+      is <- input$species
+      if (itype == id.type[["Probe ID"]] && !is.null(ip) && ip != "") {
+        dataset <- Annotate(dataset, id.type=itype, platform=input$platform)
+      } else if (!is.null(is) && is != "") {
+        dataset <- Annotate(dataset, id.type=itype, species=input$species)
+      }
+    }
+    as.data.frame(dataset)
   })
   
   output$studyName <- renderText({
@@ -55,16 +64,16 @@ preproc_server <- function(input, output, session) {
   # Annotation             #
   ##########################
   data(platform.info)
-  platform.options <- as.list(paste(platform.info[,2], platform.info[,3], sep="::"))
+  platform.options <- as.list(platform.info[,1])
   names(platform.options) <- platform.info[,1]
-  selectPlatform <- selectizeInput("platform", "Platform:", platform.options, 
+  selectPlatform <- selectizeInput("preproc-platform", "Platform:", platform.options, 
     options = select.noDefault
   )
-  selectSpecies <- selectizeInput("species", "Species:", species.option,
+  selectSpecies <- selectizeInput("preproc-species", "Species:", species.option,
     options = select.noDefault
   )
-  output$ID.type.option <- renderUI({
-    switch (input$ID.type,
+  output$id.type.option <- renderUI({
+    switch (input$id.type,
       ProbeID=selectPlatform,
       RefSeqID=selectSpecies,
       EntrezID=selectSpecies,

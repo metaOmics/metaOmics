@@ -34,3 +34,6 @@ vignettes/*.pdf
 
 # App database
 data
+
+# Temporari files
+*.swp
