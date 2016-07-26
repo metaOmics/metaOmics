@@ -2,6 +2,7 @@
 library(preproc)
 library(shiny)
 source("global/constants.R")
+source("global/messages.R")
 source("global/database.R")
 source("global/study.R")
 
@@ -20,3 +21,14 @@ for (f in list.files(path=dir, pattern="*.R")) {
   source(paste(dir, f, sep="/"))
 }
 
+sendWarningMessage <- function(session, msg) {
+  session$sendCustomMessage(type = 'warningMessage', message=msg)
+}
+
+sendErrorMessage <- function(session, msg) {
+  session$sendCustomMessage(type = 'errorMessage', message=msg)
+}
+
+sendSuccessMessage <- function(session, msg) {
+  session$sendCustomMessage(type = 'successMessage', message=msg)
+}

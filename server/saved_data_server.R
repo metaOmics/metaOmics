@@ -1,12 +1,33 @@
 saved_data_server <- function(input, output, session) {
 
-  current.study <- DB.load.active(db)
-  if (is.null(current.study))
-    current.study <- "No active study"
+  active.study <- DB.load.active(db)
+  if (is.null(active.study))
+    active.study <- "No active study"
   else
-    current.study <- current.study@name
+    active.study <- active.study@name
 
-  DB <- reactiveValues(meta=meta(db), active=current.study)
+  DB <- reactiveValues(meta=meta(db), active=active.study)
+
+  validate.merge.option <- function(input) {
+    selected <- input$table_rows_selected
+    types <- DB$meta[selected,"numeric nature"]
+    if (all(types == "continuous")) {
+      if (is.na(input$mean))
+        stop(MSG.merge.nomean)
+      else if (is.na(input$var))
+        stop(MSG.merge.novariance)
+    } else if (all(types == "discrete")){
+      if (is.na(input$threshold))
+        stop(MSG.merge.nothreshold)
+    } else {
+      stop(MSG.merge.mixedtype)
+    }
+
+    if(is.null(input$studyName) || input$studyName == "")
+      stop(MSG.merge.noname)
+    if(input$studyName %in% DB.ls(db))
+      stop(MSG.study.duplicate(input$studyName))
+  }
 
   observeEvent(input$tabChange, {
     DB$meta <- meta(db)
@@ -26,11 +47,14 @@ saved_data_server <- function(input, output, session) {
   })
 
   observeEvent(input$delete, {
-    DB.delete(db, input$table_rows_selected)
-    session$sendCustomMessage(type = 'simpleAlert',
-      message = paste("deleted:", input$table_rows_selected)
-    )
-    DB$meta <- meta(db)
+    selected <- input$table_rows_selected
+    if(length(selected) == 0) {
+      sendErrorMessage(session, "You haven't select anything yet")
+    } else {
+      DB.delete(db, selected)
+      sendSuccessMessage(session, paste(selected, "deleted"))
+      DB$meta <- meta(db)
+    }
   })
 
   output$activated <- renderText({
@@ -51,36 +75,41 @@ saved_data_server <- function(input, output, session) {
       types <- DB$meta[selected,"numeric nature"]
       if (all(types == "continuous")) {
         tagList(
-          numericInput("precMean", "mean:", value = 0.3, step= 0.1),
-          numericInput("precVar", "variance:", min = 0, value = 0.3, step= 0.1),
+          numericInput("saved_data-mean", "mean:", value = 0.3, step= 0.1),
+          numericInput("saved_data-var", "variance:", min = 0, value = 0.3, step= 0.1),
           mergeButton
         )
       } else if (all(types == "discrete")) {
         tagList(
-          numericInput("threshold", "threshold", 1, min=0),
+          numericInput("saved_data-threshold", "threshold", 1, min=0),
           mergeButton
         )
       } else {
-        tags$span("You can't merge continuous data with discrete data")
+        tags$span(MSG.merge.mixedtype)
       }
     }
   })
 
   observeEvent(input$merge, {
-    selected <- input$table_rows_selected
-    studies <- DB.load(db, selected)
-    datasets <- Merge(lapply(studies, function(s) as.matrix(s)),
-                     lapply(studies, function(s) s@dtype))
-    study <- new("Study",
-      name=input$studyName,
-      dtype=studies[[1]]@ntype,
-      datasets=datasets
+    tryCatch( {
+        validate.merge.option(input)
+        selected <- input$table_rows_selected
+        studies <- DB.load(db, selected)
+        datasets <- Merge(lapply(studies, function(s) as.matrix(s)),
+                         lapply(studies, function(s) s@dtype))
+        study <- new("Study",
+          name=input$studyName,
+          dtype=studies[[1]]@ntype,
+          datasets=datasets
+        )
+        DB.save(db, study, study@name)
+        message = paste("A merged study is created:", study@name)
+        sendSuccessMessage(session, message)
+        DB$meta <- meta(db)
+      },
+      warning=function(w) {sendWarningMessage(session, w$message)},
+      error=function(e) {sendErrorMessage(session, e$message)}
     )
-    DB.save(db, study, input$studyName)
-    session$sendCustomMessage(type = 'simpleAlert',
-      message = paste("study saved:", input$studyName)
-    )
-    DB$meta <- meta(db)
   })
 
   output$active <- renderUI({
@@ -95,5 +124,7 @@ saved_data_server <- function(input, output, session) {
     selected <- input$table_rows_selected
     DB.activate(db, selected)
     DB$active <- DB.load.active(db)@name
+    message = paste(DB$active, "is now made the active study")
+    sendSuccessMessage(session, message)
   })
 }

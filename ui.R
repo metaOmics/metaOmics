@@ -7,7 +7,10 @@ shinyUI(
     saved_data_ui("saved_data"),
     # Including css and javascripts in head section
     tags$head(
+      tags$link(rel = "stylesheet", type = "text/css", href = "css/messenger.css"),
+      tags$link(rel = "stylesheet", type = "text/css", href = "css/messenger-theme-future.css"),
       tags$link(rel = "stylesheet", type = "text/css", href = "css/styles.css"),
+      tags$script(src="js/messenger.min.js"),
       tags$script(src="js/message-handler.js")
     )
   )
