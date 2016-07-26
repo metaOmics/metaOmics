@@ -9,7 +9,8 @@ MSG.merge.novariance <- "variance can not be empty and should be numeric type"
 MSG.merge.nothreshold <- "threshold can not be empty and should be numeric type"
 MSG.merge.mixedtype <- "You can't merge continuous data with discrete data"
 
-MSG.study.noname = "Study Name can not be empty"
+MSG.study.noname <- "Study Name can not be empty"
+MSG.study.nolog <- "the numeric nature of this study is discrete, you should not apply log transform"
 MSG.study.duplicate <- function(name) {
   paste("a study called", name, "exits, please choose another name or delete the study first")
 }
