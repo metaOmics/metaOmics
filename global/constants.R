@@ -3,7 +3,9 @@ DB.dir <- "data"
 study.dtype <- list(
   "microarray"="microarray",
   "RNA sequence count"="RNAseq-count",
-  "RNA sequence FPKM"="RNAseq-FPKM"
+  "RNA sequence FPKM"="RNAseq-FPKM",
+  "continuous"="continuous",
+  "discrete"="discrete"
 )
 
 study.stype <- list(

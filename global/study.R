@@ -13,6 +13,8 @@ setClass("Study",
   ),
   validity = function(object) {
     errors <- character()
+    if(!(object@dtype %in% study.dtype))
+      errors <- c(errors, paste("dtype should be one of: ", study.dtype))
     if (length(object@datasets) <= 0) {
       errors <- c(errors, "initialize datasets with at least one dataset")
     }
@@ -84,18 +86,16 @@ setGeneric("ntype", function(object) {
 })
 
 setMethod("ntype", signature("Study"), function(object){
-  switch(object@dtype,
-    "microarray"   = study.ntype[["continuous"]],
-    "RNAseq-count" = study.ntype[["discrete"]],
-    "RNAseq-FPKM"  = study.ntype[["continuous"]]
-  )
+  if(object@dtype == "RNAseq-count" || object@dtype == "discrete")
+    study.ntype[["discrete"]]
+  else
+    study.ntype[["continuous"]]
 })
 
 setMethod("ntype", signature("character"), function(object){
-  switch(object,
-    "microarray"   = study.ntype[["continuous"]],
-    "RNAseq-count" = study.ntype[["discrete"]],
-    "RNAseq-FPKM"  = study.ntype[["continuous"]]
-  )
+  if(object == "RNAseq-count" || object == "discrete")
+    study.ntype[["discrete"]]
+  else
+    study.ntype[["continuous"]]
 })
 

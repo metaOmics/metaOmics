@@ -59,12 +59,12 @@ saved_data_server <- function(input, output, session) {
   observeEvent(input$merge, {
     selected <- input$table_rows_selected
     studies <- DB.load(db, selected)
-    studies <- Merge(lapply(studies, function(s) as.matrix(s)),
+    datasets <- Merge(lapply(studies, function(s) as.matrix(s)),
                      lapply(studies, function(s) s@dtype))
     study <- new("Study",
       name=input$studyName,
-      dtype=input$dtype,
-      datasets=studies
+      dtype=studies[[1]]@ntype,
+      datasets=datasets
     )
     DB.save(db, study, input$studyName)
     session$sendCustomMessage(type = 'simpleAlert',
