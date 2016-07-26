@@ -1,6 +1,12 @@
 saved_data_server <- function(input, output, session) {
 
-  DB <- reactiveValues(meta=meta(db), active=DB.load.active(db)@name)
+  current.study <- DB.load.active(db)
+  if (is.null(current.study))
+    current.study <- "No active study"
+  else
+    current.study <- current.study@name
+
+  DB <- reactiveValues(meta=meta(db), active=current.study)
 
   observeEvent(input$tabChange, {
     DB$meta <- meta(db)
