@@ -3,13 +3,13 @@ saved_data_ui <- function(id, label = "saved data of single study or multiple st
   tabPanel("Saved Data", value=id,
     sidebarLayout(
       sidebarPanel(
-        h3("Selected Datasets"),
+        h4("Selected Datasets"),
 	textOutput(ns("selected")),
 	tags$hr(),
-        h3("Merging and Filtering Datasets"),
+        h4("Merging and Filtering Datasets"),
         uiOutput(ns("merge.option")),
 	tags$hr(),
-        h3("Delete Data"),
+        h4("Delete Data"),
         actionButton(ns('delete'), 'Delete Selected Data', icon=icon("trash"))
       ),
       mainPanel(
@@ -26,10 +26,9 @@ saved_data_ui <- function(id, label = "saved data of single study or multiple st
           )
         ),
         # Create a new row for the table.
-        fluidRow(
-          DT::dataTableOutput(ns("table"))
-        )
+        DT::dataTableOutput(ns("table"))
       )
-    )
+    ),
+    uiOutput(ns("active"))
   )
 }

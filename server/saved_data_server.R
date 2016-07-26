@@ -1,6 +1,6 @@
 saved_data_server <- function(input, output, session) {
 
-  DB <- reactiveValues(meta=meta(db))
+  DB <- reactiveValues(meta=meta(db), active=DB.load.active(db)@name)
 
   observeEvent(input$tabChange, {
     DB$meta <- meta(db)
@@ -25,6 +25,10 @@ saved_data_server <- function(input, output, session) {
       message = paste("deleted:", input$table_rows_selected)
     )
     DB$meta <- meta(db)
+  })
+
+  output$activated <- renderText({
+    DB$active
   })
 
   output$merge.option <- renderUI({
@@ -71,5 +75,19 @@ saved_data_server <- function(input, output, session) {
       message = paste("study saved:", input$studyName)
     )
     DB$meta <- meta(db)
+  })
+
+  output$active <- renderUI({
+    if (length(input$table_rows_selected) == 1 )
+      actionButton("saved_data-active",
+        paste( "Make", input$table_rows_selected, "Active Dataset"),
+        icon=icon("compress")
+      )
+  })
+
+  observeEvent(input$active, {
+    selected <- input$table_rows_selected
+    DB.activate(db, selected)
+    DB$active <- DB.load.active(db)@name
   })
 }

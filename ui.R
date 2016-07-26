@@ -1,5 +1,6 @@
 shinyUI(
   navbarPage("metaOmics", id="nav",
+    header=h5(textOutput("saved_data-activated"), id="active-study"),
     # tab for preprosessing
     preproc_ui("preproc"),
     # tab for manipulating saved data

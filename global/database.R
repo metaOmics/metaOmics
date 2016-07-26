@@ -3,11 +3,13 @@ setClass("Database",
   representation(
     name="character",
     dir="character",
-    meta.dir="character"
+    meta.file="character",
+    activate.dir="character"
   ),
   prototype(
     dir="",
-    meta.dir=""
+    meta.file="",
+    activate.dir=""
   ),
   validity = function(object) {
     errors <- character()
@@ -20,9 +22,11 @@ setMethod("initialize", "Database",
   function(.Object, name) {
     .Object <- callNextMethod()
     .Object@dir      <- paste(DB.dir, name, sep="/")
-    .Object@meta.dir <- paste(".Database", name, "meta", sep="/")
+    .Object@meta.file <- paste(".Database", name, "meta/meta", sep="/")
+    .Object@activate.dir <- paste(".Database", name, "active",  sep="/")
     dir.create(.Object@dir, recursive=T)
-    dir.create(paste(".Database", name, sep="/"), recursive=T)
+    dir.create(paste(".Database", name, "meta",  sep="/"), recursive=T)
+    dir.create(.Object@activate.dir, recursive=T)
     studies <- c()
     studies <- DB.load(.Object, list.files(path=.Object@dir))
     db.meta <- data.frame(
@@ -48,13 +52,13 @@ setGeneric("meta", function(object) {
 
 # Return Database meta information as data.frame
 setMethod("meta", signature("Database"), function(object) {
-  readRDS(db@meta.dir)
+  readRDS(db@meta.file)
 })
 
 # write database meta data to file, should be called everytime when
 # database is modified
 DB.sync <- function(db, db.meta) {
-  saveRDS(db.meta, file=db@meta.dir)
+  saveRDS(db.meta, file=db@meta.file)
 }
 
 # save x to db as file
@@ -88,4 +92,21 @@ DB.delete <- function(db, files) {
 # list all files in db
 DB.ls <- function(db) {
   rownames(meta(db))
+}
+
+# Active study for database
+DB.activate <- function(db, study) {
+  if (class(study) == "Study")
+    study <- study@name
+  else if (!(study %in% DB.ls(db)))
+    stop("InDB.activate: No such study")
+  current.active.study <- list.files(path=db@activate.dir)
+  unlink(paste(db@activate.dir, current.active.study, sep="/"))
+  file.create(paste(db@activate.dir, study, sep="/"))
+}
+
+# Load currently active study for db
+DB.load.active <- function(db) {
+  current.active.study <- list.files(path=db@activate.dir)
+  DB.load(db, current.active.study)
 }
