@@ -1,125 +1,91 @@
-setClass("Study",
+# Database class
+setClass("Database",
   representation(
     name="character",
-    dtype="character",
-    ntype="character",
-    stype="character",
-    datasets="list"
+    dir="character",
+    meta.dir="character"
   ),
   prototype(
-    ntype="",
-    stype=""
+    dir="",
+    meta.dir=""
   ),
   validity = function(object) {
     errors <- character()
-    if (length(object@datasets) <= 0) {
-      errors <- c(errors, "initialize datasets with at least one dataset")
-    }
-    for(dataset in object@datasets) {
-      if(class(dataset) != "matrix")
-        errors <- c(errors, "datasets contains non matrix element")
-    }
     if (length(errors) == 0) TRUE else errors
   }
 )
 
-setMethod("initialize", "Study",
-  function(.Object, name, dtype, datasets) {
+# custom contructor to set meta
+setMethod("initialize", "Database",
+  function(.Object, name) {
     .Object <- callNextMethod()
-    .Object@stype <- stype(datasets)
-    .Object@ntype <- ntype(dtype)
+    .Object@dir      <- paste(DB.dir, name, sep="/")
+    .Object@meta.dir <- paste(".Database", name, "meta", sep="/")
+    dir.create(.Object@dir, recursive=T)
+    dir.create(paste(".Database", name, sep="/"), recursive=T)
+    studies <- c()
+    studies <- DB.load(.Object, list.files(path=.Object@dir))
+    db.meta <- data.frame(
+      "data type"=character(0),
+      "numeric nature"=character(0),
+      "study type"=character(0),
+      "features"=numeric(0),
+      "sample size"=numeric(0)
+    )
+    if(length(studies) > 0) {
+      db.meta <- lapply(studies, function(study) meta(study))
+      db.meta <- do.call(rbind, db.meta)
+    }
+    DB.sync(.Object, db.meta)
     .Object
   }
 )
 
-setMethod("as.matrix", signature("Study"),
-  definition=function(x, ...) {
-    do.call(cbind, x@datasets)
-  }
-)
-
-setGeneric("stype", function(object) {
-  standardGeneric("stype")
+# Generic function "meta"
+setGeneric("meta", function(object) {
+  standardGeneric("meta")
 })
 
-setMethod("stype", signature("Study"), function(object) {
-  if (length(object@datasets) > 1)
-    study.stype[["multiple studies"]]
-  else if (length(object@datasets) == 1)
-    study.stype[["single study"]]
-  else
-    NA
+# Return Database meta information as data.frame
+setMethod("meta", signature("Database"), function(object) {
+  readRDS(db@meta.dir)
 })
 
-setMethod("stype", signature("list"), function(object) {
-  if (length(object) > 1)
-    study.stype[["multiple studies"]]
-  else if (length(object) == 1)
-    study.stype[["single study"]]
-  else
-    NA
-})
-
-setGeneric("ntype", function(object) {
-  standardGeneric("ntype")
-})
-
-setMethod("ntype", signature("Study"), function(object){
-  switch(object@dtype,
-    "microarray"   = study.ntype[["continuous"]],
-    "RNAseq-count" = study.ntype[["discrete"]],
-    "RNAseq-FPKM"  = study.ntype[["continuous"]]
-  )
-})
-
-setMethod("ntype", signature("character"), function(object){
-  switch(object,
-    "microarray"   = study.ntype[["continuous"]],
-    "RNAseq-count" = study.ntype[["discrete"]],
-    "RNAseq-FPKM"  = study.ntype[["continuous"]]
-  )
-})
-
-dataset_names <- function() {
-  study.names <- list.files(path=dataset.dir)
-  all.study <- as.list(study.names)
-  names(all.study) <- study.names
-  all.study
+# write database meta data to file, should be called everytime when
+# database is modified
+DB.sync <- function(db, db.meta) {
+  saveRDS(db.meta, file=db@meta.dir)
 }
 
-load_study <- function(data.name) {
-  study <- readRDS(paste(dataset.dir, data.name, sep='/'))
-  study
+# save x to db as file
+DB.save <- function(db, x, file) {
+  if(class(x) != "Study") stop("x must be Study")
+  saveRDS(x, file=paste(db@dir, file, sep="/"))
+  db.meta <- rbind(meta(db), meta(x))
+  DB.sync(db, db.meta)
 }
 
-load_studies <- function() {
+# load file from db
+DB.load <- function(db, files) {
   studies <- c()
-  datasets <- dataset_names()
-  for (f in datasets) {
-    studies <- c(studies, load_study(f))
+  for(file in files) {
+    studies <- c(studies, readRDS(paste(db@dir, file, sep='/')))
   }
-  names(studies) <- lapply(studies, function(s) s@name )
-  studies
+  if(length(studies) == 1)
+    studies[[1]]
+  else
+    studies
 }
 
-dataset_meta <- function() {
-  studies <- load_studies()
-  if(length(studies) > 0) {
-    metas <- lapply(studies, function(x) {
-      nrows <- nrow(x@datasets[[1]])
-      ncols <- 0
-      for(d in x@datasets) {
-        ncols <- ncols + ncol(d)
-      }
-      c(x@dtype, x@ntype, x@stype, nrows, ncols)
-    })
-    n <- length(metas)
-    metas <- unlist(metas)
-    dim(metas) <- c(5, n)
-    metas <- t(metas)
-    colnames(metas) <- c("data type", "numeric nature", "study type", 
-                         "features", "sample size")
-    rownames(metas) <- unlist(lapply(studies, function(x) x@name))
-    as.data.frame(metas)
-  }
+# delete file from db
+DB.delete <- function(db, files) {
+  unlink(paste(db@dir, files, sep="/"))
+  db.meta <- meta(db)
+  db.meta <- db.meta[!(rownames(db.meta) %in% files),]
+  DB.sync(db, db.meta)
+}
+
+# list all files in db
+DB.ls <- function(db) {
+  rownames(meta(db))
 }

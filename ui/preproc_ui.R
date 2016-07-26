@@ -10,7 +10,7 @@ preproc_ui <- function(id, label= "preprocessing data") {
         fileInput(ns("file"), 'Choose CSV File',
           accept=c('text/csv', 'text/comma-separated-values,text/plain', '.csv')
         ),
-        selectizeInput(ns("dataset"), "Or use existing datasets", dataset_names(),
+        selectizeInput(ns("dataset"), "Or use existing datasets", DB.ls(db),
           options = list(
             placeholder = 'Choose from below',
             onInitialize = I('function() { this.setValue(""); }'),

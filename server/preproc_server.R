@@ -1,14 +1,14 @@
 preproc_server <- function(input, output, session) {
 
-  datasets <- reactiveValues(names=dataset_names())
+  DB <- reactiveValues(names=DB.ls(db))
 
-  observeEvent(datasets$names, {
-    updateSelectizeInput(session, "dataset", choices=datasets$names,
+  observeEvent(DB$names, {
+    updateSelectizeInput(session, "dataset", choices=DB$names,
       selected=input$studyName)
   })
 
   observeEvent(input$tabChange, {
-    datasets$names <- dataset_names()
+    DB$names <- DB.ls(db)
   })
 
   ##########################
@@ -24,7 +24,7 @@ preproc_server <- function(input, output, session) {
         updateTextInput(session, "studyName", value=inFile$name)
       }
     } else {
-      study <- load_study(input$dataset)
+      study <- DB.load(db, input$dataset)
       updateTextInput(session, "studyName", value=study@name)
       updateSelectizeInput(session, "dtype", selected=study@dtype)
       updateSelectizeInput(session, "ntype", selected=study@ntype)
@@ -91,11 +91,11 @@ preproc_server <- function(input, output, session) {
         dtype=input$dtype,
         datasets=list(as.matrix(datasetInput()))
       )
-      saveRDS(study, file=paste(dataset.dir, input$studyName, sep="/"))
+      DB.save(db, study, file=input$studyName)
       session$sendCustomMessage(type = 'simpleAlert',
         message = paste("study saved:", input$studyName)
       )
-      datasets$names <- dataset_names()
+      DB$names <- DB.ls(db)
     } else {
       session$sendCustomMessage(type = 'simpleAlert',
         message = "No valid data yet"

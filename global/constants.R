@@ -1,4 +1,4 @@
-dataset.dir <- "data/.dataset"
+DB.dir <- "data"
 
 study.dtype <- list(
   "microarray"="microarray",

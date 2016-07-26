@@ -1,23 +1,13 @@
 saved_data_server <- function(input, output, session) {
 
-  datasets <- reactiveValues(
-    names=dataset_names(),
-    meta=dataset_meta(),
-    studies=load_studies()
-  )
+  DB <- reactiveValues(meta=meta(db))
 
   observeEvent(input$tabChange, {
-    datasets$names <- dataset_names()
-  })
-
-  observe({
-    datasets$names
-    datasets$meta <- dataset_meta()
-    datasets$studies <- load_studies()
+    DB$meta <- meta(db)
   })
 
   output$table <- DT::renderDataTable(DT::datatable({
-    datasets$meta
+    DB$meta
   }))
 
   output$selected <- renderText({
@@ -30,11 +20,11 @@ saved_data_server <- function(input, output, session) {
   })
 
   observeEvent(input$delete, {
-    unlink(paste(dataset.dir, input$table_rows_selected, sep="/"))
+    DB.delete(db, input$table_rows_selected)
     session$sendCustomMessage(type = 'simpleAlert',
       message = paste("deleted:", input$table_rows_selected)
     )
-    datasets$names <- dataset_names()
+    DB$meta <- meta(db)
   })
 
   output$merge.option <- renderUI({
@@ -48,7 +38,7 @@ saved_data_server <- function(input, output, session) {
     if (length(selected) <= 1) {
       tags$span("You need to select more than one dataset")
     } else {
-      types <- datasets$meta[selected,"numeric nature"]
+      types <- DB$meta[selected,"numeric nature"]
       if (all(types == "continuous")) {
         tagList(
           numericInput("precMean", "mean:", value = 0.3, step= 0.1),
@@ -68,7 +58,7 @@ saved_data_server <- function(input, output, session) {
 
   observeEvent(input$merge, {
     selected <- input$table_rows_selected
-    studies <- datasets$studies[selected]
+    studies <- DB.load(db, selected)
     studies <- Merge(lapply(studies, function(s) as.matrix(s)),
                      lapply(studies, function(s) s@dtype))
     study <- new("Study",
@@ -76,10 +66,10 @@ saved_data_server <- function(input, output, session) {
       dtype=input$dtype,
       datasets=studies
     )
-    saveRDS(study, file=paste(dataset.dir, input$studyName, sep="/"))
+    DB.save(db, study, input$studyName)
     session$sendCustomMessage(type = 'simpleAlert',
       message = paste("study saved:", input$studyName)
     )
-    datasets$names <- dataset_names()
+    DB$meta <- meta(db)
   })
 }
