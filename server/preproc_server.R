@@ -11,6 +11,20 @@ preproc_server <- function(input, output, session) {
     DB$names <- DB.ls(db)
   })
 
+  validate.data <- function(data) {
+    if(class(data) != "data.frame") stop(MSG.datasetInput.typeerror)
+    if(all(dim(data) == 0)) stop(MSG.datasetInput.noinput)
+    if(dim(data)[1] == 0) stop(MSG.datasetInput.norow)
+    if(dim(data)[2] == 0) stop(MSG.datasetInput.nocol)
+  }
+
+  validate.study <- function(study) {
+    if((input$log == T) && (ntype(study) == "discrete")) stop(MSG.study.nolog)
+    name <- study@name
+    if(is.null(name) || name == "") stop(MSG.study.noname)
+    if(name %in% DB.ls(db)) stop(MSG.study.duplicate(name))
+  }
+
   ##########################
   # Choosing / Upload Data #
   ##########################
@@ -85,21 +99,20 @@ preproc_server <- function(input, output, session) {
   # Save and Metadata      #
   ##########################
   observeEvent(input$saveStudy, {
-    if (!is.null(datasetInput())) {
-      study <- new("Study",
-        name=input$studyName,
-        dtype=input$dtype,
-        datasets=list(as.matrix(datasetInput()))
-      )
-      DB.save(db, study, file=input$studyName)
-      session$sendCustomMessage(type = 'simpleAlert',
-        message = paste("study saved:", input$studyName)
-      )
-      DB$names <- DB.ls(db)
-    } else {
-      session$sendCustomMessage(type = 'simpleAlert',
-        message = "No valid data yet"
-      )
-    }
+    tryCatch( {
+        validate.data(datasetInput())
+        study <- new("Study",
+          name=input$studyName,
+          dtype=input$dtype,
+          datasets=list(as.matrix(datasetInput()))
+        )
+        validate.study(study)
+        DB.save(db, study, file=input$studyName)
+        sendSuccessMessage(session, paste("Study", study@name, "saved."))
+        DB$names <- DB.ls(db)
+      },
+      warning=function(w) {sendWarningMessage(session, w$message)},
+      error=function(e) {sendErrorMessage(session, e$message)}
+    )
   })
 }

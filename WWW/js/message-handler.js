@@ -5,6 +5,19 @@ Shiny.addCustomMessageHandler("simpleAlert",
   }
 );
 
+function messengerAlert(type) {
+  return function(msg) {
+    Messenger().post({
+      message: msg,
+      type: type
+    });
+  }
+}
+
+Shiny.addCustomMessageHandler("successMessage", messengerAlert("success"));
+Shiny.addCustomMessageHandler("warningMessage", messengerAlert("warning"));
+Shiny.addCustomMessageHandler("errorMessage", messengerAlert("error"));
+
 Shiny.addCustomMessageHandler("resetFileInputHandler", function(x) {      
   var id = "#" + x + "_progress";
   var idBar = id + " .bar";
