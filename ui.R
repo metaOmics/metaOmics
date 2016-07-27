@@ -6,7 +6,7 @@ shinyUI(
     # tab for manipulating saved data
     saved_data_ui("saved_data"),
     #tab for metaClust
-    meta_clust_ui("meta_clust"),
+   meta_clust_ui("meta_clust"),
     # Including css and javascripts in head section
     tags$head(
       tags$link(rel = "stylesheet", type = "text/css", href = "css/messenger.css"),
