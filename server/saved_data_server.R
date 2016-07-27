@@ -11,12 +11,12 @@ saved_data_server <- function(input, output, session) {
   validate.merge.option <- function(input) {
     selected <- input$table_rows_selected
     types <- DB$meta[selected,"numeric nature"]
-    if (all(types == "continuous")) {
+    if (all(is.contunuous(types))) {
       if (is.na(input$mean))
         stop(MSG.merge.nomean)
       else if (is.na(input$var))
         stop(MSG.merge.novariance)
-    } else if (all(types == "discrete")){
+    } else if (all(is.discrete(types))){
       if (is.na(input$threshold))
         stop(MSG.merge.nothreshold)
     } else {

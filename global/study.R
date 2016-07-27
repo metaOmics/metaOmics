@@ -99,3 +99,15 @@ setMethod("ntype", signature("character"), function(object){
     study.ntype[["continuous"]]
 })
 
+is.discrete <- function(studies) {
+  if(length(studies) == 1)
+    ntype(studies) == "discrete"
+  else {
+    res <- logical()
+    for (study in studies)
+      res <- c(res, ntype(study) == "discrete")
+    res
+  }
+}
+
+is.continuous <- function(study) (!is.discrete(study))

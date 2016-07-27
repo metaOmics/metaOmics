@@ -12,14 +12,14 @@ preproc_server <- function(input, output, session) {
   })
 
   validate.data <- function(data) {
-    if(class(data) != "data.frame") stop(MSG.datasetInput.typeerror)
+    if(class(data) != "matrix") stop(MSG.datasetInput.typeerror)
     if(all(dim(data) == 0)) stop(MSG.datasetInput.noinput)
     if(dim(data)[1] == 0) stop(MSG.datasetInput.norow)
     if(dim(data)[2] == 0) stop(MSG.datasetInput.nocol)
   }
 
   validate.study <- function(study) {
-    if((input$dataset == "") && (input$log == T) && (ntype(study) == "discrete"))
+    if((input$dataset == "") && (input$log == T) && is.discrete(study))
       stop(MSG.study.nolog)
     name <- study@name
     if(is.null(name) || name == "") stop(MSG.study.noname)
@@ -46,6 +46,9 @@ preproc_server <- function(input, output, session) {
       updateSelectizeInput(session, "stype", selected=study@stype)
       dataset <- as.matrix(study)
     }
+    if (input$impute != "none") {
+      dataset <- Impute(dataset, method=input$impute)
+    }
     itype <- input$id.type
     if (itype  != id.type[["Gene Symbol"]]) {
       ip <- input$platform
@@ -55,11 +58,12 @@ preproc_server <- function(input, output, session) {
       } else if (!is.null(is) && is != "") {
         dataset <- Annotate(dataset, id.type=itype, species=input$species)
       }
+      if(all(is.na(row.names(dataset))))
+        sendWarningMessage(session, MSG.annotate.wrong.platform)
+      else if (input$replicate != "none")
+        dataset <- PoolReplicate(dataset, method=input$replicate)
     }
-    if (input$impute != "none") {
-      dataset <- Impute(dataset, method=input$impute)
-    }
-    as.data.frame(dataset)
+    dataset
   })
   
   output$studyName <- renderText({
@@ -71,7 +75,7 @@ preproc_server <- function(input, output, session) {
     if (is.null(dataset))
       "No file uploaded"
     else
-      summary(dataset )
+      summary(dataset)
   })
 
   output$dataPreview <- DT::renderDataTable(DT::datatable({
@@ -108,7 +112,7 @@ preproc_server <- function(input, output, session) {
         study <- new("Study",
           name=input$studyName,
           dtype=input$dtype,
-          datasets=list(as.matrix(datasetInput()))
+          datasets=list(datasetInput())
         )
         validate.study(study)
         DB.save(db, study, file=input$studyName)
