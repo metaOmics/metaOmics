@@ -81,6 +81,8 @@ h4 {
 
 .help {
   color: rgb(113, 113, 113);
-  font-size: 15px;
+  font-size: 13px;
   margin-left: 10px;
+  position: relative;
+  top: -10px;
 }

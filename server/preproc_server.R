@@ -56,6 +56,9 @@ preproc_server <- function(input, output, session) {
         dataset <- Annotate(dataset, id.type=itype, species=input$species)
       }
     }
+    if (input$impute != "none") {
+      dataset <- Impute(dataset, method=input$impute)
+    }
     as.data.frame(dataset)
   })
   
