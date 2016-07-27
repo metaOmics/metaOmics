@@ -54,6 +54,11 @@ saved_data_server <- function(input, output, session) {
       DB.delete(db, selected)
       sendSuccessMessage(session, paste(selected, "deleted"))
       DB$meta <- meta(db)
+      active.study <- DB.load.active(db)
+      if (is.null(active.study))
+        DB$active <- "No active study"
+      else
+        DB$active <- active.study@name
     }
   })
 

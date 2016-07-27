@@ -75,14 +75,17 @@ DB.load <- function(db, files) {
   for(file in files) {
     studies <- c(studies, readRDS(paste(db@dir, file, sep='/')))
   }
-  if(length(studies) == 1)
-    studies[[1]]
-  else
-    studies
+  studies
 }
 
 # delete file from db
 DB.delete <- function(db, files) {
+  active <- DB.load.active(db)
+  if (!is.null(active)) {
+    active <- active@name
+    if (active %in% files)
+      unlink(paste(db@activate.dir, active, sep="/"))
+  }
   unlink(paste(db@dir, files, sep="/"))
   db.meta <- meta(db)
   db.meta <- db.meta[!(rownames(db.meta) %in% files),]
@@ -108,5 +111,5 @@ DB.activate <- function(db, study) {
 # Load currently active study for db
 DB.load.active <- function(db) {
   current.active.study <- list.files(path=db@activate.dir)
-  DB.load(db, current.active.study)
+  DB.load(db, current.active.study)[[1]]
 }

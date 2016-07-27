@@ -26,7 +26,7 @@ A graphical user interface to facilitate the application of meta analysis on -Om
 
 ## For developer
 #### Required package
-preproc, DT
+preproc, DT, shiny, shinyBS
 
 #### How to start the app
 if the directory of the app is `metaOmics`,

@@ -41,9 +41,23 @@ preproc_ui <- function(id, label= "preprocessing data") {
         ##########################
         # Annotation             #
         ##########################
-        h4("Annotation"),
+        h4("Annotation"), helpIcon(ns("annotate_help"), Help.annotate),
         selectInput(ns("id.type"), "ID type", id.type),
         uiOutput(ns("id.type.option")),
+        tags$hr(),
+
+        ##########################
+        # Tranforming Data       #
+        ##########################
+        h4("Impute"), helpIcon(ns("impute_help"), Help.impute),
+        selectInput(ns("impute"), "Method:", impute.type),
+        tags$hr(),
+
+        ##########################
+        # Replicate Handling     #
+        ##########################
+        h4("Replicate Handling"), helpIcon(ns("replicate_help"), Help.replicate),
+        selectInput(ns("replicate"), "Method:", replicate.type),
         tags$hr(),
 
         ##########################

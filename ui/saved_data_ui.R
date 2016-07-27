@@ -3,14 +3,14 @@ saved_data_ui <- function(id, label = "saved data of single study or multiple st
   tabPanel("Saved Data", value=id,
     sidebarLayout(
       sidebarPanel(
-        h4("Selected Datasets"),
+        h4("Selected Datasets"), helpIcon(ns('merge_select'), HELP.select.datasets),
 	textOutput(ns("selected")),
 	tags$hr(),
-        h4("Merging and Filtering Datasets"),
+        h4("Merging and Filtering Datasets"), helpIcon(ns('merge_help'), HELP.merge),
         uiOutput(ns("merge.option")),
 	tags$hr(),
-        h4("Delete Data"),
-        actionButton(ns('delete'), 'Delete Selected Data', icon=icon("trash"))
+        h4("Danger Zone: "), helpIcon(ns('delete_help'), HELP.delete), tags$br(),
+        actionButton(ns('delete'), 'Delete Selected Data', icon=icon("trash"), class="btn-danger")
       ),
       mainPanel(
         h3("List of saved data"),

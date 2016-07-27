@@ -31,6 +31,19 @@ species.option <- list(
   Rat="rat"
 )
 
+impute.type <- list(
+  None="none",
+  KNN="impute",
+  Remove="remove"
+)
+
+replicate.type <- list(
+  None="none",
+  IQR="IQR",
+  Largest="largest",
+  Average="average"
+)
+
 select.noDefault <- list(
   placeholder = 'Choose from below',
   onInitialize = I('function() { this.setValue(""); }')

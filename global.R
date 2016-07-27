@@ -1,8 +1,10 @@
 # This file will be executed prior to app startup to setup the necessary environment
 library(preproc)
 library(shiny)
+library(shinyBS)
 source("global/constants.R")
 source("global/messages.R")
+source("global/help.R")
 source("global/database.R")
 source("global/study.R")
 
@@ -31,4 +33,11 @@ sendErrorMessage <- function(session, msg) {
 
 sendSuccessMessage <- function(session, msg) {
   session$sendCustomMessage(type = 'successMessage', message=msg)
+}
+
+helpIcon <- function(id, msg) {
+  tagList(
+    htmlOutput(id, container=tags$i, class="fa fa-question help"),
+    bsTooltip(id, msg, "right", trigger = "hover", option=list(html=T))
+  )
 }

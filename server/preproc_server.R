@@ -39,7 +39,7 @@ preproc_server <- function(input, output, session) {
         updateTextInput(session, "studyName", value=inFile$name)
       }
     } else {
-      study <- DB.load(db, input$dataset)
+      study <- DB.load(db, input$dataset)[[1]]
       updateTextInput(session, "studyName", value=study@name)
       updateSelectizeInput(session, "dtype", selected=study@dtype)
       updateSelectizeInput(session, "ntype", selected=study@ntype)

@@ -74,3 +74,13 @@ h1, h2, h3, h4 { font-weight: 400; }
   padding: 10px;
   font-size: 20px;
 }
+
+h4 {
+  display: inline;
+}
+
+.help {
+  color: rgb(113, 113, 113);
+  font-size: 15px;
+  margin-left: 10px;
+}
