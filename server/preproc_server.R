@@ -19,7 +19,8 @@ preproc_server <- function(input, output, session) {
   }
 
   validate.study <- function(study) {
-    if((input$log == T) && (ntype(study) == "discrete")) stop(MSG.study.nolog)
+    if((input$dataset == "") && (input$log == T) && (ntype(study) == "discrete"))
+      stop(MSG.study.nolog)
     name <- study@name
     if(is.null(name) || name == "") stop(MSG.study.noname)
     if(name %in% DB.ls(db)) stop(MSG.study.duplicate(name))
