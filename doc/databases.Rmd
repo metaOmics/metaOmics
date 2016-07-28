@@ -1,0 +1,51 @@
+---
+title: "Database"
+runtime: shiny
+output: html_document
+---
+
+Database is a class that manipulates all the data saving or loading machanism. One should
+not try to manipulate saving or loading manually. As shiny is a reactive application, 
+Database helps retain the single source of truth about the status of the application.
+Keeping all data saving/editing/deleting operations within the Database class extracts
+the tidious codes needed for synchronizing application state from server logic.
+
+Database keep tracks of which study is saved, active, and deleted. Each study has some 
+meta data and a huge data set. To improve performance, the database keeps an exact copy
+of just the meta data in another place, so that listing all studies and their meta could 
+be both time and memory efficient.
+
+### Slots
+
+### Database Public Helper
+* DB.ls(db)
+    + return: vector of names stored in `db`.
+    + description: db should be of type `Databse`, usually it just the globally 
+      visible database instance `db`. It will return a vector of names stored in `db`.
+* DB.save(db, study)
+    + return: no return value.
+    + description: saves study x in db. x shuold be of type `Study`, db should be of type `Database`.
+* DB.load(db, studies)
+    + return: list of `Study`.
+    + description: load a list of studies from the vector of names given by `studies`.
+* DB.delete(db, studies)
+    + return: no return value.
+    + description: delete all studies specified in the vector of names given by `studies`.
+* DB.activate(db, study)
+    + return: no return value.
+    + description: make `study` the active study.
+* DB.load.active(db)
+    + return: the active study (if any), or NULL if there is no active study.
+    + description: returns the active study.
+
+### Database Private Helper
+* DB.sync(db, db.meta)
+    + return: no return value.
+    + description: DB.sync is performed whenever there is a modification to the database.
+      So if you check the source of DB.delete or DB.save, it is performed at the end.
+
+### Database Generic Method
+* meta(db)
+    + return: the data.frame that contains the meta data of this database.
+    + description: it will return the current meta data of this database,
+      which is all studies and their meta data.

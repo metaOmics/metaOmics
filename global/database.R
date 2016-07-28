@@ -62,33 +62,33 @@ DB.sync <- function(db, db.meta) {
 }
 
 # save x to db as file
-DB.save <- function(db, x, file) {
-  if(class(x) != "Study") stop("x must be Study")
-  saveRDS(x, file=paste(db@dir, file, sep="/"))
-  db.meta <- rbind(meta(db), meta(x))
+DB.save <- function(db, study) {
+  if(class(study) != "Study") stop("study must be Study")
+  saveRDS(study, file=paste(db@dir, study@name, sep="/"))
+  db.meta <- rbind(meta(db), meta(study))
   DB.sync(db, db.meta)
 }
 
 # load file from db
-DB.load <- function(db, files) {
-  studies <- c()
-  for(file in files) {
-    studies <- c(studies, readRDS(paste(db@dir, file, sep='/')))
+DB.load <- function(db, studies) {
+  res <- c()
+  for(study in studies) {
+    res <- c(res, readRDS(paste(db@dir, study, sep='/')))
   }
-  studies
+  res
 }
 
 # delete file from db
-DB.delete <- function(db, files) {
+DB.delete <- function(db, studies) {
   active <- DB.load.active(db)
   if (!is.null(active)) {
     active <- active@name
-    if (active %in% files)
+    if (active %in% studies)
       unlink(paste(db@activate.dir, active, sep="/"))
   }
-  unlink(paste(db@dir, files, sep="/"))
+  unlink(paste(db@dir, studies, sep="/"))
   db.meta <- meta(db)
-  db.meta <- db.meta[!(rownames(db.meta) %in% files),]
+  db.meta <- db.meta[!(rownames(db.meta) %in% studies),]
   DB.sync(db, db.meta)
 }
 

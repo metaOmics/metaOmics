@@ -1,0 +1,66 @@
+---
+title: "File Organization"
+runtime: shiny
+output: html_document
+---
+
+```
+|-- .Database       # .Database and data related to database operation
+|-- data            # folder should not be modified manually
+|-- README.md       # this file
+|-- WWW             # folders for network resources
+|---|-- css         # all css files
+|---|-- js          # all javascript files
+|-- global          # folders for all global data
+|---|-- constants.R # all global constants
+|---|-- database.R  # database class
+|---|-- help.R      # all help message
+|---|-- helpers.R   # all helper functions
+|---|-- messagess.R # all warning/error messages
+|---|-- study.R     # study class
+|-- global.R        # Shiny's env setup file, will be
+|                   # executed before app start up
+|-- server          # folder for all server modules
+|---|-- ...
+|-- server.R        # Shiny's default server file
+|-- ui              # folder for all ui modules
+|---|-- ...
+|-- ui.R            # Shiny's default ui file
+```
+
+## The Constants
+
+### global.R
+* All variables declared in `global.R` is visable globally
+* This file is load before shiny app start up, so it is reponsible for sourcing all other constants file and set up the environment (set up database for example)
+
+### constant.R
+* `global/constants.R` is where one would store progeam related contant.
+* parameter options should be stores in this file
+
+### message.R
+* `global/messages.R` is where all error and warning messages are declared,
+* All variable name in this file start with `MSG.`, for example:
+```{r eval=FALSE}
+MSG.merge.noname <- "Study Name can not be empty"
+```
+
+### help.R
+* `global/help.R` is where all help messages are declared.
+* All variable name in this file starts with `HELP.`, for example,
+```{r eval=FALSE}
+HELP.delete <- "are u sure you want to delete the files?"
+```
+* help message can be in html format.
+* All help messages in `global/help.R` should not contain newline character. If you really want to format the message, use `paste`:
+```{r eval=FALSE}
+Help.replicate <- paste(
+  "Handing replicated gene symbol (replicated row names of your dataset)",
+    "<ul>",
+      "<li> IQR: </li>",
+      "<li> largest: </li>",
+      "<li> average: </li>",
+    "</ul>"
+)
+```
+

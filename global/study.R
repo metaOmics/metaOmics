@@ -110,4 +110,4 @@ is.discrete <- function(studies) {
   }
 }
 
-is.continuous <- function(study) (!is.discrete(study))
+is.continuous <- function(studies) (!is.discrete(studies))

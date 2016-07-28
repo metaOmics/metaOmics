@@ -1,0 +1,34 @@
+---
+title: "metaOmics"
+runtime: shiny
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(shiny)
+library(shinyBS)
+source("global/constants.R")
+source("global/messages.R")
+source("global/help.R")
+source("global/database.R")
+source("global/study.R")
+source("global/helpers.R")
+```
+
+A graphical user interface to facilitate the application of meta analysis on -Omics study
+
+## Required Packages
+
+preproc, metaClust, DT, shiny, shinyBS
+
+## How to start the app
+if the directory of the app is `metaOmics`,
+* in command line
+```
+R -e "shiny::runApp('metaOmics', port=9987, launch.browser=T)"
+```
+* in R console
+```{r eval=FALSE}
+shiny::runApp('metaOmics', port=9987, launch.browser=T)
+```

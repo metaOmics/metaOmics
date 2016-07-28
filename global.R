@@ -8,6 +8,7 @@ source("global/messages.R")
 source("global/help.R")
 source("global/database.R")
 source("global/study.R")
+source("global/helpers.R")
 
 # Create the directory for database prior to application startup
 db <- new("Database", name="studies")
@@ -24,21 +25,3 @@ for (f in list.files(path=dir, pattern="*.R")) {
   source(paste(dir, f, sep="/"))
 }
 
-sendWarningMessage <- function(session, msg) {
-  session$sendCustomMessage(type = 'warningMessage', message=msg)
-}
-
-sendErrorMessage <- function(session, msg) {
-  session$sendCustomMessage(type = 'errorMessage', message=msg)
-}
-
-sendSuccessMessage <- function(session, msg) {
-  session$sendCustomMessage(type = 'successMessage', message=msg)
-}
-
-helpIcon <- function(id, msg) {
-  tagList(
-    htmlOutput(id, container=tags$i, class="fa fa-question help"),
-    bsTooltip(id, msg, "right", trigger = "hover", option=list(html=T))
-  )
-}

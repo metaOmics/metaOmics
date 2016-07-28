@@ -1,4 +1,4 @@
-Help.annotate <- paste(
+HELP.annotate <- paste(
   "Choose the annotation of this data, and it will be transformed to corresponding gene symbol",
     "<ul>",
       "<li> Gene Symbol: this means the data is already annotated with gene symbol, no further processing needded</li>",
@@ -7,14 +7,14 @@ Help.annotate <- paste(
       "<li> Entrez ID: Choose a species from the dropdown to properly annotate the data</li>",
     "</ul>"
 )
-Help.impute <- paste(
+HELP.impute <- paste(
   "Handing missing data",
     "<ul>",
       "<li> KNN: replaces NaNs in Data with the dominant value from the nearest-neighbor cell. </li>",
       "<li> Remove: replace missing value with 0. </li>",
     "</ul>"
 )
-Help.replicate <- paste(
+HELP.replicate <- paste(
   "Handing replicated gene symbol (replicated row names of your dataset)",
     "<ul>",
       "<li> IQR: </li>",

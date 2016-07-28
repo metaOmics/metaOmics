@@ -107,7 +107,7 @@ saved_data_server <- function(input, output, session) {
           dtype=studies[[1]]@ntype,
           datasets=datasets
         )
-        DB.save(db, study, study@name)
+        DB.save(db, study)
         message = paste("A merged study is created:", study@name)
         sendSuccessMessage(session, message)
         DB$meta <- meta(db)

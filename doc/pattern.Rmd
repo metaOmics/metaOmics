@@ -1,0 +1,43 @@
+---
+title: "Developer"
+runtime: shiny
+output: html_document
+---
+
+
+```{r}
+validate.data <- function(data) {
+  if (is.null(data)) stop("data can not be null")
+}
+tryCatch( {
+    data <- NULL
+    validate.data(data)
+    sendSuccessMessage(session, "data is validated!")
+  },
+  warning=function(w) {sendWarningMessage(session, w$message)},
+  error=function(e) {sendErrorMessage(session, e$message)}
+)
+```
+
+```{r,
+  uiOutput("id.type.option")}
+
+# Here is the server code for above synamic option example
+data(platform.info)
+platform.options <- as.list(platform.info[,1])
+names(platform.options) <- platform.info[,1]
+selectPlatform <- selectizeInput("preproc-platform", "Platform:", platform.options, 
+  options = select.noDefault
+)
+selectSpecies <- selectizeInput("preproc-species", "Species:", species.option,
+  options = select.noDefault
+)
+output$id.type.option <- renderUI({
+  switch (input$id.type,
+    ProbeID=selectPlatform,
+    RefSeqID=selectSpecies,
+    EntrezID=selectSpecies,
+    default=NULL
+  )
+})
+```

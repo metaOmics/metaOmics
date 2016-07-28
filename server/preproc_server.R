@@ -115,7 +115,7 @@ preproc_server <- function(input, output, session) {
           datasets=list(datasetInput())
         )
         validate.study(study)
-        DB.save(db, study, file=input$studyName)
+        DB.save(db, study)
         sendSuccessMessage(session, paste("Study", study@name, "saved."))
         DB$names <- DB.ls(db)
       },
