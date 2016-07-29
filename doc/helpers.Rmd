@@ -4,6 +4,18 @@ runtime: shiny
 output: html_document
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(shiny)
+library(shinyBS)
+source("global/constants.R")
+source("global/messages.R")
+source("global/help.R")
+source("global/database.R")
+source("global/study.R")
+source("global/helpers.R")
+```
+
 ## Helpers
 ### sendErrorMessage(session, msg) 
 `sendErrorMessage` will send a warning message to the browser, it should be used in `server.R` or server modules. Alternatively, we have `sendWarningMessage(session, msg)` and `sendSuccessMessage(session, msg)`
