@@ -10,8 +10,6 @@ navbar:
       href: helpers.Rmd 
     - text: "Database"
       href: databases.Rmd 
-    - text: "Study"
-      href: study.Rmd 
     - text: "Git"
       href: git.Rmd 
 output:
