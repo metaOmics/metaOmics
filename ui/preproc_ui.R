@@ -42,7 +42,7 @@ preproc_ui <- function(id, label= "preprocessing data") {
         # Annotation             #
         ##########################
         h4("Annotation"), helpIcon(ns("annotate_help"), HELP.annotate),
-        selectInput(ns("id.type"), "ID type", id.type),
+        selectInput(ns("id.type"), "ID type", as.list(ID.TYPE.all)),
         uiOutput(ns("id.type.option")),
         tags$hr(),
 
@@ -50,21 +50,21 @@ preproc_ui <- function(id, label= "preprocessing data") {
         # Tranforming Data       #
         ##########################
         h4("Impute"), helpIcon(ns("impute_help"), HELP.impute),
-        selectInput(ns("impute"), "Method:", impute.type),
+        selectInput(ns("impute"), "Method:", as.list(c(None="none", IMPUTE.method.all))),
         tags$hr(),
 
         ##########################
         # Replicate Handling     #
         ##########################
         h4("Replicate Handling"), helpIcon(ns("replicate_help"), HELP.replicate),
-        selectInput(ns("replicate"), "Method:", replicate.type),
+        selectInput(ns("replicate"), "Method:", as.list(c(None="none", REPLICATE.all))),
         tags$hr(),
 
         ##########################
         # Save and Metadata      #
         ##########################
         h4("Configuring Metadata"),
-        selectInput(ns("dtype"), "Type of Data", study.dtype),
+        selectInput(ns("dtype"), "Type of Data", as.list(DTYPE.all)),
         textInput(ns("studyName"), "Study Name:", "some study"),
         actionButton(ns('saveStudy'), 'save single study', icon=icon("save"))
       ),

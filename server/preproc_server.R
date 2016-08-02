@@ -5,38 +5,37 @@ preproc_server <- function(input, output, session) {
   observeEvent(DB$names, {
     updateSelectizeInput(session, "dataset", choices=DB$names,
       selected=input$studyName)
+    updateSelectizeInput(session, "id.type", selected=ID.TYPE.geneSymbol)
   })
 
   observeEvent(input$tabChange, {
     DB$names <- DB.ls(db)
   })
 
-  validate.data <- function(data) {
-    if(class(data) != "matrix") stop(MSG.datasetInput.typeerror)
-    if(all(dim(data) == 0)) stop(MSG.datasetInput.noinput)
-    if(dim(data)[1] == 0) stop(MSG.datasetInput.norow)
-    if(dim(data)[2] == 0) stop(MSG.datasetInput.nocol)
-  }
-
   validate.study <- function(study) {
+    dataset <- study@datasets[[1]]
+    if(all(dim(dataset) == 0)) stop(MSG.datasetInput.noinput)
+    if(dim(dataset)[1] == 0) stop(MSG.datasetInput.norow)
+    if(dim(dataset)[2] == 0) stop(MSG.datasetInput.nocol)
     if((input$dataset == "") && (input$log == T) && is.discrete(study))
       stop(MSG.study.nolog)
     name <- study@name
     if(is.null(name) || name == "") stop(MSG.study.noname)
     if(name %in% DB.ls(db)) stop(MSG.study.duplicate(name))
+    validObject(study)
   }
 
   ##########################
   # Choosing / Upload Data #
   ##########################
-  datasetInput <- reactive({
-    dataset <- NULL
+  studyInput <- reactive({
+    study <- NULL
     if (input$dataset == "") {
       inFile <- input$file
       if (!is.null(inFile)) {
-        dataset <- ReadExpr(inFile$datapath, header=input$header,
-          sep=input$sep, quote=input$quote, log=input$log)
         updateTextInput(session, "studyName", value=inFile$name)
+        study <- ReadExpr(inFile$datapath, name=inFile$name, dtype=DTYPE.microarray,
+          header=input$header, sep=input$sep, quote=input$quote, log=input$log)
       }
     } else {
       study <- DB.load(db, input$dataset)[[1]]
@@ -44,26 +43,25 @@ preproc_server <- function(input, output, session) {
       updateSelectizeInput(session, "dtype", selected=study@dtype)
       updateSelectizeInput(session, "ntype", selected=study@ntype)
       updateSelectizeInput(session, "stype", selected=study@stype)
-      dataset <- as.matrix(study)
     }
     if (input$impute != "none") {
-      dataset <- Impute(dataset, method=input$impute)
+      study <- Impute(study, method=input$impute)
     }
     itype <- input$id.type
-    if (itype  != id.type[["Gene Symbol"]]) {
+    if (!is.null(study) && itype != id.type[["Gene Symbol"]]) {
       ip <- input$platform
       is <- input$species
       if (itype == id.type[["Probe ID"]] && !is.null(ip) && ip != "") {
-        dataset <- Annotate(dataset, id.type=itype, platform=input$platform)
+        study <- Annotate(study, id.type=itype, platform=input$platform)
       } else if (!is.null(is) && is != "") {
-        dataset <- Annotate(dataset, id.type=itype, species=input$species)
+        study <- Annotate(study, id.type=itype, species=input$species)
       }
-      if(all(is.na(row.names(dataset))))
+      if(all(is.na(row.names(study@datasets[[1]]))))
         sendWarningMessage(session, MSG.annotate.wrong.platform)
       else if (input$replicate != "none")
-        dataset <- PoolReplicate(dataset, method=input$replicate)
+        study <- PoolReplicate(study, method=input$replicate)
     }
-    dataset
+    study
   })
   
   output$studyName <- renderText({
@@ -71,27 +69,26 @@ preproc_server <- function(input, output, session) {
   })
 
   output$summary <- renderPrint({
-    dataset <- datasetInput()
-    if (is.null(dataset))
+    study <- studyInput()
+    if (is.null(study))
       "No file uploaded"
     else
-      summary(dataset)
+      summary(study@datasets[[1]])
   })
 
   output$dataPreview <- DT::renderDataTable(DT::datatable({
-    datasetInput()
+    study <- studyInput()
+    if (!is.null(study))
+      study@datasets[[1]]
   }))
 
   ##########################
   # Annotation             #
   ##########################
-  data(platform.info)
-  platform.options <- as.list(platform.info[,1])
-  names(platform.options) <- platform.info[,1]
-  selectPlatform <- selectizeInput("preproc-platform", "Platform:", platform.options, 
+  selectPlatform <- selectizeInput("preproc-platform", "Platform:", as.list(PLATFORM.all), 
     options = select.noDefault
   )
-  selectSpecies <- selectizeInput("preproc-species", "Species:", species.option,
+  selectSpecies <- selectizeInput("preproc-species", "Species:", as.list(SPECIES.all),
     options = select.noDefault
   )
   output$id.type.option <- renderUI({
@@ -108,12 +105,9 @@ preproc_server <- function(input, output, session) {
   ##########################
   observeEvent(input$saveStudy, {
     tryCatch( {
-        validate.data(datasetInput())
-        study <- new("Study",
-          name=input$studyName,
-          dtype=input$dtype,
-          datasets=list(datasetInput())
-        )
+        study <- studyInput()
+        study@name  <- input$studyName
+        study@dtype <- input$dtype
         validate.study(study)
         DB.save(db, study)
         sendSuccessMessage(session, paste("Study", study@name, "saved."))

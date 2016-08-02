@@ -100,13 +100,7 @@ saved_data_server <- function(input, output, session) {
         validate.merge.option(input)
         selected <- input$table_rows_selected
         studies <- DB.load(db, selected)
-        datasets <- Merge(lapply(studies, function(s) as.matrix(s)),
-                         lapply(studies, function(s) s@dtype))
-        study <- new("Study",
-          name=input$studyName,
-          dtype=studies[[1]]@ntype,
-          datasets=datasets
-        )
+        study <- Merge(studies, name=input$studyName)
         DB.save(db, study)
         message = paste("A merged study is created:", study@name)
         sendSuccessMessage(session, message)

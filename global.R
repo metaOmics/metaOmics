@@ -3,11 +3,13 @@ library(preproc)
 library(MetaSparseKmeans)
 library(shiny)
 library(shinyBS)
+
+data(preproc.option)
+
 source("global/constants.R")
 source("global/messages.R")
 source("global/help.R")
 source("global/database.R")
-source("global/study.R")
 source("global/helpers.R")
 
 # Create the directory for database prior to application startup

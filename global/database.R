@@ -45,11 +45,6 @@ setMethod("initialize", "Database",
   }
 )
 
-# Generic function "meta"
-setGeneric("meta", function(object) {
-  standardGeneric("meta")
-})
-
 # Return Database meta information as data.frame
 setMethod("meta", signature("Database"), function(object) {
   readRDS(db@meta.file)

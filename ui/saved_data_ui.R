@@ -16,13 +16,13 @@ saved_data_ui <- function(id, label = "saved data of single study or multiple st
         h3("List of saved data"),
         fluidRow(
           column(4,
-            selectInput(ns("ntype"), "numeric type", study.ntype)
+            selectInput(ns("ntype"), "numeric type", as.list(NTYPE.all))
           ),
           column(4, 
-            selectInput(ns("stype"), "study type:", study.stype)
+            selectInput(ns("stype"), "study type:", as.list(STYPE.all))
           ),
           column(4,
-            selectInput(ns("dtype"), "data type", study.dtype)
+            selectInput(ns("dtype"), "data type", as.list(DTYPE.all))
           )
         ),
         # Create a new row for the table.
