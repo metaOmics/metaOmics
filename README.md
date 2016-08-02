@@ -3,9 +3,23 @@ A graphical user interface to facilitate the application of meta analysis on -Om
 
 ## Required package
 preproc, metaClust, DT, shiny, shinyBS
+* To install all the required packages, open R console
+```R
+install.packages(c("utils", "devtools", "DMwR"))
+source("https://bioconductor.org/biocLite.R")
+biocLite("AnnotationDbi")
+
+library(devtools)
+install_github("metaOmic/MetaSparseKmeans")
+install_github("metaOmic/preproc")
+```
 
 ## How to start the app
-if the directory of the app is `metaOmics`,
+First, clone the project
+```
+git clone https://github.com/metaOmic/metaOmics
+```
+
 * in command line:
 ```
 R -e "shiny::runApp('metaOmics', port=9987, launch.browser=T)"
