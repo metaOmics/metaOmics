@@ -10,6 +10,14 @@ sendSuccessMessage <- function(session, msg) {
   session$sendCustomMessage(type = 'successMessage', message=msg)
 }
 
+wait <- function(session, msg) {
+  session$sendCustomMessage(type = 'wait', message=msg)
+}
+
+done <- function(session, msg) {
+  session$sendCustomMessage(type = 'done', message=msg)
+}
+
 helpIcon <- function(id, msg) {
   tagList(
     htmlOutput(id, container=tags$i, class="fa fa-question help"),

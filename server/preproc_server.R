@@ -59,6 +59,7 @@ preproc_server <- function(input, output, session) {
 
   # Setting study from file type
   observeEvent(STUDY$update, {
+    wait(session, "")
     if (STUDY$action == STUDY.expression.upload) {
       inFile <- input$exprfile
       STUDY$ori <- ReadExpr(inFile$datapath, name=inFile$name, dtype=DTYPE.microarray,
@@ -72,6 +73,7 @@ preproc_server <- function(input, output, session) {
                                      quote=input$clinical.quote)
       STUDY$clinicals <- list(clinical)
     }
+    done(session, "")
   }, label="setting STUDY$ori from file upload or selection")
 
   # watch for change in STUDY$preview to update meda data
@@ -87,6 +89,7 @@ preproc_server <- function(input, output, session) {
   observe({
     # annotation
     study <- STUDY$ori
+    wait(session, "")
     try({
       if(!is.null(study)) {
         id.type <- input$id.type
@@ -112,6 +115,7 @@ preproc_server <- function(input, output, session) {
         STUDY$preview <- study
       }
     }, session)
+    done(session, "annotation")
   }, label="processing after read")
   
   # Save and Metadata
