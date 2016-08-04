@@ -1,5 +1,5 @@
 ---
-title: "Study"
+title: "Git"
 runtime: shiny
 output: html_document
 ---
@@ -43,6 +43,14 @@ git pull origin develop
 * Merge from develop
 ```
 # First you should commit all the changes
+git status
+git add -A
+git commit -m"the commit message"
+# Then you should update the develop branch
+git checkout develop
+git pull origin develop
+# finally merge develop into metaClust
+git checkout metaClust
 git merge develop
 ```
 * Push to branch `metaClust`
