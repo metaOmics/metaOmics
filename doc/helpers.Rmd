@@ -20,7 +20,7 @@ source("global/helpers.R")
 loading = document.createElement('div')
 loading.innerHTML = '<div id="loading"><div id="loadingcontent"><p id="loadingspinner">loading......</p></div></div>'
 header = document.getElementById("header")
-header.insertBefore(loading)
+header.insertBefore(loading, header.childNodes[0])
 </script>
 
 ## Helpers
