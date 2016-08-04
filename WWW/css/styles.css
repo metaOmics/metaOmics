@@ -86,3 +86,37 @@ h4 {
   position: relative;
   top: -10px;
 }
+
+/* Spinner CSS */
+#loading
+{
+    display:none;
+    position:fixed;
+    left:0;
+    top:0;
+    width:100%;
+    height:100%;
+    background:rgba(255,255,255,0.8);
+    z-index:1000;
+}
+
+#loadingcontent
+{
+    display:table;
+    position:fixed;
+    left:0;
+    top:70px;
+    font-size:30px;
+    width:100%;
+    height:100%;
+}
+
+#loadingspinner
+{
+    display: table-cell;
+    vertical-align:middle;
+    width: 100%;
+    text-align: center;
+    font-size:larger;
+    padding-top:80px;
+}

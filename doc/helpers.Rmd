@@ -16,6 +16,13 @@ source("global/database.R")
 source("global/helpers.R")
 ```
 
+<script>
+loading = document.createElement('div')
+loading.innerHTML = '<div id="loading"><div id="loadingcontent"><p id="loadingspinner">loading......</p></div></div>'
+header = document.getElementById("header")
+header.insertBefore(loading)
+</script>
+
 ## Helpers
 ### sendErrorMessage(session, msg) 
 `sendErrorMessage` will send a warning message to the browser, it should be used in `server.R` or server modules. Alternatively, we have `sendWarningMessage(session, msg)` and `sendSuccessMessage(session, msg)`
@@ -41,4 +48,20 @@ definition.
 ```{r}
 tagList( h4("Annotation"), helpIcon("annotate_help", HELP.annotate))
 tagList( h4("Delete"), helpIcon("delete_help", HELP.delete))
+```
+
+### Loading Spinner
+If you have a task with long execution time, you can output a loading spinner wih some message. To start and end loading spinner, use `wait(session, msg)` and `done(session)` respectively.
+```{r}
+tagList(
+  textInput('loading.message', 'Enter your message', 'Loading Message....'),
+  actionButton('loading.btn', 'Start a 3 second task'),
+  tags$br()
+)
+# Server code for rendering wait and done
+observeEvent(input$loading.btn, {
+  wait(session, input$loading.message)
+  Sys.sleep(3)
+  done(session)
+})
 ```

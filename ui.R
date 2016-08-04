@@ -10,6 +10,13 @@ shinyUI(
       meta_clust_ui("meta_clust"),
       meta_de_ui("meta_de")
     ),
+    tags$div(
+      tags$div(id="loading", 
+        tags$div(id="loadingcontent",
+          tags$p(id="loadingspinner", "loading......")
+        )
+      )
+    ),
     # Including css and javascripts in head section
     tags$head(
       tags$link(rel = "stylesheet", type = "text/css", href = "css/messenger.css"),

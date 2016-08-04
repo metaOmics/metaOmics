@@ -14,8 +14,8 @@ wait <- function(session, msg) {
   session$sendCustomMessage(type = 'wait', message=msg)
 }
 
-done <- function(session, msg) {
-  session$sendCustomMessage(type = 'done', message=msg)
+done <- function(session) {
+  session$sendCustomMessage(type = 'done', message="loading...")
 }
 
 helpIcon <- function(id, msg) {

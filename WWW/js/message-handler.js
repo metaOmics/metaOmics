@@ -57,10 +57,14 @@ $(function() {
     Shiny.onInputChange(this.getAttribute("data-value") + "-tabChange", Date.now());
   })
   Shiny.addCustomMessageHandler("wait", function(msg) {
-    target = document.getElementsByClassName('tab-content')[0]
+    document.getElementById("loadingspinner").textContent = msg
+    $("#loading").show();
+    target = document.getElementById('loading')
     spinner = new Spinner(opts).spin(target);
   });
   Shiny.addCustomMessageHandler("done", function(msg) {
+    document.getElementById("loadingspinner").textContent = msg
+    $("#loading").hide();
     spinner.stop()
   });
 

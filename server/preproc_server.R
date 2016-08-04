@@ -59,21 +59,23 @@ preproc_server <- function(input, output, session) {
 
   # Setting study from file type
   observeEvent(STUDY$update, {
-    wait(session, "")
     if (STUDY$action == STUDY.expression.upload) {
+      wait(session, "Parsing Expression File...")
       inFile <- input$exprfile
       STUDY$ori <- ReadExpr(inFile$datapath, name=inFile$name, dtype=DTYPE.microarray,
         header=input$header, sep=input$data.sep, quote=input$data.quote, log=input$log)
+      done(session)
     } else if (STUDY$action == STUDY.select.from.db) {
       STUDY$ori <- DB.load(db, input$study)[[1]]
       STUDY$clinicals <- STUDY$ori@clinicals
     } else if (STUDY$action == STUDY.clinical.upload) {
+      wait(session, "Parsing Clinical File...")
       inFile <- input$clinical
       clinical <- ReadClinical(inFile$datapath, sep=input$clinical.sep, 
                                      quote=input$clinical.quote)
       STUDY$clinicals <- list(clinical)
+      done(session)
     }
-    done(session, "")
   }, label="setting STUDY$ori from file upload or selection")
 
   # watch for change in STUDY$preview to update meda data
@@ -87,35 +89,39 @@ preproc_server <- function(input, output, session) {
 
   # processing after read
   observe({
-    # annotation
     study <- STUDY$ori
-    wait(session, "")
     try({
       if(!is.null(study)) {
+        # annotation
         id.type <- input$id.type
         if(id.type != ID.TYPE.geneSymbol) {
+          wait(session, "Annotating.... (annotation map is automatically downloaded)")
           platform <- input$platform
           species  <- input$species
           if (id.type == ID.TYPE.probeID && length(platform) > 0 && platform != "")
             study <- Annotate(study, id.type=id.type, platform=input$platform)
           else if (length(species) > 0 && species != "")
             study <- Annotate(study, id.type=id.type, species=input$species)
+          done(session)
         }
         # impute
-        if(!is.null(study)) {
-          if (input$impute != "none")
-            study <- Impute(study, method=input$impute)
+        if (input$impute != "none") {
+          wait(session, "Impute Missing Value....")
+          study <- Impute(study, method=input$impute)
+          done(session)
         }
         # handle replicate
         if(all(is.na(row.names(study@datasets[[1]]))))
           sendWarningMessage(session, MSG.annotate.wrong.platform)
-        else if (input$replicate != "none")
+        else if (input$replicate != "none") {
+          wait(session, "Handing Replicate Gene Symbol....")
           study <- PoolReplicate(study, method=input$replicate)
+          done(session)
+        }
         # update preview
         STUDY$preview <- study
       }
     }, session)
-    done(session, "annotation")
   }, label="processing after read")
   
   # Save and Metadata
