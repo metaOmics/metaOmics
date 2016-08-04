@@ -37,6 +37,7 @@ preproc_server <- function(input, output, session) {
       STUDY$action <- STUDY.expression.upload
       STUDY$update <- STUDY$update + 1
       updateSelectizeInput(session, "study", selected="")
+      STUDY$clinicals <- NULL
     }
   }, label="expression file upload")
   # watch for clinical file upload
@@ -52,6 +53,7 @@ preproc_server <- function(input, output, session) {
       STUDY$action <- STUDY.select.from.db
       STUDY$update <- STUDY$update + 1
       session$sendCustomMessage(type="resetFile", message="#preproc-exprfile")
+      session$sendCustomMessage(type="resetFile", message="#preproc-clinical")
     }
   }, label="select study from database")
 
@@ -63,10 +65,12 @@ preproc_server <- function(input, output, session) {
         header=input$header, sep=input$data.sep, quote=input$data.quote, log=input$log)
     } else if (STUDY$action == STUDY.select.from.db) {
       STUDY$ori <- DB.load(db, input$study)[[1]]
+      STUDY$clinicals <- STUDY$ori@clinicals
     } else if (STUDY$action == STUDY.clinical.upload) {
       inFile <- input$clinical
-      STUDY$clinical <- ReadClinical(inFile$datapath, sep=input$clinical.sep, 
+      clinical <- ReadClinical(inFile$datapath, sep=input$clinical.sep, 
                                      quote=input$clinical.quote)
+      STUDY$clinicals <- list(clinical)
     }
   }, label="setting STUDY$ori from file upload or selection")
 
@@ -83,34 +87,36 @@ preproc_server <- function(input, output, session) {
   observe({
     # annotation
     study <- STUDY$ori
-    if(!is.null(study)) {
-      id.type <- input$id.type
-      if(id.type != ID.TYPE.geneSymbol) {
-        platform <- input$platform
-        species  <- input$species
-        if (id.type == ID.TYPE.probeID && length(platform) > 0 && platform != "")
-          study <- Annotate(study, id.type=id.type, platform=input$platform)
-        else if (length(species) > 0 && species != "")
-          study <- Annotate(study, id.type=id.type, species=input$species)
-      }
-      # impute
+    try({
       if(!is.null(study)) {
-        if (input$impute != "none")
-          study <- Impute(study, method=input$impute)
+        id.type <- input$id.type
+        if(id.type != ID.TYPE.geneSymbol) {
+          platform <- input$platform
+          species  <- input$species
+          if (id.type == ID.TYPE.probeID && length(platform) > 0 && platform != "")
+            study <- Annotate(study, id.type=id.type, platform=input$platform)
+          else if (length(species) > 0 && species != "")
+            study <- Annotate(study, id.type=id.type, species=input$species)
+        }
+        # impute
+        if(!is.null(study)) {
+          if (input$impute != "none")
+            study <- Impute(study, method=input$impute)
+        }
+        # handle replicate
+        if(all(is.na(row.names(study@datasets[[1]]))))
+          sendWarningMessage(session, MSG.annotate.wrong.platform)
+        else if (input$replicate != "none")
+          study <- PoolReplicate(study, method=input$replicate)
+        # update preview
+        STUDY$preview <- study
       }
-      # handle replicate
-      if(all(is.na(row.names(study@datasets[[1]]))))
-        sendWarningMessage(session, MSG.annotate.wrong.platform)
-      else if (input$replicate != "none")
-        study <- PoolReplicate(study, method=input$replicate)
-      # update preview
-      STUDY$preview <- study
-    }
+    }, session)
   }, label="processing after read")
   
   # Save and Metadata
   observeEvent(input$saveStudy, {
-    tryCatch( {
+    try({
         study <- STUDY$preview
         study@name  <- input$studyName
         study@dtype <- input$dtype
@@ -119,10 +125,7 @@ preproc_server <- function(input, output, session) {
         DB.save(db, study)
         sendSuccessMessage(session, paste("Study", study@name, "saved."))
         DB$names <- DB.ls(db)
-      },
-      warning=function(w) {sendWarningMessage(session, w$message)},
-      error=function(e) {sendErrorMessage(session, e$message)}
-    )
+    }, session)
   }, label="save study")
 
   # watch the list of all study names for change
@@ -151,13 +154,18 @@ preproc_server <- function(input, output, session) {
   output$dataPreview <- DT::renderDataTable(DT::datatable({
     study <- STUDY$preview
     if (!is.null(study))
-      study@datasets[[1]]
+      to.matrix(study)
   }))
   # clinical data preview
   output$clinicalPreview <- DT::renderDataTable(DT::datatable({
-    clinical <- STUDY$clinical
-    if (!is.null(clinical))
+    clinicals <- STUDY$clinicals
+    if (!is.null(clinicals)) {
+      clinicals <- lapply(clinicals, function(x) as.matrix(x))
+      clinical <- do.call(rbind, clinicals)
+      clinical <- cbind("Sample ID"=row.names(clinical), clinical)
+      row.names(clinical) <- NULL
       clinical
+    }
   }))
   # annotation option
   selectPlatform <- selectizeInput("preproc-platform", "Platform:", 

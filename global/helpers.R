@@ -16,3 +16,10 @@ helpIcon <- function(id, msg) {
     bsTooltip(id, msg, "right", trigger = "hover", option=list(html=T))
   )
 }
+
+try <- function(code, session) {
+  tryCatch(code,
+    warning=function(w) {sendWarningMessage(session, w$message)},
+    error=function(e) {sendErrorMessage(session, e$message)}
+  )
+}
