@@ -4,7 +4,7 @@ preproc_server <- function(input, output, session) {
   # Reactive Values        #
   ##########################
   DB   <- reactiveValues(names=DB.ls(db))
-  STUDY <- reactiveValues(action="", update=0, ori=NULL, preview=NULL, clinical=NULL)
+  STUDY <- reactiveValues(action="", update=0, ori=NULL, preview=NULL, clinicals=NULL)
 
   ##########################
   # Validation             #
@@ -127,14 +127,19 @@ preproc_server <- function(input, output, session) {
   # Save and Metadata
   observeEvent(input$saveStudy, {
     try({
-        study <- STUDY$preview
-        study@name  <- input$studyName
-        study@dtype <- input$dtype
-        validate.study(study)
-        study <- setClinical(study, list(STUDY$clinical))
-        DB.save(db, study)
-        sendSuccessMessage(session, paste("Study", study@name, "saved."))
-        DB$names <- DB.ls(db)
+      if (is.null(STUDY$preview))
+        stop(MSG.datasetInput.noinput)
+      study <- STUDY$preview
+      study@name  <- input$studyName
+      study@dtype <- input$dtype
+      if(stype(study) == STYPE.single) {
+        names(study@datasets) <- study@name
+      }
+      validate.study(study)
+      study <- setClinical(study, STUDY$clinicals)
+      DB.save(db, study)
+      sendSuccessMessage(session, paste("Study", study@name, "saved."))
+      DB$names <- DB.ls(db)
     }, session)
   }, label="save study")
 
