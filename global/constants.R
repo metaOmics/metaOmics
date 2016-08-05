@@ -55,3 +55,9 @@ IND.DESeq2    <- "DESeq2"
 IND.pearsonr  <- "pearsonr"
 IND.all <- c(IND.limma, IND.sam, IND.limmaVoom, IND.edgeR, IND.DESeq2, IND.pearsonr)
 names(IND.all) <- IND.all
+
+TAIL.low  <- "low"
+TAIL.high <- "high"
+TAIL.abs  <- "abs"
+TAIL.all <- c(TAIL.low, TAIL.high, TAIL.abs)
+names(TAIL.all) <- TAIL.all
