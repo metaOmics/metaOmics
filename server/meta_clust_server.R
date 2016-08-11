@@ -31,19 +31,55 @@ meta_clust_server <- function(input, output,session) {
           plot(gskmn, main = paste('gap statistics for ',names(datasets)[i],sep=''))
           dev.off()
         }
+
+        
+        output$plots <- renderUI({
+          plot_output_list <- lapply(1:input$n, function(i) {
+            plotname <- paste("plot", i, sep="")
+            plotOutput(plotname, height = 280, width = 250)
+          })
+          
+          # Convert the list to a tagList - this is necessary for the list of items
+          # to display properly.
+          do.call(tagList, plot_output_list)
+        })
+        
+        for (i in 1:length(datasets)) {
+          # Need local so that each item gets its own number. Without it, the value
+          # of i in the renderPlot() will be the same across all instances, because
+          # of when the expression is evaluated.
+          local({
+            my_i <- i
+            plotname <- paste("plot", my_i, sep="")
+            
+            output[[plotname]] <- renderPlot({
+              plot(1:my_i, 1:my_i,
+                   xlim = c(1, length(datasets)),
+                   ylim = c(1, length(datasets)),
+                   main = paste("1:", my_i, ".  n is ", length(datasets), sep = "")
+              )
+            })
+          })
+        }
+        
+        
         done(session)
       }
     })
 
     observeEvent(input$tuneW, {
-      wait(session, "Tuning wbounds for meta sparse k means...")
-      gapStatResult <- calculateGap(datasets,K=input$KforW,wbounds=input$min:input$max,B=input$B)
-      png(paste(input$outDir,'/mskmGapStatstics.png',sep=""))
-      plot(gapStatResult$wbounds,gapStatResult$gapStat,type='b',xlab='mu',ylab='gapStat') 
-      arrows(gapStatResult$wbounds, gapStatResult$gapStat-gapStatResult$se.score, 
+      if (is.null(s))
+        s <- "No active study"
+        else{
+        wait(session, "Tuning wbounds for meta sparse k means...")
+        gapStatResult <- calculateGap(datasets,K=input$KforW,wbounds=input$min:input$max,B=input$B)
+        png(paste(input$outDir,'/mskmGapStatstics.png',sep=""))
+        plot(gapStatResult$wbounds,gapStatResult$gapStat,type='b',xlab='mu',ylab='gapStat') 
+        arrows(gapStatResult$wbounds, gapStatResult$gapStat-gapStatResult$se.score, 
              gapStatResult$wbounds, gapStatResult$gapStat+gapStatResult$se.score, length=0.05, angle=90, code=3)
-      dev.off()
-      done(session)
+        dev.off()
+        done(session)
+      }
     })
     
     
@@ -100,7 +136,8 @@ meta_clust_server <- function(input, output,session) {
        })
     })
     
-    output$heatmap <- renderPlot({
-        if (is.null(runClust))          return()
-    })
+        
+#    output$heatmap <- renderPlot({
+#        if (is.null(runClust))          return()
+#    })
 }
