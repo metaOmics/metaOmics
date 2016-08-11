@@ -136,7 +136,8 @@ preproc_server <- function(input, output, session) {
         names(study@datasets) <- study@name
       }
       validate.study(study)
-      study <- setClinical(study, STUDY$clinicals)
+      if (!is.null(STUDY$clinicals))
+        study <- setClinical(study, STUDY$clinicals)
       DB.save(db, study)
       sendSuccessMessage(session, paste("Study", study@name, "saved."))
       DB$names <- DB.ls(db)
