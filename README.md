@@ -33,7 +33,7 @@ shiny::runApp('metaOmics', port=9987, launch.browser=T)
 
 * Install rmarkdown for R
 ```
-instal.packages("rmarkdown")
+install.packages("rmarkdown")
 ```
 * Inside `doc` directory, start R console, and:
 ```R
