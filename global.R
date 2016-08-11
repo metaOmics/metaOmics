@@ -3,6 +3,7 @@ library(preproc)
 library(MetaSparseKmeans)
 library(shiny)
 library(shinyBS)
+library(cluster)
 
 data(preproc.option)
 
