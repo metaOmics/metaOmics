@@ -6,8 +6,8 @@ meta_clust_ui <- function(id, label = "meta sparse K means") {
 ##############################
                                         # Parameters for SparsKMeans #
 ##############################
-                     textInput("outDir", "Output directory:", "~/"),
-                     h4("Tune number of clusters K K (optional)"),
+                     textInput(ns("outDir"), "Output directory:", "~/"),
+                     h4("Tune number of clusters K (optional)"),
                      br(),
                      actionButton(ns("tuneK"), "Tune K",icon = icon("stats", lib = "glyphicon")),
                      tags$hr(),
@@ -34,12 +34,15 @@ meta_clust_ui <- function(id, label = "meta sparse K means") {
                                         #          column(12, plotOutput("plot2")),
                                         #        ),
                                         # This is the dynamic UI for the plots
-                     h4("Gap statistics"),
+                     h4("Gap statistics (K)"),
                      tags$hr(),
-                     uiOutput(ns("plots")),
+                     uiOutput(ns("plotsK")),
+                     h4("Gap statistics (wbounds)"),
+                     tags$hr(),
+                     plotOutput(ns("plotW")),
                      h4("Heatmap"),
                      fluidRow(
-                         plotOutput(ns("heatmap"))
+                         uiOutput(ns("heatmaps"))
                                         # ui_output
                      )
                  )

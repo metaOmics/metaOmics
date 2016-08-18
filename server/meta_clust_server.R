@@ -5,9 +5,9 @@ meta_clust_server <- function(input, output,session) {
         sendErrorMessage(session, "No active study")
     else
         datasets <- s@datasets
-    datasets <- t(datasets) # What's the dimension like??
-    runClust <- reactiveValues(data = NULL)
-    
+    datasets <- lapply(datasets,t) # What's the dimension like??
+  #  print( dim(datasets[[1]]) )
+
     tuneIndStudyK <- function(aS, topPercent=0.1, B = 100, seed=15213, verbose=FALSE){
         ## aS: a study, n*p, sample*gene
         ## topPercent: top percentage of genes with the largest variance
@@ -18,26 +18,27 @@ meta_clust_server <- function(input, output,session) {
         bS <- aS[,varS > quantile(varS,1-topPercent)]
         set.seed(seed)
         gskmn <- clusGap(bS, FUN = kmeans, nstart = 20, K.max = 8, B = B, verbose=verbose)
-        gskmn
+        return(gskmn)
     }
-    
+
     observeEvent(input$tuneK, {
         if (is.null(s))
             s <- "No active study"
         else{
+            gskmn <- list()
             wait(session, "Tuning number of clusters for meta sparse k means")
             for(i in 1:length(datasets)){	
-                gskmn <- tuneIndStudyK(datasets[[i]], topPercent=0.1, B = 10, verbose=TRUE)
+                gskmn[[i]] <- tuneIndStudyK(datasets[[i]], topPercent=0.1, B = 10, verbose=TRUE)
                 png(paste(input$outDir,'/gskmn',i,'.png',sep=""))
-                plot(gskmn, main = paste('gap statistics for ',names(datasets)[i],sep=''))
+                plot(gskmn[[i]], main = paste('gap statistics for ',names(datasets)[i],sep=''))
                 dev.off()
             }
 
             
-            output$plots <- renderUI({
-                plot_output_list <- lapply(1:input$n, function(i) {
-                    plotname <- paste("meta_clust-plot", i, sep="")
-                    plotOutput(plotname, height = 280, width = 250)
+            output$plotsK <- renderUI({
+                plot_output_list <- lapply(1:length(datasets), function(i) {
+                    plotname <- paste("meta_clust-plotsK", i, sep="")
+                    plotOutput(plotname, height = 280, width = 350)
                 })
                 
                                         # Convert the list to a tagList - this is necessary for the list of items
@@ -51,22 +52,16 @@ meta_clust_server <- function(input, output,session) {
                                         # of when the expression is evaluated.
                 local({
                     my_i <- i
-                    plotname <- paste("plot", my_i, sep="")
+                    plotname <- paste("plotsK", my_i, sep="")
                     
                     output[[plotname]] <- renderPlot({
-                        plot(1:my_i, 1:my_i,
-                             xlim = c(1, length(datasets)),
-                             ylim = c(1, length(datasets)),
-                             main = paste("1:", my_i, ".  n is ", length(datasets), sep = "")
-                             )
+                        plot(gskmn[[my_i]], main = paste('gap statistics for ',names(datasets)[my_i],sep=''))
                     })
                 })
             }
             
-            
             done(session)
             
-            updateSliderInput(        )#....??
             sendSuccessMessage(session, "K updated")
         }
     })
@@ -79,13 +74,24 @@ meta_clust_server <- function(input, output,session) {
         arrows(gapStatResult$wbounds, gapStatResult$gapStat-gapStatResult$se.score, 
                gapStatResult$wbounds, gapStatResult$gapStat+gapStatResult$se.score, length=0.05, angle=90, code=3)
         dev.off()
+
+        output$plotW <- renderPlot({
+            plot(gapStatResult$wbounds,gapStatResult$gapStat,type='b',xlab='mu',ylab='gapStat') 
+            arrows(gapStatResult$wbounds, gapStatResult$gapStat-gapStatResult$se.score, 
+                   gapStatResult$wbounds, gapStatResult$gapStat+gapStatResult$se.score, length=0.05, angle=90, code=3)            
+        })
+        
         done(session)
 
-        updateSliderInput(        )#....??
         sendSuccessMessage(session, "Wbounds updated")
     })
-    
-    
+
+    observe({
+        val <- input$KforW 
+        updateSliderInput(session, "k", value = val,
+                          min = 0, max = max(20, val+5), step = 1)
+    })
+
     observeEvent(input$clustGo, {
         runClust <- TRUE
         
@@ -95,7 +101,7 @@ meta_clust_server <- function(input, output,session) {
         
         ## output gene list
         geneList <- res$ws
-        write.csv(geneList,paste(input$outDir,'/geneList.csv',sep="")) # need to add the output directory ??
+        write.csv(geneList,paste(input$outDir,'/geneList.csv',sep=""))
         
         ## output labels
         for(i in 1:length(datasets)){	
@@ -104,9 +110,7 @@ meta_clust_server <- function(input, output,session) {
             names(alabel) <- rownames(datasets[[i]])	
             write.csv(alabel, afileName)
         }
-        done(session)
-        
-        wait(session, "Saving sparse K means results")
+
         ## visualization.
         for(i in 1:length(datasets)){	
             afileName <- paste('heatmap_',names(datasets)[i],'.png',sep='')
@@ -120,24 +124,44 @@ meta_clust_server <- function(input, output,session) {
             
             dev.off()
         }
+
         done(session)
-        
-        output$heatmap <- renderPlot({
-            wait(session, "Visualizing sparse K means results...")
-                                        #par(mfrow=c(1,length(datasets))) #does this work?
-                                        #OW try https://gist.github.com/wch/5436415/
+        wait(session, "Visualizing sparse K means results...")
+
+        output$heatmaps <- renderUI({
+            plot_output_list <- lapply(1:length(datasets), function(i) {
+                plotname <- paste("meta_clust-plot", i, sep="")
+                plotOutput(plotname, height = 480, width = 450)
+            })
             
-            for(i in 1:length(datasets)){	
-                if(i==1){
-                    geneOrder = getWsHeatmap(t(datasets[[i]]),res$Cs[[i]],res$ws,main=names(datasets)[i],Rowv=TRUE,labCol="",labRow="")	
-                } else {
-                    getWsHeatmap(t(datasets[[i]]),res$Cs[[i]],res$ws,main=names(datasets)[i], Rowv = geneOrder$Rowv,labCol="",labRow="")	
-                }
-            }
-            done(session)
-            sendSuccessMessage(session, "Meta sparse K means complete. Heatmap saved to output directory")
-                                        #par(mfrow=c(1,1))
+                                        # Convert the list to a tagList - this is necessary for the list of items
+                                        # to display properly.
+            do.call(tagList, plot_output_list)
         })
+        
+        for (i in 1:length(datasets)) {
+                                        # Need local so that each item gets its own number. Without it, the value
+                                        # of i in the renderPlot() will be the same across all instances, because
+                                        # of when the expression is evaluated.
+            local({
+                my_i <- i
+                plotname <- paste("plot", my_i, sep="")
+                
+                output[[plotname]] <- renderPlot({
+                    if(my_i==1){
+                        geneOrder = getWsHeatmap(t(datasets[[my_i]]),res$Cs[[my_i]],res$ws,main=names(datasets)[my_i],Rowv=TRUE,labCol="",labRow="")	
+                    } else {
+                        getWsHeatmap(t(datasets[[my_i]]),res$Cs[[my_i]],res$ws,main=names(datasets)[my_i], Rowv = geneOrder$Rowv,labCol="",labRow="")	
+                    }
+                    
+                })
+            })
+        }
+        
+        done(session)
+        sendSuccessMessage(session, "Meta sparse K means complete. Heatmap saved to output directory")
+                                        #par(mfrow=c(1,1))
+    
     })            
 
 }
