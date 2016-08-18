@@ -7,9 +7,18 @@ Shiny.addCustomMessageHandler("simpleAlert",
 
 function messengerAlert(type) {
   return function(msg) {
-    Messenger().post({
+    msg = Messenger().post({
       message: msg,
-      type: type
+      hideAfter: 30,
+      type: type,
+      actions: {
+        cancel: {
+	  label: "close",
+          action: function() {
+            return msg.cancel();
+          }
+        }
+      }
     });
   }
 }
