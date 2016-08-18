@@ -11,6 +11,7 @@ source("global/messages.R")
 source("global/help.R")
 source("global/database.R")
 source("global/helpers.R")
+source("global/directoryInput.R")
 
 # Create the directory for database prior to application startup
 db <- new("Database", name="studies")
