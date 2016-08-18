@@ -9,7 +9,7 @@ function messengerAlert(type) {
   return function(msg) {
     msg = Messenger().post({
       message: msg,
-      hideAfter: 30,
+      hideAfter: 0,
       type: type,
       actions: {
         cancel: {
