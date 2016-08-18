@@ -31,3 +31,5 @@ try <- function(code, session) {
     error=function(e) {sendErrorMessage(session, e$message)}
   )
 }
+
+NS <- function(prefix) { function(name) {paste(prefix, name, sep="-")} }
