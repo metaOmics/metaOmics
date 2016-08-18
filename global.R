@@ -4,6 +4,8 @@ library(MetaSparseKmeans)
 library(shiny)
 library(shinyBS)
 library(cluster)
+library(PMA)
+library(metaPCA)
 
 data(preproc.option)
 
