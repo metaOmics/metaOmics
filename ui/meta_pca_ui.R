@@ -17,19 +17,22 @@ meta_pca_ui <- function(id, label = "meta PCA") {
                      br(),
 
                      
-                     selectInput(ns("dimAuto"), label = "Whether dimension is determined by variance quantile",
-                                 choices = list("True" ="TRUE", "False"="FALSE"),
-                                 selected = "TRUE"),
-                     br(),
-                     
-                     selectInput(ns("sparse"), label = "Whether sparseness is encouraged",
-                                 choices = list("True" ="TRUE", "False"="FALSE"),
-                                 selected = "TRUE"),
-                     br(),
+#                     selectInput(ns("dimAuto"), label = "Whether dimension is determined by variance quantile",
+#                                 choices = list("True" ="TRUE", "False"="FALSE"),
+                                        #                                 selected = "TRUE"),
+                     checkboxInput(ns("dimAuto"),"Dimension is determined by variance quantile"),
 
+                     checkboxInput(ns("sparse"),"Sparseness is encouraged"),
                      
-                     sliderInput(ns("lambda"), "Tuning parameter for sparsity:",
-                                 min = 0, max = 20, value = 6, step = 1),
+#                     selectInput(ns("sparse"), label = "Whether sparseness is encouraged",
+#                                 choices = list("True" ="TRUE", "False"="FALSE"),
+#                                 selected = "TRUE"),
+                     conditionalPanel(
+                         condition="input.sparse == TRUE",
+                         sliderInput(ns("lambda"), "Tuning parameter for sparsity:",
+                                     min = 0, max = 20, value = 6, step = 1)
+                     ),
+
                      tags$hr(),
                      
                      actionButton(ns("pcaGo"), "Run meta PCA",icon = icon("play", lib = "glyphicon"))

@@ -14,9 +14,13 @@ meta_pca_server <- function(input, output,session) {
             s <- "No active study"
         else{
             wait(session, "Running Meta PCA. Go get a coffee.")
-            
+
+            if (is.null(input$lambda))
+            res6 <- meta.pca(DList=datasets, method=input$methods, Meta.Dim=input$dim, is.auto.Dim = input$dimAuto, #as.logical
+                             is.sparse=linput$sparse)
+            else
             res6 <- meta.pca(DList=datasets, method=input$methods, Meta.Dim=input$dim, is.auto.Dim = input$dimAuto,
-                             is.sparse=input$sparse, Lambda=input$lambda)
+                             is.sparse=linput$sparse, Lambda=input$lambda)
             
             coord <- res6$coord
 
