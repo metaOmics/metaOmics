@@ -16,3 +16,4 @@ MSG.study.duplicate <- function(name) {
   paste("a study called", name, "exits, please choose another name or delete the study first")
 }
 
+MSG.no.active = "You haven't select any active study yet. Go to \"Saved Data\" tab and click on the study to make it active"

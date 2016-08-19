@@ -9,6 +9,10 @@ meta_de_server <- function(input, output, session) {
   ##########################
   # Validation             #
   ##########################
+  validate <- function() {
+    if(length(DB$active) == 0 )
+      warning(MSG.no.active)
+  }
 
   ##########################
   # Observers              #
@@ -22,15 +26,18 @@ meta_de_server <- function(input, output, session) {
   close.btn <- actionButton('meta_de-close.advanced.opt',
                             'Hide advanced options', icon=icon("minus"))
   observeEvent(input$expand.advanced.opt, {
-    group.choices <- colnames(DB$active@clinicals[[1]])
-    output$toggle.option <- renderUI({
-      tagList(
-        close.btn,
-        selectizeInput("meta_de-group", "select group", group.choices, multiple=T),
-        numericInput("meta_de-nperm", "number of permutation", NULL),
-        selectizeInput("meta_de-tail", "tail", TAIL.all)
-      )
-    })
+    try({
+      validate()
+      group.choices <- colnames(DB$active@clinicals[[1]])
+      output$toggle.option <- renderUI({
+        tagList(
+          close.btn,
+          selectizeInput("meta_de-group", "select group", group.choices, multiple=T),
+          numericInput("meta_de-nperm", "number of permutation", NULL),
+          selectizeInput("meta_de-tail", "tail", TAIL.all)
+        )
+      })
+    }, session)
   })
   observeEvent(input$close.advanced.opt, {
     output$toggle.option <- renderUI({
@@ -53,58 +60,67 @@ meta_de_server <- function(input, output, session) {
   })
 
   observeEvent(input$resp.type, {
-    resp <- input$resp.type
-    clinical.options <- names(DB$active@clinicals[[1]])
-    output$resp.type.option <- renderUI({
-      if (resp == RESP.two.class) {
-        tagList(
-          selectInput(ns("two.class.col"), "Label Attribute:", clinical.options),
-          uiOutput(ns("class.option"))
-        )
-      } else if (resp == RESP.multi.class) {
-        tagList(
-          selectInput(ns("multi.class.col"), "Label Attribute:", clinical.options),
-          uiOutput(ns("class.option"))
-        )
-      } else if (resp == RESP.continuous) {
-        selectInput(ns("conti.col"), "Label Attribute:", clinical.options)
-      } else if (resp == RESP.survival) {
-        tagList(
-          selectInput(ns("time.col"), "Time Attribute:", clinical.options),
-          selectInput(ns("indicator.col"), "Indicator Attribute:", clinical.options)
-        )
-      }
-    })
+    try({
+      validate()
+      resp <- input$resp.type
+      clinical.options <- names(DB$active@clinicals[[1]])
+      output$resp.type.option <- renderUI({
+        if (resp == RESP.two.class) {
+          tagList(
+            selectInput(ns("two.class.col"), "Label Attribute:", clinical.options),
+            uiOutput(ns("class.option"))
+          )
+        } else if (resp == RESP.multi.class) {
+          tagList(
+            selectInput(ns("multi.class.col"), "Label Attribute:", clinical.options),
+            uiOutput(ns("class.option"))
+          )
+        } else if (resp == RESP.continuous) {
+          selectInput(ns("conti.col"), "Label Attribute:", clinical.options)
+        } else if (resp == RESP.survival) {
+          tagList(
+            selectInput(ns("time.col"), "Time Attribute:", clinical.options),
+            selectInput(ns("indicator.col"), "Indicator Attribute:", clinical.options)
+          )
+        }
+      })
+    }, session)
   })
 
   observeEvent(input$two.class.col, {
-    resp <- input$resp.type
-    labels <- DB$active@clinicals[[1]][,input$two.class.col]
-    labels <- levels(as.factor(labels))
-    output$class.option <- renderUI({
-      tagList(
-        selectInput(ns("control.label"), "Control Label:", labels),
-        selectInput(ns("expr.label"), "Experimental Label:", labels)
-      )
-    })
+    try({
+      validate()
+      resp <- input$resp.type
+      labels <- DB$active@clinicals[[1]][,input$two.class.col]
+      labels <- levels(as.factor(labels))
+      output$class.option <- renderUI({
+        tagList(
+          selectInput(ns("control.label"), "Control Label:", labels),
+          selectInput(ns("expr.label"), "Experimental Label:", labels)
+        )
+      })
+    }, session)
   })
 
   observeEvent(input$multi.class.col, {
-    resp <- input$resp.type
-    labels <- DB$active@clinicals[[1]][,input$multi.class.col]
-    labels <- levels(as.factor(labels))
-    output$class.option <- renderUI({
-      selectizeInput(ns("group.label"), "Group Labels:", labels, 
-                  multiple=T, options = select.noDefault)
-    })
+    try({
+      validate()
+      resp <- input$resp.type
+      labels <- DB$active@clinicals[[1]][,input$multi.class.col]
+      labels <- levels(as.factor(labels))
+      output$class.option <- renderUI({
+        selectizeInput(ns("group.label"), "Group Labels:", labels, 
+                    multiple=T, options = select.noDefault)
+      })
+    }, session)
   })
 
   ##########################
   # Render output/UI       #
   ##########################
   output$ind.method <- renderUI({
-    study <- DB$active
-    if (!is.null(study)) {
+    try({
+      study <- DB$active
       study.names <- names(study@datasets)
       index <- 0
       lapply(study.names, function(study.name) {
@@ -112,9 +128,7 @@ meta_de_server <- function(input, output, session) {
         tag.id <- ns(paste("ind", index, sep=""))
         selectizeInput(tag.id, study.name, IND.all)
       })
-    } else {
-      "You haven't select an active study yet"
-    }
+    }, session)
   })
 
   output$toggle.option <- renderUI({ expand.btn })
