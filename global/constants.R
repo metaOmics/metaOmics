@@ -61,3 +61,27 @@ TAIL.high <- "high"
 TAIL.abs  <- "abs"
 TAIL.all <- c(TAIL.low, TAIL.high, TAIL.abs)
 names(TAIL.all) <- TAIL.all
+
+
+RESP.two.class   <- "twoclass"
+RESP.multi.class <- "multiclass"
+RESP.continuous  <- "continuous"
+RESP.survival    <- "survival"
+RESP.all <- c(RESP.two.class, RESP.multi.class, RESP.continuous, RESP.survival)
+names(RESP.all) <- c("Two Class", "Multi-Class", "Continuous", "Survival")
+
+AW.original      <- "original"
+AW.unconditional <- "uncond"
+AW.conditional   <- "cond"
+AW.all <- c(AW.original, AW.unconditional, AW.conditional)
+names(AW.all) <- c("Original", "Conditional", "Un-conditional")
+
+REM.type = c("HS","HO", "DL", "SJ", "EB", "RML" )
+REM.HS  <- "HS"
+REM.HO  <- "HO"
+REM.DL  <- "DL"
+REM.SJ  <- "SJ"
+REM.EB  <- "EB"
+REM.RML <- "RML"
+REM.all <- c(REM.HS, REM.HO, REM.DL, REM.SJ, REM.EB, REM.RML)
+names(REM.all) <- c("HS", "HO", "DL", "SJ", "EB", "RML")

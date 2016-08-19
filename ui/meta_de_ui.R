@@ -8,6 +8,9 @@ meta_de_ui <- function(id, label = "meta DE") {
         h4("Meta Method"),
         selectizeInput(ns("meta.method"), "", as.list(META.all)),
         uiOutput(ns("meta.method.option")),
+        h4("Response Type"),
+        selectizeInput(ns("resp.type"), "", as.list(RESP.all)),
+        uiOutput(ns("resp.type.option")),
         uiOutput(ns("toggle.option")),
         uiOutput(ns("advanced.option"))
       ),
