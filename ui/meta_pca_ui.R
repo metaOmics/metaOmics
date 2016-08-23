@@ -28,7 +28,7 @@ meta_pca_ui <- function(id, label = "meta PCA") {
 #                                 choices = list("True" ="TRUE", "False"="FALSE"),
 #                                 selected = "TRUE"),
                      conditionalPanel(
-                         condition="input.sparse == TRUE",
+                         condition="document.getElementById('meta_pca-sparse').checked == true ",
                          sliderInput(ns("lambda"), "Tuning parameter for sparsity:",
                                      min = 0, max = 20, value = 6, step = 1)
                      ),
