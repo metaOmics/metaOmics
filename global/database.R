@@ -4,11 +4,13 @@ setClass("Database",
     name="character",
     dir="character",
     meta.file="character",
+    working.path="character",
     activate.dir="character"
   ),
   prototype(
     dir="",
     meta.file="",
+    working.path="",
     activate.dir=""
   ),
   validity = function(object) {
@@ -23,10 +25,14 @@ setMethod("initialize", "Database",
     .Object <- callNextMethod()
     .Object@dir      <- paste(DB.dir, name, sep="/")
     .Object@meta.file <- paste(".Database", name, "meta/meta", sep="/")
+    .Object@working.path <- paste(".Database", name, "working/working", sep="/")
     .Object@activate.dir <- paste(".Database", name, "active",  sep="/")
     dir.create(.Object@dir, recursive=T)
     dir.create(paste(".Database", name, "meta",  sep="/"), recursive=T)
+    dir.create(paste(".Database", name, "working",  sep="/"), recursive=T)
     dir.create(.Object@activate.dir, recursive=T)
+    if (!file.exists(.Object@working.path))
+      file.create(.Object@working.path, overwrite=F)
     studies <- c()
     studies <- DB.load(.Object, list.files(path=.Object@dir))
     db.meta <- data.frame(
@@ -107,4 +113,20 @@ DB.activate <- function(db, study) {
 DB.load.active <- function(db) {
   current.active.study <- list.files(path=db@activate.dir)
   DB.load(db, current.active.study)[[1]]
+}
+
+DB.set.working.dir <- function(db, path){
+  file.con <- file(db@working.path)
+  writeLines(path, file.con)
+  close(file.con)
+}
+
+DB.load.working.dir <- function(db){
+  file.con <- file(db@working.path)
+  path <- readLines(file.con)
+  close(file.con)
+  if (length(path) == 0)
+    ""
+  else
+    path
 }

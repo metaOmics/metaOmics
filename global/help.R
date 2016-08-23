@@ -26,3 +26,4 @@ HELP.select.datasets <- "Click on the rows of datasets on the right to select da
 HELP.merge <- "Merging selected dataset will keep only those features (gene symbols) that is common to all datasets selected"
 HELP.delete <- "After you delete these datasets, they will not be recoverable"
 
+HELP.working.dir <- "During the computation, some output files or images are automatically saved to this directory."
