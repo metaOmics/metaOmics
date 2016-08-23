@@ -1,6 +1,21 @@
 shinyUI(
   navbarPage("metaOmics", id="nav",
-    header=h5(textOutput("saved_data-activated"), id="active-study"),
+    header=tagList(
+      tags$div(id="working-dir",
+        tagList(
+          tags$p("Working Directory", class="header-label"),
+          tags$p(textOutput("setting-working.dir"))
+        )
+      ),
+      tags$div(id="active-study", 
+        tagList(
+          tags$p("Active Study", class="header-label"),
+          tags$div(tags$p(textOutput("saved_data-activated")))
+        )
+      )
+    ),
+    # tab for global settings
+    setting_ui("setting"),
     # tab for preprosessing
     preproc_ui("preproc"),
     # tab for manipulating saved data
