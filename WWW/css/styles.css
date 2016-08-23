@@ -62,7 +62,7 @@ h1, h2, h3, h4 { font-weight: 400; }
 }
 
 #active-study {
-  background: rgba(64, 161, 255, 0.53);
+  background: rgba(4, 175, 20, 0.53);
   margin-top: 0px;
   margin-bottom: 20px;
   position: absolute;
@@ -73,6 +73,27 @@ h1, h2, h3, h4 { font-weight: 400; }
   z-index: 9999;
   padding: 10px;
   font-size: 20px;
+  overflow-x: scroll;
+}
+
+#working-dir {
+  background: rgba(41, 255, 78, 0.53);
+  margin-top: 0px;
+  margin-bottom: 20px;
+  position: absolute;
+  width: 210px;
+  top: 0px;
+  right: 170px;
+  height: 50px;
+  z-index: 9999;
+  padding: 10px;
+  font-size: 20px;
+  overflow-x: scroll;
+}
+
+.header-label {
+  font-size: 10px;
+  height: 0px;
 }
 
 h4 {
