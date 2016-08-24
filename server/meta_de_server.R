@@ -143,15 +143,7 @@ meta_de_server <- function(input, output, session) {
       response <- c(input$time.col, input$indicator.col)
     }
 
-    cat(file=stderr(), "data: ", class(study@datasets),"\n")
-    cat(file=stderr(), "clin.data: ", class(study@clinicals),"\n")
-    cat(file=stderr(), "data.type: ", study@dtype,"\n")
-    cat(file=stderr(), "resp.type: ", input$resp.type,"\n")
-    cat(file=stderr(), "response: ", response,"\n")
-    cat(file=stderr(), "meta.method: ", input$meta.method,"\n")
-    cat(file=stderr(), "select.group: ", select.group,"\n")
-    cat(file=stderr(), "ref.level: ", ref.level,"\n")
-    cat(file=stderr(), rep(FALSE,length(study@datasets)), "\n")
+    wait(session, "running meta DE, should be soon")
     meta.res.p <- MetaDE(
       data=study@datasets,
       clin.data=study@clinicals,
@@ -169,17 +161,20 @@ meta_de_server <- function(input, output, session) {
       REM.type=NULL,
       asymptotic.p=FALSE
     )
-    cat(file=stderr(), "3\n")
 
     output$heatmap <- renderImage({
       meta.method <- 'AW'
       outfile <- tempfile(fileext='.png')
-      png(outfile)
+      height <- 800
+      width <- 400 * length(ind.method)
+      png(outfile, res=120, width=width, height=height)
       heatmap.sig.genes(meta.res.p, meta.method=meta.method,
-                        fdr.cut=1e-7,color="GR")
-      list(src=outfile, contentType='image/png', alt="heatmap")
+                        fdr.cut=1e-9,color="GR")
+      dev.off()
+      list(src=outfile, contentType='image/png', alt="heatmap", width=width, height=height)
     }, deleteFile=TRUE)
-    cat(file=stderr(), "4\n")
+
+    done(session)
   })
 
   ##########################
@@ -189,12 +184,13 @@ meta_de_server <- function(input, output, session) {
     try({
       study <- DB$active
       study.names <- names(study@datasets)
-      index <- 0
-      lapply(study.names, function(study.name) {
-        index <- index + 1
+      ind.inputs <- list()
+      for (index in 1:length(study.names)) {
         tag.id <- ns(paste("ind", index, sep=""))
-        selectizeInput(tag.id, study.name, IND.all)
-      })
+        ind.inputs <- c(ind.inputs, selectizeInput(tag.id, study.names[index], IND.all))
+      }
+      # do.call(tagList, ind.inputs)
+      ind.inputs
     }, session)
   })
 
