@@ -12,9 +12,12 @@ meta_de_ui <- function(id, label = "meta DE") {
         selectizeInput(ns("resp.type"), "", as.list(RESP.all)),
         uiOutput(ns("resp.type.option")),
         uiOutput(ns("toggle.option")),
-        uiOutput(ns("advanced.option"))
+        uiOutput(ns("advanced.option")),
+	tags$hr(),
+        actionButton(ns('run'), 'Run', icon=icon("rocket"), class="btn-success btn-run")
       ),
       mainPanel(
+	imageOutput(ns('heatmap'))
       )
     )
   )

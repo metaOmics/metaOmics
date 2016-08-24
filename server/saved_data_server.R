@@ -42,7 +42,7 @@ saved_data_server <- function(input, output, session) {
     if(length(selected) == 0)
       "You haven't select anything yet"
     else
-      paste(selected, sep=", ")
+      paste(rownames(meta(db)[selected,]), sep=", ")
     
   })
 
@@ -51,6 +51,7 @@ saved_data_server <- function(input, output, session) {
     if(length(selected) == 0) {
       sendErrorMessage(session, "You haven't select anything yet")
     } else {
+      selected <- rownames(meta(db)[selected,])
       DB.delete(db, selected)
       sendSuccessMessage(session, paste(selected, "deleted"))
       DB$meta <- meta(db)
@@ -99,6 +100,7 @@ saved_data_server <- function(input, output, session) {
     tryCatch( {
         validate.merge.option(input)
         selected <- input$table_rows_selected
+        selected <- rownames(meta(db)[selected,])
         studies <- DB.load(db, selected)
         study <- Merge(studies, name=input$studyName)
         DB.save(db, study)
@@ -112,15 +114,19 @@ saved_data_server <- function(input, output, session) {
   })
 
   output$active <- renderUI({
-    if (length(input$table_rows_selected) == 1 )
+    selected <- input$table_rows_selected
+    if (length(selected) == 1 ) {
+      selected <- rownames(meta(db)[selected,])
       actionButton("saved_data-active",
-        paste( "Make", input$table_rows_selected, "Active Dataset"),
+        paste( "Make", selected, "Active Dataset"),
         icon=icon("compress")
       )
+    }
   })
 
   observeEvent(input$active, {
     selected <- input$table_rows_selected
+    selected <- rownames(meta(db)[selected,])
     DB.activate(db, selected)
     DB$active <- DB.load.active(db)@name
     message = paste(DB$active, "is now made the active study")
