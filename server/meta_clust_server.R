@@ -6,11 +6,8 @@ meta_clust_server <- function(input, output,session) {
     else
         datasets <- s@datasets
     datasets <- lapply(datasets,t)
-    wd <- ""
     observeEvent(input$tabChange, {
-      wd <- DB.load.working.dir(db)
-      wd <- paste(wd, "metaClust", sep="/")
-      dir.create(wd)
+      dir.create(paste(DB.load.working.dir(db),"metaClust",sep="/"))
     })
 
     tuneIndStudyK <- function(aS, topPercent=0.1, B = 100, seed=15213, verbose=FALSE){
@@ -34,7 +31,7 @@ meta_clust_server <- function(input, output,session) {
             wait(session, "Tuning number of clusters for meta sparse k means")
             for(i in 1:length(datasets)){	
                 gskmn[[i]] <- tuneIndStudyK(datasets[[i]], topPercent=0.1, B = 10, verbose=TRUE)
-                png(paste(wd,'/gskmn',i,'.png',sep=""))
+                png(paste( DB.load.working.dir(db),"/metaClust/gskmn",i,".png",sep=""))
                 plot(gskmn[[i]], main = paste('gap statistics for ',names(datasets)[i],sep=''))
                 dev.off()
             }
@@ -74,7 +71,7 @@ meta_clust_server <- function(input, output,session) {
     observeEvent(input$tuneW, {
         wait(session, "Tuning wbounds for meta sparse k means")
         gapStatResult <- calculateGap(datasets,K=input$KforW,wbounds=input$min:input$max,B=input$B)
-        png(paste(wd,'/mskmGapStatstics.png',sep=""))
+        png(paste( DB.load.working.dir(db),"/metaClust/mskmGapStatstics.png",sep=""))
         plot(gapStatResult$wbounds,gapStatResult$gapStat,type='b',xlab='mu',ylab='gapStat') 
         arrows(gapStatResult$wbounds, gapStatResult$gapStat-gapStatResult$se.score, 
                gapStatResult$wbounds, gapStatResult$gapStat+gapStatResult$se.score, length=0.05, angle=90, code=3)
@@ -106,11 +103,11 @@ meta_clust_server <- function(input, output,session) {
         
         ## output gene list
         geneList <- res$ws
-        write.csv(geneList,paste(wd,'/geneList.csv',sep=""))
+        write.csv(geneList,paste( DB.load.working.dir(db),"/metaClust/geneList.csv",sep=""))
         
         ## output labels
         for(i in 1:length(datasets)){	
-            afileName <- paste(wd,'/mskm_label_',names(datasets)[i],'.csv',sep='')
+            afileName <- paste( DB.load.working.dir(db),"/metaClust/mskm_label_",names(datasets)[i],".csv",sep='')
             alabel <- res$Cs[[i]]
             names(alabel) <- rownames(datasets[[i]])	
             write.csv(alabel, afileName)
@@ -118,7 +115,7 @@ meta_clust_server <- function(input, output,session) {
 
         ## visualization.
         for(i in 1:length(datasets)){	
-            afileName <- paste(wd, 'heatmap_',names(datasets)[i],'.png',sep='')
+            afileName <- paste( DB.load.working.dir(db),"/metaClust/heatmap_",names(datasets)[i],".png",sep='')
             
             png(afileName)
             if(i==1){
