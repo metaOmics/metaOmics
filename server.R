@@ -5,6 +5,6 @@ shinyServer(function(input, output, session) {
   callModule(preproc_server, "preproc")
   callModule(saved_data_server, "saved_data")
   callModule(meta_clust_server, "meta_clust")
-#  callModule(meta_de_server, "meta_de")
+  callModule(meta_de_server, "meta_de")
   callModule(meta_pca_server,"meta_pca")
 })

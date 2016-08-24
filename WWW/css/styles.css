@@ -163,3 +163,8 @@ h4 {
 .list-inline {
   white-space:nowrap;
 }
+
+/* meta de*/
+#meta_de-heatmap {
+  overflow: scroll;
+}

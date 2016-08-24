@@ -17,7 +17,7 @@ meta_de_ui <- function(id, label = "meta DE") {
         actionButton(ns('run'), 'Run', icon=icon("rocket"), class="btn-success btn-run")
       ),
       mainPanel(
-	imageOutput(ns('heatmap'))
+	imageOutput(ns('heatmap'), height="100%")
       )
     )
   )
