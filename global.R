@@ -1,6 +1,7 @@
 # This file will be executed prior to app startup to setup the necessary environment
 library(preproc)
 library(MetaSparseKmeans)
+library(MetaDE)
 library(shiny)
 library(shinyBS)
 
