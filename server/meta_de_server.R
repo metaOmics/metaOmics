@@ -184,11 +184,12 @@ meta_de_server <- function(input, output, session) {
     try({
       study <- DB$active
       study.names <- names(study@datasets)
-      ind.inputs <- c()
+      ind.inputs <- list()
       for (index in 1:length(study.names)) {
         tag.id <- ns(paste("ind", index, sep=""))
         ind.inputs <- c(ind.inputs, selectizeInput(tag.id, study.names[index], IND.all))
       }
+      # do.call(tagList, ind.inputs)
       ind.inputs
     }, session)
   })
