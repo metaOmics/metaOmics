@@ -17,6 +17,11 @@ meta_de_ui <- function(id, label = "meta DE") {
         actionButton(ns('run'), 'Run', icon=icon("rocket"), class="btn-success btn-run")
       ),
       mainPanel(
+        h4("Image parameters"),
+        fluidRow(
+          column(6, numericInput(ns("fdr.cut"), "FRD Cutoff", value=1e-9)),
+          column(6, sliderInput(ns("scale"), "Image Size", value=1, min=0.5, max=4))
+        ),
 	imageOutput(ns('heatmap'), height="100%")
       )
     )

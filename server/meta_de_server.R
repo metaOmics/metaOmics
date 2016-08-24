@@ -6,6 +6,7 @@ meta_de_server <- function(input, output, session) {
   # Reactive Values        #
   ##########################
   DB <- reactiveValues(active=DB.load.active(db))
+  IMAGE <- reactiveValues(heatmap.data=NULL)
 
   ##########################
   # Validation             #
@@ -32,12 +33,24 @@ meta_de_server <- function(input, output, session) {
       output$toggle.option <- renderUI({
         tagList(
           close.btn,
-          numericInput("meta_de-nperm", "number of permutation", NULL),
+          radioButtons(ns("asymptotic.p"), 'Asymptotic P', inline=T,
+            c(No=F, Yes=T), F
+          ),
+          uiOutput(ns("asym.option")),
           selectizeInput("meta_de-tail", "tail", TAIL.all)
         )
       })
     }, session)
   })
+
+  observeEvent(input$asymptotic.p, {
+    output$asym.option <- renderUI({
+      if (input$asymptotic.p == T) {
+        numericInput("meta_de-nperm", "number of permutation", NULL)
+      }
+    })
+  })
+
   observeEvent(input$close.advanced.opt, {
     output$toggle.option <- renderUI({
       expand.btn
@@ -94,8 +107,8 @@ meta_de_server <- function(input, output, session) {
       labels <- levels(as.factor(labels))
       output$class.option <- renderUI({
         tagList(
-          selectInput(ns("control.label"), "Control Label:", labels),
-          selectInput(ns("expr.label"), "Experimental Label:", labels)
+          selectInput(ns("control.label"), "Control Label:", labels, selected=labels[1]),
+          selectInput(ns("expr.label"), "Experimental Label:", labels, selected=labels[2])
         )
       })
     }, session)
@@ -144,7 +157,7 @@ meta_de_server <- function(input, output, session) {
     }
 
     wait(session, "running meta DE, should be soon")
-    meta.res.p <- MetaDE(
+    IMAGE$heatmap.data <- MetaDE(
       data=study@datasets,
       clin.data=study@clinicals,
       data.type=study@dtype,
@@ -156,25 +169,28 @@ meta_de_server <- function(input, output, session) {
       select.group=select.group,
       ref.level=ref.level,
       paired=rep(FALSE,length(study@datasets)),
-      rth=NULL,
-      AW.type="original",
-      REM.type=NULL,
+      rth=input$rth,
+      AW.type=input$AW.type,
+      REM.type=input$REM.type,
       asymptotic.p=FALSE
     )
-
-    output$heatmap <- renderImage({
-      meta.method <- 'AW'
-      outfile <- tempfile(fileext='.png')
-      height <- 800
-      width <- 400 * length(ind.method)
-      png(outfile, res=120, width=width, height=height)
-      heatmap.sig.genes(meta.res.p, meta.method=meta.method,
-                        fdr.cut=1e-9,color="GR")
-      dev.off()
-      list(src=outfile, contentType='image/png', alt="heatmap", width=width, height=height)
-    }, deleteFile=TRUE)
-
     done(session)
+  })
+
+  observeEvent(c(IMAGE$heatmap.data, input$fdr.cut, input$scale), {
+    if (!is.null(IMAGE$heatmap.data)) {
+      output$heatmap <- renderImage({
+        meta.method <- 'AW'
+        outfile <- tempfile(fileext='.png')
+        height <- 800 * input$scale
+        width <- 400 * length(DB$active@datasets) * input$scale
+        png(outfile, res=140, width=width, height=height)
+        heatmap.sig.genes(IMAGE$heatmap.data, meta.method=meta.method,
+                          fdr.cut=input$fdr.cut, color="GR")
+        dev.off()
+        list(src=outfile, contentType='image/png', alt="heatmap", width=width, height=height)
+      }, deleteFile=TRUE)
+    }
   })
 
   ##########################
@@ -184,13 +200,10 @@ meta_de_server <- function(input, output, session) {
     try({
       study <- DB$active
       study.names <- names(study@datasets)
-      ind.inputs <- list()
-      for (index in 1:length(study.names)) {
+      lapply(seq_along(study.names), function(index) {
         tag.id <- ns(paste("ind", index, sep=""))
-        ind.inputs <- c(ind.inputs, selectizeInput(tag.id, study.names[index], IND.all))
-      }
-      # do.call(tagList, ind.inputs)
-      ind.inputs
+        selectizeInput(tag.id, study.names[index], IND.all)
+      })
     }, session)
   })
 
