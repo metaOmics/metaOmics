@@ -48,7 +48,7 @@ h1, h2, h3, h4 { font-weight: 400; }
   max-height: 150px;
 }
 
-#preproc-dataPreview {
+#preproc-dataPreview, #preproc-clinicalPreview, #meta_de-summary, #meta_de-heatmap {
   overflow-x: scroll;
 }
 
@@ -164,7 +164,3 @@ h4 {
   white-space:nowrap;
 }
 
-/* meta de*/
-#meta_de-heatmap {
-  overflow: scroll;
-}

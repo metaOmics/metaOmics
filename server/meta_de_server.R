@@ -6,7 +6,7 @@ meta_de_server <- function(input, output, session) {
   # Reactive Values        #
   ##########################
   DB <- reactiveValues(active=DB.load.active(db))
-  IMAGE <- reactiveValues(heatmap.data=NULL)
+  DE <- reactiveValues(result=NULL)
 
   ##########################
   # Validation             #
@@ -37,7 +37,7 @@ meta_de_server <- function(input, output, session) {
             c(No=F, Yes=T), F
           ),
           uiOutput(ns("asym.option")),
-          selectizeInput("meta_de-tail", "tail", TAIL.all)
+          selectizeInput(ns("tail"), "Alternative Hypothesis", TAIL.all)
         )
       })
     }, session)
@@ -45,8 +45,8 @@ meta_de_server <- function(input, output, session) {
 
   observeEvent(input$asymptotic.p, {
     output$asym.option <- renderUI({
-      if (input$asymptotic.p == T) {
-        numericInput("meta_de-nperm", "number of permutation", NULL)
+      if (input$asymptotic.p == F) {
+        numericInput("meta_de-nperm", "number of permutation", value=100)
       }
     })
   })
@@ -62,7 +62,7 @@ meta_de_server <- function(input, output, session) {
     output$meta.method.option <- renderUI({
       if (method == META.roP || method == META.roP.OC) {
         n <- length(DB$active@datasets)
-        sliderInput(ns("rth"), "rth", min=1, max=n, value=1)
+        sliderInput(ns("rth"), "rth", min=1, max=n, value=1, step=1)
       } else if (method == META.AW) {
         selectInput(ns("AW.type"), "AW Type", AW.all)
       } else if (method == META.REM) {
@@ -121,7 +121,7 @@ meta_de_server <- function(input, output, session) {
       labels <- DB$active@clinicals[[1]][,input$multi.class.col]
       labels <- levels(as.factor(labels))
       output$class.option <- renderUI({
-	tagList(
+        tagList(
           selectizeInput(ns("group.label"), "Group Labels:", labels, 
                          multiple=T, options = select.noDefault),
           selectInput(ns("control.label"), "Control Label:", labels)
@@ -156,39 +156,65 @@ meta_de_server <- function(input, output, session) {
       response <- c(input$time.col, input$indicator.col)
     }
 
+    asymptotic.p <- input$asymptotic.p
+    if (length(asymptotic.p) == 0) asymptotic.p <- F
+    tail <- input$tail
+    if (length(tail) == 0) tail <- "abs"
+    nperm <- input$nperm
+    if (length(nperm) == 0) nperm <- 100
+
     wait(session, "running meta DE, should be soon")
-    IMAGE$heatmap.data <- MetaDE(
-      data=study@datasets,
-      clin.data=study@clinicals,
-      data.type=study@dtype,
-      resp.type=input$resp.type,
-      response=response,
-      covariate=NULL,
-      ind.method=ind.method,
-      meta.method=input$meta.method,
-      select.group=select.group,
-      ref.level=ref.level,
-      paired=rep(FALSE,length(study@datasets)),
-      rth=input$rth,
-      AW.type=input$AW.type,
-      REM.type=input$REM.type,
-      asymptotic.p=FALSE
-    )
+    try({
+      DE$result <- MetaDE(
+        data=study@datasets,
+        clin.data=study@clinicals,
+        data.type=study@dtype,
+        resp.type=input$resp.type,
+        response=response,
+        covariate=NULL,
+        ind.method=ind.method,
+        meta.method=input$meta.method,
+        select.group=select.group,
+        ref.level=ref.level,
+        paired=rep(FALSE,length(study@datasets)),
+        rth=input$rth,
+        AW.type=input$AW.type,
+        REM.type=input$REM.type,
+        asymptotic.p=asymptotic.p,
+        nperm=nperm,
+        tail=tail
+      )
+    }, session)
+    output$summary <- DT::renderDataTable(DT::datatable({
+      summary.de <- summary.meta(DE$result, isolate(input$meta.method))
+      count <- sum(summary.de$FDR <= input$fdr.cut)
+      output$heatmap.info <- renderText({
+        paste(isolate(input$meta.method), "with", tail, "alternative hypothesis,",
+              count, "significant genes left after cut off.")
+      })
+      summary.de
+    }))
     done(session)
   })
 
-  observeEvent(c(IMAGE$heatmap.data, input$fdr.cut, input$scale), {
-    if (!is.null(IMAGE$heatmap.data)) {
+  observe({
+    if (!is.null(DE$result)) {
       output$heatmap <- renderImage({
-        meta.method <- 'AW'
         outfile <- tempfile(fileext='.png')
         height <- 800 * input$scale
         width <- 400 * length(DB$active@datasets) * input$scale
-        png(outfile, res=140, width=width, height=height)
-        heatmap.sig.genes(IMAGE$heatmap.data, meta.method=meta.method,
-                          fdr.cut=input$fdr.cut, color="GR")
-        dev.off()
-        list(src=outfile, contentType='image/png', alt="heatmap", width=width, height=height)
+	cat(file=stderr(), input$fdr.cut, input$scale, "\n")
+        wait(session, paste("Plotting result with FDR", input$fdr.cut, 
+                            "and scale to", input$scale))
+          try({
+            png(outfile, res=140, width=width, height=height)
+            heatmap.sig.genes(DE$result, meta.method=isolate(input$meta.method),
+                              fdr.cut=input$fdr.cut, color="GR")
+            dev.off()
+          }, session)
+        done(session)
+        list(src=outfile, contentType='image/png', alt="heatmap",
+             width=width, height=height)
       }, deleteFile=TRUE)
     }
   })

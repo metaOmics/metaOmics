@@ -17,12 +17,15 @@ meta_de_ui <- function(id, label = "meta DE") {
         actionButton(ns('run'), 'Run', icon=icon("rocket"), class="btn-success btn-run")
       ),
       mainPanel(
-        h4("Image parameters"),
+        h3("Heat Map"),
         fluidRow(
-          column(6, numericInput(ns("fdr.cut"), "FRD Cutoff", value=1e-9)),
+          column(6, numericInput(ns("fdr.cut"), "FDR Cutoff", value=1e-9)),
           column(6, sliderInput(ns("scale"), "Image Size", value=1, min=0.5, max=4))
         ),
-	imageOutput(ns('heatmap'), height="100%")
+        h3(textOutput(ns("heatmap.info"))),
+	imageOutput(ns('heatmap'), height="100%"),
+        h3("Analysis Summary"),
+        DT::dataTableOutput(ns("summary"))
       )
     )
   )
