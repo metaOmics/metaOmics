@@ -8,8 +8,18 @@ meta_clust_server <- function(input, output,session) {
     datasets <- lapply(datasets,t)
     observeEvent(input$tabChange, {
       dir.create(paste(DB.load.working.dir(db),"metaClust",sep="/"))
-    })
+    }) 
 
+    table <- matrix(NA, length(datasets), 2 )
+    colnames(table) <- c("#Genes","#Samples")
+    rownames(table) <- names(datasets)
+    for (i in 1:length(datasets)){
+        table[i,2] <- dim(datasets[[i]])[1]
+        table[i,1] <- dim(datasets[[i]])[2]
+    }
+    
+    output$summaryTable <- renderTable(table)    
+    
     tuneIndStudyK <- function(aS, topPercent=0.1, B = 100, seed=15213, verbose=FALSE){
         ## aS: a study, n*p, sample*gene
         ## topPercent: top percentage of genes with the largest variance
@@ -89,9 +99,15 @@ meta_clust_server <- function(input, output,session) {
     })
 
     observe({
-        val <- input$KforW 
+        val <- input$KforW
         updateSliderInput(session, "k", value = val,
                           min = 0, max = max(20, val+5), step = 1)
+    })
+    
+    observe({
+        val <- input$byW
+        updateSliderInput(session, "WRange",value=c(3,15),
+                          min=0,max=30,step=val)
     })
 
     observeEvent(input$clustGo, {
