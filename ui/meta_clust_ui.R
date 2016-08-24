@@ -6,7 +6,6 @@ meta_clust_ui <- function(id, label = "meta sparse K means") {
 ##############################
                                         # Parameters for SparsKMeans #
 ##############################
-                     textInput(ns("outDir"), "Output directory:", "~/"),
                      h4("Tune number of clusters K (optional)"),
                      br(),
                      actionButton(ns("tuneK"), "Tune K",icon = icon("stats", lib = "glyphicon")),

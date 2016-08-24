@@ -5,7 +5,8 @@ meta_clust_server <- function(input, output,session) {
         sendErrorMessage(session, "No active study")
     else
         datasets <- s@datasets
-    datasets <- lapply(datasets,t) # What's the dimension like??
+    datasets <- lapply(datasets,t)
+    wd <- DB.load.working.dir(db)
   #  print( dim(datasets[[1]]) )
 
     tuneIndStudyK <- function(aS, topPercent=0.1, B = 100, seed=15213, verbose=FALSE){
@@ -29,7 +30,7 @@ meta_clust_server <- function(input, output,session) {
             wait(session, "Tuning number of clusters for meta sparse k means")
             for(i in 1:length(datasets)){	
                 gskmn[[i]] <- tuneIndStudyK(datasets[[i]], topPercent=0.1, B = 10, verbose=TRUE)
-                png(paste(input$outDir,'/gskmn',i,'.png',sep=""))
+                png(paste(wd,'/gskmn',i,'.png',sep=""))
                 plot(gskmn[[i]], main = paste('gap statistics for ',names(datasets)[i],sep=''))
                 dev.off()
             }
@@ -69,7 +70,7 @@ meta_clust_server <- function(input, output,session) {
     observeEvent(input$tuneW, {
         wait(session, "Tuning wbounds for meta sparse k means")
         gapStatResult <- calculateGap(datasets,K=input$KforW,wbounds=input$min:input$max,B=input$B)
-        png(paste(input$outDir,'/mskmGapStatstics.png',sep=""))
+        png(paste(wd,'/mskmGapStatstics.png',sep=""))
         plot(gapStatResult$wbounds,gapStatResult$gapStat,type='b',xlab='mu',ylab='gapStat') 
         arrows(gapStatResult$wbounds, gapStatResult$gapStat-gapStatResult$se.score, 
                gapStatResult$wbounds, gapStatResult$gapStat+gapStatResult$se.score, length=0.05, angle=90, code=3)
@@ -101,11 +102,11 @@ meta_clust_server <- function(input, output,session) {
         
         ## output gene list
         geneList <- res$ws
-        write.csv(geneList,paste(input$outDir,'/geneList.csv',sep=""))
+        write.csv(geneList,paste(wd,'/geneList.csv',sep=""))
         
         ## output labels
         for(i in 1:length(datasets)){	
-            afileName <- paste(input$outDir,'/mskm_label_',names(datasets)[i],'.csv',sep='')
+            afileName <- paste(wd,'/mskm_label_',names(datasets)[i],'.csv',sep='')
             alabel <- res$Cs[[i]]
             names(alabel) <- rownames(datasets[[i]])	
             write.csv(alabel, afileName)
