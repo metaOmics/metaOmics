@@ -23,7 +23,7 @@ shinyUI(
     #tab for metaClust
     navbarMenu("Toolsets",
                meta_clust_ui("meta_clust"),
-        #       meta_de_ui("meta_de"),
+               meta_de_ui("meta_de"),
                meta_pca_ui("meta_pca")
     ),
     tags$div(

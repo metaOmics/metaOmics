@@ -145,3 +145,21 @@ h4 {
     font-size:larger;
     padding-top:80px;
 }
+
+/* metaClust's horizontal CSS */
+.DocumentList
+{
+    overflow-x:scroll;
+    overflow-y:hidden;
+    width:100%;
+    padding: 0 15px;
+}
+
+.DocumentItem
+{
+    padding:0;
+}
+
+.list-inline {
+  white-space:nowrap;
+}

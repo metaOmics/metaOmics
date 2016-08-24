@@ -6,8 +6,12 @@ meta_clust_server <- function(input, output,session) {
     else
         datasets <- s@datasets
     datasets <- lapply(datasets,t)
-    wd <- DB.load.working.dir(db)
-  #  print( dim(datasets[[1]]) )
+    wd <- ""
+    observeEvent(input$tabChange, {
+      wd <- DB.load.working.dir(db)
+      wd <- paste(wd, "metaClust", sep="/")
+      dir.create(wd)
+    })
 
     tuneIndStudyK <- function(aS, topPercent=0.1, B = 100, seed=15213, verbose=FALSE){
         ## aS: a study, n*p, sample*gene
@@ -114,7 +118,7 @@ meta_clust_server <- function(input, output,session) {
 
         ## visualization.
         for(i in 1:length(datasets)){	
-            afileName <- paste('heatmap_',names(datasets)[i],'.png',sep='')
+            afileName <- paste(wd, 'heatmap_',names(datasets)[i],'.png',sep='')
             
             png(afileName)
             if(i==1){
@@ -132,12 +136,18 @@ meta_clust_server <- function(input, output,session) {
         output$heatmaps <- renderUI({
             plot_output_list <- lapply(1:length(datasets), function(i) {
                 plotname <- paste("meta_clust-plot", i, sep="")
-                plotOutput(plotname, height = 480, width = 450)
+                tags$li(class="DocumentItem",
+                  plotOutput(plotname, height = 480, width = 450)
+                )
             })
             
                                         # Convert the list to a tagList - this is necessary for the list of items
                                         # to display properly.
-            do.call(tagList, plot_output_list)
+            tags$div(class="DocumentList",
+              tags$ul(class="list-inline",
+                plot_output_list
+              )
+            )
         })
         
         for (i in 1:length(datasets)) {
