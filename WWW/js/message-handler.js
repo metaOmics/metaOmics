@@ -33,6 +33,10 @@ Shiny.addCustomMessageHandler("resetFile", function(id) {
   $(id + " .bar").css("width", "0%");
 });
 
+Shiny.addCustomMessageHandler("initCollapse", function(msg){
+  $('.collapse').collapse('show');
+});
+
 function findAncestor (el, cls) {
   while ((el = el.parentElement) && !el.classList.contains(cls));
     return el;

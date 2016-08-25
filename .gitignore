@@ -73,7 +73,8 @@ vignettes/*.pdf
 *.knit.md
 
 # App database
-data
+/data
+!/data/example
 .Database
 
 # Temporari files

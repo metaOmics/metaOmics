@@ -21,6 +21,7 @@ meta_de_server <- function(input, output, session) {
   ##########################
   observeEvent(input$tabChange, {
     DB$active <- DB.load.active(db)
+    session$sendCustomMessage(type='initCollapse', message="")
   })
 
   observeEvent(input$asymptotic.p, {
