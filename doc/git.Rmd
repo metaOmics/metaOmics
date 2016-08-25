@@ -1,0 +1,59 @@
+---
+title: "Git"
+runtime: shiny
+output: html_document
+---
+
+### Getting the project
+```
+git clone https://github.com/metaOmic/metaOmics
+```
+
+### commit
+* Check Status of the project
+```
+git status
+```
+* If nothing strange, add everything and commit
+```
+git add -A
+git commit -m"the commit message"
+```
+
+### Branch
+* Checking out which branch you are on
+```
+git branch
+```
+* Switch branch to `metaClust`
+```
+git checkout metaClust
+```
+* Create a new branch
+```
+git branch new_branch_name
+```
+* Update brance `develop`
+```
+git checkout develop
+git pull origin develop
+```
+
+### Merge and Push
+* Merge from develop
+```
+# First you should commit all the changes
+git status
+git add -A
+git commit -m"the commit message"
+# Then you should update the develop branch
+git checkout develop
+git pull origin develop
+# finally merge develop into metaClust
+git checkout metaClust
+git merge develop
+```
+* Push to branch `metaClust`
+```
+git push origin metaClust
+```

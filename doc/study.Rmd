@@ -1,0 +1,39 @@
+---
+title: "Study"
+runtime: shiny
+output: html_document
+---
+
+### Slots
+* name: name of the study
+* dtype: data type of the study, should be one of: microarray, RNAseq-count, RNAseq-FPKM, 
+  continuous, discrete.
+* ntype: numeric nature of the study, should be one of: continuous, discrete.
+* stype: study type, should be one of: single, multiple
+* datasets: a list of dataset matrix
+
+### Database Public Helper
+* is.discrete(studies)
+    + return: a vector of boolean.
+    + description: returns a vector of boolean to check if each of the study is discrete.
+* is.continuous(studies)
+    + return: a vector of boolean.
+    + description: returns a vector of boolean to check if each of the study is continuous
+
+### Database Private Helper
+
+### Database Generic Method
+* meta(study)
+    + return: the data.frame that contains the meta data of this study
+    + description: it will return the current meta data of this study, including
+      name, data type, numeric nature, study type, dimension.
+* as.matrix(study)
+    + return: matrix of study.
+    + description: if the study is a multiple study (i.e, length(study#datasets) > 1),
+      it returns a single matrix whose columns are combined from each dataset.
+* stype(stduy)
+    + return: study type of the study.
+    + description: it returns with "single" or "multiple" based on the type of study.
+* ntype(study)
+    + return: numeric type of the study.
+    + description: it returns with "continuous" or "discrete" based on the type of study.

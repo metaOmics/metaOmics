@@ -1,0 +1,175 @@
+input[type="number"] {
+  max-width: 80%;
+}
+
+div.outer {
+  position: fixed;
+  top: 41px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  padding: 0;
+}
+
+/* Customize fonts */
+body, label, input, button, select { 
+  font-family: 'Helvetica Neue', Helvetica;
+  font-weight: 200;
+}
+h1, h2, h3, h4 { font-weight: 400; }
+
+#controls {
+  /* Appearance */
+  background-color: white;
+  padding: 0 20px 20px 20px;
+  cursor: move;
+  /* Fade out while not hovering */
+  opacity: 0.65;
+  zoom: 0.9;
+  transition: opacity 500ms 1s;
+}
+
+#controls:hover {
+  /* Fade in while hovering */
+  opacity: 0.95;
+  transition-delay: 0;
+}
+
+/* Position and style citation */
+#cite {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  font-size: 12px;
+}
+
+#preproc-summary {
+  max-height: 150px;
+}
+
+#preproc-dataPreview, #preproc-clinicalPreview, #meta_de-summary, #meta_de-heatmap {
+  overflow-x: scroll;
+}
+
+#saved_data-active button{
+  width: 100%;
+  height: 100px;
+  background: rgb(7, 255, 141);
+  border: none;
+  font-size: 20px;
+  margin-top: 10px;
+}
+
+#active-study {
+  background: rgba(4, 175, 20, 0.53);
+  margin-top: 0px;
+  margin-bottom: 20px;
+  position: absolute;
+  width: 170px;
+  top: 0px;
+  right: 0px;
+  height: 50px;
+  z-index: 9999;
+  padding: 10px;
+  font-size: 20px;
+  overflow-x: scroll;
+}
+
+#working-dir {
+  background: rgba(41, 255, 78, 0.53);
+  margin-top: 0px;
+  margin-bottom: 20px;
+  position: absolute;
+  width: 210px;
+  top: 0px;
+  right: 170px;
+  height: 50px;
+  z-index: 9999;
+  padding: 10px;
+  font-size: 20px;
+  overflow-x: scroll;
+}
+
+.btn-run {
+  width: 100%;
+}
+
+.header-label {
+  font-size: 10px;
+  height: 0px;
+}
+
+h4 {
+  display: inline;
+}
+
+.help {
+  color: rgb(113, 113, 113);
+  font-size: 13px;
+  margin-left: 10px;
+  position: relative;
+  top: -10px;
+}
+
+/* Spinner CSS */
+#loading
+{
+    display:none;
+    position:fixed;
+    left:0;
+    top:0;
+    width:100%;
+    height:100%;
+    background:rgba(255,255,255,0.8);
+    z-index:1000;
+}
+
+#loadingcontent
+{
+    display:table;
+    position:fixed;
+    left:0;
+    top:70px;
+    font-size:30px;
+    width:100%;
+    height:100%;
+}
+
+#loadingspinner
+{
+    display: table-cell;
+    vertical-align:middle;
+    width: 100%;
+    text-align: center;
+    font-size:larger;
+    padding-top:80px;
+}
+
+/* metaClust's horizontal CSS */
+.DocumentList
+{
+    overflow-x:scroll;
+    overflow-y:hidden;
+    width:100%;
+    padding: 0 15px;
+}
+
+.DocumentItem
+{
+    padding:0;
+}
+
+.list-inline {
+  white-space:nowrap;
+}
+
+.panel-primary {
+   border-color: #76d07e;
+ }
+
+.panel-primary>.panel-heading {
+   color: #334426;
+   background-color: #89fb9d;
+   border-color: #76d07e;
+}

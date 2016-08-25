@@ -1,0 +1,19 @@
+name: "metaOmic Documentation"
+navbar:
+  title: "metaOmic Documentation"
+  left:
+    - text: "Home"
+      href: index.Rmd
+    - text: "File Organization"
+      href: file.Rmd
+    - text: "helpers"
+      href: helpers.Rmd 
+    - text: "Database"
+      href: databases.Rmd 
+    - text: "Git"
+      href: git.Rmd 
+output:
+  html_document:
+    css: WWW/css/styles.css
+    include:
+      in_header: _header.html
