@@ -1,26 +1,29 @@
 meta_clust_server <- function(input, output,session) {
     study <- DB.load.active(db) 
     DB <- reactiveValues(acitve=study,transpose=lapply(study@datasets,t))
-    
+
+    updateSelectizeInput(session, "studyforK", label="Select studies to be tuned", choices = NULL, server = TRUE)  
     observeEvent(input$tabChange, {
         dir.create(paste(DB.load.working.dir(db),"metaClust",sep="/"))
         
         DB$active <- DB.load.active(db)
         DB$transpose <- lapply(DB$active@datasets,t)
         
+        updateSelectizeInput(session, "studyforK", label="Select studies to be tuned", choices = names(DB$transpose), server = TRUE)
+        
         output$plotsK <- renderUI({
             plot_output_list <- lapply(1:length(DB$transpose), function(i) {
                 plotname <- paste("meta_clust-plotsK", i, sep="")
                 tags$li(class="DocumentItem",
-                       plotOutput(plotname, height = 280, width = 350)
-                       )
+                        plotOutput(plotname, height = 280, width = 350)
+                        )
             })
 
             tags$div(class="DocumentList",
                      tags$ul(class="list-inline",
                              plot_output_list
+                             )
                      )
-            )
         })
 
         
@@ -34,7 +37,7 @@ meta_clust_server <- function(input, output,session) {
         
         output$summaryTable <- renderTable(table)   
     }) 
-    
+
     tuneIndStudyK <- function(aS, topPercent=0.1, B = 100, seed=15213,maxK=8, verbose=FALSE){
         ## aS: a study, n*p, sample*gene
         ## topPercent: top percentage of genes with the largest variance
@@ -49,23 +52,27 @@ meta_clust_server <- function(input, output,session) {
     }
 
     observeEvent(input$tuneK, {
+        
+        studyIdx <- which(names(DB$transpose)%in%input$studyforK)
+        print(studyIdx)
+
         gskmn <- list()
-        wait(session, "Tuning number of clusters for all studies")
-        for(i in 1:length(DB$transpose)){	
-            gskmn[[i]] <- tuneIndStudyK(DB$transpose[[i]], topPercent=input$topPerc, B = input$BforK, maxK=input$maxK, verbose=TRUE)
-            png(paste( DB.load.working.dir(db),"/metaClust/gskmn",i,".png",sep=""))
-            plot(gskmn[[i]], main = paste('gap statistics for ',names(DB$transpose)[i],sep=''))
+        wait(session, "Tuning number of clusters")
+        for(i in 1:length(studyIdx)){	
+            gskmn[[studyIdx[i]]] <- tuneIndStudyK(DB$transpose[[studyIdx[i]]], topPercent=input$topPerc, B = input$BforK, maxK=input$maxK, verbose=TRUE)
+            png(paste( DB.load.working.dir(db),"/metaClust/gskmn",studyIdx[i],".png",sep=""))
+            plot(gskmn[[studyIdx[i]]], main = paste('gap statistics for ',names(DB$transpose)[studyIdx[i]],sep=''))
             dev.off()
         }
 
 
         
-        for (i in 1:length(DB$transpose)) {
+        for (i in 1:length(studyIdx)) {
                                         # Need local so that each item gets its own number. Without it, the value
                                         # of i in the renderPlot() will be the same across all instances, because
                                         # of when the expression is evaluated.
             local({
-                my_i <- i
+                my_i <- studyIdx[i]
                 plotname <- paste("plotsK", my_i, sep="")
                 
                 output[[plotname]] <- renderPlot({
@@ -79,33 +86,6 @@ meta_clust_server <- function(input, output,session) {
         sendSuccessMessage(session, "K updated")
     })
 
-    observeEvent(input$tuneKIndi, {
-        gskmn <- list()
-        idx <- input$KIndi
-        wait(session, paste("Tuning number of clusters for study ", names(DB$transpose)[idx],sep=""))
-        
-        gskmn[[idx]] <- tuneIndStudyK(DB$transpose[[idx]], topPercent=input$topPerc, B = input$BforK, maxK=input$maxK, verbose=TRUE)
-        png(paste( DB.load.working.dir(db),"/metaClust/gskmn",idx,".png",sep=""))
-        plot(gskmn[[idx]], main = paste('gap statistics for ',names(DB$transpose)[idx],sep=''))
-        dev.off()
-
-                                        # Need local so that each item gets its own number. Without it, the value
-                                        # of i in the renderPlot() will be the same across all instances, because
-                                        # of when the expression is evaluated.
-        local({
-            my_i <- idx
-            plotname <- paste("plotsK", my_i, sep="")
-            
-            output[[plotname]] <- renderPlot({
-                plot(gskmn[[my_i]], main = paste('gap statistics for ',names(DB$transpose)[my_i],sep=''))
-            })
-        })
-        
-        done(session)
-        
-        sendSuccessMessage(session, paste("K updated for study", names(DB$transpose[idx]),sep=""))
-    })
-
     observeEvent(input$tuneW, {
         wait(session, "Tuning wbounds for meta sparse k means. Go get a coffee")
         gapStatResult <- calculateGap(DB$transpose,K=input$KforW,wbounds=seq(input$WRange[1],input$WRange[2],by=input$byW),B=input$BforW)
@@ -115,7 +95,6 @@ meta_clust_server <- function(input, output,session) {
                gapStatResult$wbounds, gapStatResult$gapStat+gapStatResult$se.score, length=0.05, angle=90, code=3)
         dev.off()
 
-        cat(file=stderr(), "1\n")
         output$plotW <- renderPlot({
             plot(gapStatResult$wbounds,gapStatResult$gapStat,type='b',xlab='mu',ylab='gapStat') 
             arrows(gapStatResult$wbounds, gapStatResult$gapStat-gapStatResult$se.score, 
