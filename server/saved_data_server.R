@@ -1,5 +1,6 @@
 saved_data_server <- function(input, output, session) {
 
+  ns <- NS("saved_data")
   active.study <- DB.load.active(db)
   if (is.null(active.study))
     active.study <- "No active study"
@@ -70,8 +71,8 @@ saved_data_server <- function(input, output, session) {
   output$merge.option <- renderUI({
     selected <- input$table_rows_selected
     mergeButton <- tagList(
-      textInput("saved_data-studyName", "Study Name:", ""),
-      actionButton("saved_data-merge", "Merge from Selected Datasets",
+      textInput(ns("studyName"), "Study Name:", ""),
+      actionButton(ns("merge"), "Merge from Selected Datasets",
         icon=icon("compress")
       )
     )
@@ -81,13 +82,13 @@ saved_data_server <- function(input, output, session) {
       types <- DB$meta[selected,"numeric nature"]
       if (all(types == "continuous")) {
         tagList(
-          numericInput("saved_data-mean", "mean:", value = 0.3, step= 0.1),
-          numericInput("saved_data-var", "variance:", min = 0, value = 0.3, step= 0.1),
+          numericInput(ns("mean"), "mean:", value = 0.3, step= 0.1),
+          numericInput(ns("var"), "variance:", min = 0, value = 0.3, step= 0.1),
           mergeButton
         )
       } else if (all(types == "discrete")) {
         tagList(
-          numericInput("saved_data-threshold", "threshold", 1, min=0),
+          numericInput(ns("threshold"), "threshold", 1, min=0),
           mergeButton
         )
       } else {
@@ -103,6 +104,10 @@ saved_data_server <- function(input, output, session) {
         selected <- rownames(meta(db)[selected,])
         studies <- DB.load(db, selected)
         study <- Merge(studies, name=input$studyName)
+        if (study@ntype == NTYPE.continuous)
+          study <- Filter(study, study@dtype, del.perc=c(input$mean, input$var))
+        else
+          study <- Filter(study, study@dtype, threshold=input$threshold)
         DB.save(db, study)
         message = paste("A merged study is created:", study@name)
         sendSuccessMessage(session, message)
@@ -117,7 +122,7 @@ saved_data_server <- function(input, output, session) {
     selected <- input$table_rows_selected
     if (length(selected) == 1 ) {
       selected <- rownames(meta(db)[selected,])
-      actionButton("saved_data-active",
+      actionButton(ns("active"),
         paste( "Make", selected, "Active Dataset"),
         icon=icon("compress")
       )
