@@ -24,7 +24,7 @@ shinyUI(
     navbarMenu("Toolsets",
       meta_clust_ui("meta_clust"),
       meta_de_ui("meta_de"),
-      meta_pca_ui("meta_pca")
+      # meta_pca_ui("meta_pca")
     ),
     tags$div(
       tags$div(id="loading", 
