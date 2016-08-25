@@ -9,8 +9,13 @@ saved_data_ui <- function(id, label = "saved data of single study or multiple st
         h4("Merging and Filtering Datasets"), helpIcon(ns('merge_help'), HELP.merge),
         uiOutput(ns("merge.option")),
 	tags$hr(),
-        h4("Danger Zone: "), helpIcon(ns('delete_help'), HELP.delete), tags$br(),
-        actionButton(ns('delete'), 'Delete Selected Data', icon=icon("trash"), class="btn-danger")
+        bsCollapse(id="saved_data-danger",
+          bsCollapsePanel("Danger Zone",
+            actionButton(ns('delete'), 'Delete Selected Data',
+              icon=icon("trash"), class="btn-danger")
+            , style="danger"
+          )
+        )
       ),
       mainPanel(
         h3("List of saved data"),

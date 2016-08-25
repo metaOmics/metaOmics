@@ -164,3 +164,12 @@ h4 {
   white-space:nowrap;
 }
 
+.panel-primary {
+   border-color: #76d07e;
+ }
+
+.panel-primary>.panel-heading {
+   color: #334426;
+   background-color: #89fb9d;
+   border-color: #76d07e;
+}

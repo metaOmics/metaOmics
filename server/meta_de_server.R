@@ -23,37 +23,11 @@ meta_de_server <- function(input, output, session) {
     DB$active <- DB.load.active(db)
   })
 
-  expand.btn <- actionButton('meta_de-expand.advanced.opt',
-                             'Show advanced options', icon=icon("plus"))
-  close.btn <- actionButton('meta_de-close.advanced.opt',
-                            'Hide advanced options', icon=icon("minus"))
-  observeEvent(input$expand.advanced.opt, {
-    try({
-      validate()
-      output$toggle.option <- renderUI({
-        tagList(
-          close.btn,
-          radioButtons(ns("asymptotic.p"), 'Asymptotic P', inline=T,
-            c(No=F, Yes=T), F
-          ),
-          uiOutput(ns("asym.option")),
-          selectizeInput(ns("tail"), "Alternative Hypothesis", TAIL.all)
-        )
-      })
-    }, session)
-  })
-
   observeEvent(input$asymptotic.p, {
     output$asym.option <- renderUI({
       if (input$asymptotic.p == F) {
         numericInput("meta_de-nperm", "number of permutation", value=100)
       }
-    })
-  })
-
-  observeEvent(input$close.advanced.opt, {
-    output$toggle.option <- renderUI({
-      expand.btn
     })
   })
 
@@ -203,15 +177,14 @@ meta_de_server <- function(input, output, session) {
         outfile <- tempfile(fileext='.png')
         height <- 800 * input$scale
         width <- 400 * length(DB$active@datasets) * input$scale
-	cat(file=stderr(), input$fdr.cut, input$scale, "\n")
-        wait(session, paste("Plotting result with FDR", input$fdr.cut, 
-                            "and scale to", input$scale))
-          try({
-            png(outfile, res=140, width=width, height=height)
-            heatmap.sig.genes(DE$result, meta.method=isolate(input$meta.method),
-                              fdr.cut=input$fdr.cut, color="GR")
-            dev.off()
-          }, session)
+        wait(session, paste("Plotting result with FDR",
+          input$fdr.cut, "and scale to", input$scale))
+        try({
+          png(outfile, res=140, width=width, height=height)
+          heatmap.sig.genes(isolate(DE$result), meta.method=isolate(input$meta.method),
+                            fdr.cut=isolate(input$fdr.cut), color="GR")
+          dev.off()
+        }, session)
         done(session)
         list(src=outfile, contentType='image/png', alt="heatmap",
              width=width, height=height)
@@ -232,7 +205,4 @@ meta_de_server <- function(input, output, session) {
       })
     }, session)
   })
-
-  output$toggle.option <- renderUI({ expand.btn })
-
 }

@@ -3,16 +3,31 @@ meta_de_ui <- function(id, label = "meta DE") {
   tabPanel("Meta DE", value=id,
     sidebarLayout(
       sidebarPanel(
-        h4("Individual DE Method"),
-        uiOutput(ns("ind.method")),
-        h4("Meta Method"),
-        selectizeInput(ns("meta.method"), "", as.list(META.all)),
-        uiOutput(ns("meta.method.option")),
-        h4("Response Type"),
-        selectizeInput(ns("resp.type"), "", as.list(RESP.all)),
-        uiOutput(ns("resp.type.option")),
-        uiOutput(ns("toggle.option")),
-        uiOutput(ns("advanced.option")),
+        bsCollapse(id="meta_de-opts",
+          bsCollapsePanel("Setting Individual Study Method",
+            uiOutput(ns("ind.method")), style="primary"
+          ),
+          bsCollapsePanel("Meta Method",
+            selectizeInput(ns("meta.method"), "", as.list(META.all)),
+            uiOutput(ns("meta.method.option")), style="primary"
+          ),
+          bsCollapsePanel("Response Type",
+            selectizeInput(ns("resp.type"), "", as.list(RESP.all)),
+            uiOutput(ns("resp.type.option")), style="primary"
+          )
+        ),
+	tags$hr(),
+        bsCollapse(id="meta_de-advanced",
+          bsCollapsePanel("Advanced Options",
+            tagList(
+              radioButtons(ns("asymptotic.p"), 'Asymptotic P', inline=T,
+                c(No=F, Yes=T), F
+              ),
+              uiOutput(ns("asym.option")),
+              selectizeInput(ns("tail"), "Alternative Hypothesis", TAIL.all)
+            ), style="info"
+          )
+        ),
 	tags$hr(),
         actionButton(ns('run'), 'Run', icon=icon("rocket"), class="btn-success btn-run")
       ),
