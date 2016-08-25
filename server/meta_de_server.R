@@ -181,7 +181,7 @@ meta_de_server <- function(input, output, session) {
         wait(session, paste("Plotting result with FDR",
           input$fdr.cut, "and scale to", input$scale))
         try({
-          png(outfile, res=140, width=width, height=height)
+          png(outfile, res=120, width=width, height=height)
           heatmap.sig.genes(isolate(DE$result), meta.method=isolate(input$meta.method),
                             fdr.cut=isolate(input$fdr.cut), color="GR")
           dev.off()
