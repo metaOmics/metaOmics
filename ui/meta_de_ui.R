@@ -3,7 +3,7 @@ meta_de_ui <- function(id, label = "meta DE") {
   tabPanel("Meta DE", value=id,
     sidebarLayout(
       sidebarPanel(
-        bsCollapse(id="meta_de-opts",
+        bsCollapse(id="meta_de-opts", multiple=TRUE,
           bsCollapsePanel("Setting Individual Study Method",
             uiOutput(ns("ind.method")), style="primary"
           ),

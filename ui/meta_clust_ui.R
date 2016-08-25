@@ -50,18 +50,15 @@ meta_clust_ui <- function(id, label = "meta sparse K means") {
 
                  ),
                  mainPanel(
-                                        # This is the dynamic UI for the plots
+                     h4("Heatmap"),
+                     tags$hr(),
+                     uiOutput(ns("heatmaps")),
                      h4("Gap statistics (K)"),
                      tags$hr(),
                      uiOutput(ns("plotsK")),
                      h4("Gap statistics (wbounds)"),
                      tags$hr(),
-                     plotOutput(ns("plotW")),
-                     h4("Heatmap"),
-                     fluidRow(
-                         uiOutput(ns("heatmaps"))
-                                        # ui_output
-                     )
+                     plotOutput(ns("plotW"))
                  )
              )
              )

@@ -11,10 +11,16 @@ meta_clust_server <- function(input, output,session) {
         output$plotsK <- renderUI({
             plot_output_list <- lapply(1:length(DB$transpose), function(i) {
                 plotname <- paste("meta_clust-plotsK", i, sep="")
-                plotOutput(plotname, height = 280, width = 350)
+                tags$li(class="DocumentItem",
+                       plotOutput(plotname, height = 280, width = 350)
+                       )
             })
-            
-            do.call(tagList, plot_output_list)
+
+            tags$div(class="DocumentList",
+                     tags$ul(class="list-inline",
+                             plot_output_list
+                     )
+            )
         })
 
         
@@ -109,6 +115,7 @@ meta_clust_server <- function(input, output,session) {
                gapStatResult$wbounds, gapStatResult$gapStat+gapStatResult$se.score, length=0.05, angle=90, code=3)
         dev.off()
 
+        cat(file=stderr(), "1\n")
         output$plotW <- renderPlot({
             plot(gapStatResult$wbounds,gapStatResult$gapStat,type='b',xlab='mu',ylab='gapStat') 
             arrows(gapStatResult$wbounds, gapStatResult$gapStat-gapStatResult$se.score, 
