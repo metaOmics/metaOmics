@@ -1,26 +1,35 @@
 meta_clust_server <- function(input, output,session) {
-    s <- DB.load.active(db)
-    datasets <- NULL
-    if (is.null(s))
-        sendErrorMessage(session, "No active study")
-    else
-        datasets <- s@datasets
-    datasets <- lapply(datasets,t)
+    study <- DB.load.active(db) 
+    DB <- reactiveValues(acitve=study,transpose=lapply(study@datasets,t))
+    
     observeEvent(input$tabChange, {
-      dir.create(paste(DB.load.working.dir(db),"metaClust",sep="/"))
-    }) 
+        dir.create(paste(DB.load.working.dir(db),"metaClust",sep="/"))
+        
+        DB$active <- DB.load.active(db)
+        DB$transpose <- lapply(DB$active@datasets,t)
+        
+        output$plotsK <- renderUI({
+            plot_output_list <- lapply(1:length(DB$transpose), function(i) {
+                plotname <- paste("meta_clust-plotsK", i, sep="")
+                plotOutput(plotname, height = 280, width = 350)
+            })
+            
+            do.call(tagList, plot_output_list)
+        })
 
-    table <- matrix(NA, length(datasets), 2 )
-    colnames(table) <- c("#Genes","#Samples")
-    rownames(table) <- names(datasets)
-    for (i in 1:length(datasets)){
-        table[i,2] <- dim(datasets[[i]])[1]
-        table[i,1] <- dim(datasets[[i]])[2]
-    }
+        
+        table <- matrix(NA, length(DB$transpose), 2 )
+        colnames(table) <- c("#Genes","#Samples")
+        rownames(table) <- names(DB$transpose)
+        for (i in 1:length(DB$transpose)){
+            table[i,2] <- dim(DB$transpose[[i]])[1]
+            table[i,1] <- dim(DB$transpose[[i]])[2]
+        }
+        
+        output$summaryTable <- renderTable(table)   
+    }) 
     
-    output$summaryTable <- renderTable(table)    
-    
-    tuneIndStudyK <- function(aS, topPercent=0.1, B = 100, seed=15213, verbose=FALSE){
+    tuneIndStudyK <- function(aS, topPercent=0.1, B = 100, seed=15213,maxK=8, verbose=FALSE){
         ## aS: a study, n*p, sample*gene
         ## topPercent: top percentage of genes with the largest variance
         ## B: number of permutation
@@ -29,58 +38,71 @@ meta_clust_server <- function(input, output,session) {
         varS <- apply(aS,2,var)
         bS <- aS[,varS > quantile(varS,1-topPercent)]
         set.seed(seed)
-        gskmn <- clusGap(bS, FUN = kmeans, nstart = 20, K.max = 8, B = B, verbose=verbose)
+        gskmn <- clusGap(bS, FUN = kmeans, nstart = 20, K.max = maxK, B = B, verbose=verbose)
         return(gskmn)
     }
 
     observeEvent(input$tuneK, {
-        if (is.null(s))
-            s <- "No active study"
-        else{
-            gskmn <- list()
-            wait(session, "Tuning number of clusters for meta sparse k means")
-            for(i in 1:length(datasets)){	
-                gskmn[[i]] <- tuneIndStudyK(datasets[[i]], topPercent=0.1, B = 10, verbose=TRUE)
-                png(paste( DB.load.working.dir(db),"/metaClust/gskmn",i,".png",sep=""))
-                plot(gskmn[[i]], main = paste('gap statistics for ',names(datasets)[i],sep=''))
-                dev.off()
-            }
+        gskmn <- list()
+        wait(session, "Tuning number of clusters for all studies")
+        for(i in 1:length(DB$transpose)){	
+            gskmn[[i]] <- tuneIndStudyK(DB$transpose[[i]], topPercent=input$topPerc, B = input$BforK, maxK=input$maxK, verbose=TRUE)
+            png(paste( DB.load.working.dir(db),"/metaClust/gskmn",i,".png",sep=""))
+            plot(gskmn[[i]], main = paste('gap statistics for ',names(DB$transpose)[i],sep=''))
+            dev.off()
+        }
 
-            
-            output$plotsK <- renderUI({
-                plot_output_list <- lapply(1:length(datasets), function(i) {
-                    plotname <- paste("meta_clust-plotsK", i, sep="")
-                    plotOutput(plotname, height = 280, width = 350)
-                })
-                
-                                        # Convert the list to a tagList - this is necessary for the list of items
-                                        # to display properly.
-                do.call(tagList, plot_output_list)
-            })
-            
-            for (i in 1:length(datasets)) {
+
+        
+        for (i in 1:length(DB$transpose)) {
                                         # Need local so that each item gets its own number. Without it, the value
                                         # of i in the renderPlot() will be the same across all instances, because
                                         # of when the expression is evaluated.
-                local({
-                    my_i <- i
-                    plotname <- paste("plotsK", my_i, sep="")
-                    
-                    output[[plotname]] <- renderPlot({
-                        plot(gskmn[[my_i]], main = paste('gap statistics for ',names(datasets)[my_i],sep=''))
-                    })
+            local({
+                my_i <- i
+                plotname <- paste("plotsK", my_i, sep="")
+                
+                output[[plotname]] <- renderPlot({
+                    plot(gskmn[[my_i]], main = paste('gap statistics for ',names(DB$transpose)[my_i],sep=''))
                 })
-            }
-            
-            done(session)
-            
-            sendSuccessMessage(session, "K updated")
+            })
         }
+        
+        done(session)
+        
+        sendSuccessMessage(session, "K updated")
+    })
+
+    observeEvent(input$tuneKIndi, {
+        gskmn <- list()
+        idx <- input$KIndi
+        wait(session, paste("Tuning number of clusters for study ", names(DB$transpose)[idx],sep=""))
+        
+        gskmn[[idx]] <- tuneIndStudyK(DB$transpose[[idx]], topPercent=input$topPerc, B = input$BforK, maxK=input$maxK, verbose=TRUE)
+        png(paste( DB.load.working.dir(db),"/metaClust/gskmn",idx,".png",sep=""))
+        plot(gskmn[[idx]], main = paste('gap statistics for ',names(DB$transpose)[idx],sep=''))
+        dev.off()
+
+                                        # Need local so that each item gets its own number. Without it, the value
+                                        # of i in the renderPlot() will be the same across all instances, because
+                                        # of when the expression is evaluated.
+        local({
+            my_i <- idx
+            plotname <- paste("plotsK", my_i, sep="")
+            
+            output[[plotname]] <- renderPlot({
+                plot(gskmn[[my_i]], main = paste('gap statistics for ',names(DB$transpose)[my_i],sep=''))
+            })
+        })
+        
+        done(session)
+        
+        sendSuccessMessage(session, paste("K updated for study", names(DB$transpose[idx]),sep=""))
     })
 
     observeEvent(input$tuneW, {
-        wait(session, "Tuning wbounds for meta sparse k means")
-        gapStatResult <- calculateGap(datasets,K=input$KforW,wbounds=input$min:input$max,B=input$B)
+        wait(session, "Tuning wbounds for meta sparse k means. Go get a coffee")
+        gapStatResult <- calculateGap(DB$transpose,K=input$KforW,wbounds=seq(input$WRange[1],input$WRange[2],by=input$byW),B=input$BforW)
         png(paste( DB.load.working.dir(db),"/metaClust/mskmGapStatstics.png",sep=""))
         plot(gapStatResult$wbounds,gapStatResult$gapStat,type='b',xlab='mu',ylab='gapStat') 
         arrows(gapStatResult$wbounds, gapStatResult$gapStat-gapStatResult$se.score, 
@@ -100,44 +122,42 @@ meta_clust_server <- function(input, output,session) {
 
     observe({
         val <- input$KforW
-        updateSliderInput(session, "k", value = val,
-                          min = 0, max = max(20, val+5), step = 1)
+        updateNumericInput(session, "k", value = val)
     })
     
     observe({
         val <- input$byW
-        updateSliderInput(session, "WRange",value=c(3,15),
-                          min=0,max=30,step=val)
+        updateSliderInput(session, "WRange",value=c(1,15), min=0,max=30,step=val)
     })
 
     observeEvent(input$clustGo, {
         runClust <- TRUE
         
-        wait(session, "Running meta sparse k means. Go get a coffee.")
+        wait(session, "Running meta sparse k means.")
         set.seed(15213)
-        res = MetaSpaKmeans(x=datasets,K=input$k,wbounds=input$wBounds)
+        res = MetaSpaKmeans(x=DB$transpose,K=input$k,wbounds=input$wBounds, method=input$methods, sampleSizeAdjust=input$sizeAdj)
         
         ## output gene list
         geneList <- res$ws
         write.csv(geneList,paste( DB.load.working.dir(db),"/metaClust/geneList.csv",sep=""))
         
         ## output labels
-        for(i in 1:length(datasets)){	
-            afileName <- paste( DB.load.working.dir(db),"/metaClust/mskm_label_",names(datasets)[i],".csv",sep='')
+        for(i in 1:length(DB$transpose)){	
+            afileName <- paste( DB.load.working.dir(db),"/metaClust/mskm_label_",names(DB$transpose)[i],".csv",sep='')
             alabel <- res$Cs[[i]]
-            names(alabel) <- rownames(datasets[[i]])	
+            names(alabel) <- rownames(DB$transpose[[i]])	
             write.csv(alabel, afileName)
         }
 
         ## visualization.
-        for(i in 1:length(datasets)){	
-            afileName <- paste( DB.load.working.dir(db),"/metaClust/heatmap_",names(datasets)[i],".png",sep='')
+        for(i in 1:length(DB$transpose)){	
+            afileName <- paste( DB.load.working.dir(db),"/metaClust/heatmap_",names(DB$transpose)[i],".png",sep='')
             
             png(afileName)
             if(i==1){
-                geneOrder = getWsHeatmap(t(datasets[[i]]),res$Cs[[i]],res$ws,main=names(datasets)[i],Rowv=TRUE,labCol="",labRow="")	
+                geneOrder = getWsHeatmap(t(DB$transpose[[i]]),res$Cs[[i]],res$ws,main=names(DB$transpose)[i],Rowv=TRUE,labCol="",labRow="")	
             } else {
-                getWsHeatmap(t(datasets[[i]]),res$Cs[[i]],res$ws,main=names(datasets)[i], Rowv = geneOrder$Rowv,labCol="",labRow="")	
+                getWsHeatmap(t(DB$transpose[[i]]),res$Cs[[i]],res$ws,main=names(DB$transpose)[i], Rowv = geneOrder$Rowv,labCol="",labRow="")	
             }
             
             dev.off()
@@ -147,23 +167,23 @@ meta_clust_server <- function(input, output,session) {
         wait(session, "Visualizing sparse K means results...")
 
         output$heatmaps <- renderUI({
-            plot_output_list <- lapply(1:length(datasets), function(i) {
+            plot_output_list <- lapply(1:length(DB$transpose), function(i) {
                 plotname <- paste("meta_clust-plot", i, sep="")
                 tags$li(class="DocumentItem",
-                  plotOutput(plotname, height = 480, width = 450)
-                )
+                        plotOutput(plotname, height = 480, width = 450)
+                        )
             })
             
                                         # Convert the list to a tagList - this is necessary for the list of items
                                         # to display properly.
             tags$div(class="DocumentList",
-              tags$ul(class="list-inline",
-                plot_output_list
-              )
-            )
+                     tags$ul(class="list-inline",
+                             plot_output_list
+                             )
+                     )
         })
         
-        for (i in 1:length(datasets)) {
+        for (i in 1:length(DB$transpose)) {
                                         # Need local so that each item gets its own number. Without it, the value
                                         # of i in the renderPlot() will be the same across all instances, because
                                         # of when the expression is evaluated.
@@ -173,9 +193,9 @@ meta_clust_server <- function(input, output,session) {
                 
                 output[[plotname]] <- renderPlot({
                     if(my_i==1){
-                        geneOrder = getWsHeatmap(t(datasets[[my_i]]),res$Cs[[my_i]],res$ws,main=names(datasets)[my_i],Rowv=TRUE,labCol="",labRow="")	
+                        geneOrder = getWsHeatmap(t(DB$transpose[[my_i]]),res$Cs[[my_i]],res$ws,main=names(DB$transpose)[my_i],Rowv=TRUE,labCol="",labRow="")	
                     } else {
-                        getWsHeatmap(t(datasets[[my_i]]),res$Cs[[my_i]],res$ws,main=names(datasets)[my_i], Rowv = geneOrder$Rowv,labCol="",labRow="")	
+                        getWsHeatmap(t(DB$transpose[[my_i]]),res$Cs[[my_i]],res$ws,main=names(DB$transpose)[my_i], Rowv = geneOrder$Rowv,labCol="",labRow="")	
                     }
                     
                 })
@@ -185,7 +205,7 @@ meta_clust_server <- function(input, output,session) {
         done(session)
         sendSuccessMessage(session, "Meta sparse K means complete. Heatmap saved to output directory")
                                         #par(mfrow=c(1,1))
-    
+        
     })            
 
 }
