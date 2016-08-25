@@ -11,6 +11,7 @@ biocLite("AnnotationDbi")
 
 library(devtools)
 install_github("metaOmic/MetaSparseKmeans")
+install_github("metaOmic/MetaDE")
 install_github("metaOmic/preproc")
 ```
 
