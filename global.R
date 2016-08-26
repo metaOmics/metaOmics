@@ -32,3 +32,9 @@ for (f in list.files(path=dir, pattern="*.R")) {
   source(paste(dir, f, sep="/"))
 }
 
+# Setting default working sirectory
+tryCatch({
+  DB.load.working.dir(db)
+}, error=function(error){
+  DB.set.working.dir(db, getwd())
+})

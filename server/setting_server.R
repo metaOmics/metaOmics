@@ -19,9 +19,13 @@ setting_server <- function(input, output, session) {
     handlerExpr = {
       if (input$directory > 0) {
         path = choose.dir(default = readDirectoryInput(session, 'directory'))
-        updateDirectoryInput(session, 'directory', value = path)
-        DB.set.working.dir(db, path)
-        output$working.dir <- renderText({DB.load.working.dir(db)})
+	if(is.na(path)) {
+	  sendErrorMessage(session, MSG.no.working.dir)
+	} else {
+          updateDirectoryInput(session, 'directory', value = path)
+          DB.set.working.dir(db, path)
+          output$working.dir <- renderText({DB.load.working.dir(db)})
+        }
       }
     }
   )
@@ -29,7 +33,9 @@ setting_server <- function(input, output, session) {
   ##########################
   # Render output/UI       #
   ##########################
-  output$working.dir <- renderText({DB.load.working.dir(db)})
+  output$working.dir <- renderText({
+    try({ DB.load.working.dir(db) }, session)
+  })
   output$urlText <- renderText({
     server.type <- ""
     if (session$clientData$url_hostname == "127.0.0.1")

@@ -98,7 +98,7 @@ saved_data_server <- function(input, output, session) {
   })
 
   observeEvent(input$merge, {
-    tryCatch( {
+    try({
         validate.merge.option(input)
         selected <- input$table_rows_selected
         selected <- rownames(meta(db)[selected,])
@@ -112,9 +112,7 @@ saved_data_server <- function(input, output, session) {
         message = paste("A merged study is created:", study@name)
         sendSuccessMessage(session, message)
         DB$meta <- meta(db)
-      },
-      warning=function(w) {sendWarningMessage(session, w$message)},
-      error=function(e) {sendErrorMessage(session, e$message)}
+      }, session
     )
   })
 
