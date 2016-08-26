@@ -15,7 +15,7 @@ preproc_server <- function(input, output, session) {
     if(all(dim(dataset) == 0)) stop(MSG.datasetInput.noinput)
     if(dim(dataset)[1] == 0) stop(MSG.datasetInput.norow)
     if(dim(dataset)[2] == 0) stop(MSG.datasetInput.nocol)
-    if((input$study == "") && (input$log == T) && is.discrete(study))
+    if((input$study == "") && (input$log == T) && ntype(study) == NTYPE.discrete)
       stop(MSG.study.nolog)
     name <- study@name
     if(is.null(name) || name == "") stop(MSG.study.noname)
@@ -132,6 +132,7 @@ preproc_server <- function(input, output, session) {
       study <- STUDY$preview
       study@name  <- input$studyName
       study@dtype <- input$dtype
+      study@ntype <- ntype(input$dtype)
       if(stype(study) == STYPE.single) {
         names(study@datasets) <- study@name
       }
@@ -149,7 +150,7 @@ preproc_server <- function(input, output, session) {
     # update dataset select options, and select the newly saved study
     updateSelectizeInput(session, "study", choices=DB$names,
       selected=input$studyName)
-    # update annotation to gene symbol, since saved study should be annotated
+    # update annotation to gene symbol, since saved study shouldn't be annotated
     updateSelectizeInput(session, "id.type", selected=ID.TYPE.geneSymbol)
   }, label="update selected study")
 
