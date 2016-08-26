@@ -12,7 +12,7 @@ meta_clust_ui <- function(id, label = "meta sparse K means") {
                                 bsCollapsePanel("Tune K (optional)",
                                                 "This panel is for tuning number of clusters K",
                                                 tags$hr(),
-                                                numericInput(ns("maxK"), "Maximum of K:", value=10),
+                                                numericInput(ns("maxK"), "Maximum of K:", value=5),
                                                 numericInput(ns("topPerc"),"Top percentage by larger variance:",value =0.1),
                                                 numericInput(ns("BforK"), "Number of permutations",value=10),
                                                 br(),
@@ -23,11 +23,11 @@ meta_clust_ui <- function(id, label = "meta sparse K means") {
                                 bsCollapsePanel("Tune Wbounds (optional)",
                                                 "This panel is for tuning Wbounds",
                                                 tags$hr(),
-                                                numericInput(ns("KforW"),"Number of clusters for tuning wbounds", value=5),
+                                                numericInput(ns("KforW"),"Number of clusters for tuning wbounds", value=3),
                                                 numericInput(ns("BforW"), "Iterations:", value=2),
                                                 
                                                 fluidRow(
-                                                    column(4,numericInput(ns("minforW"),"Minimum of wbounds:", value=1)),
+                                                    column(4,numericInput(ns("minforW"),"Minimum of wbounds:", value=2)),
                                                     column(4,numericInput(ns("maxforW"),"Maximum of wbounds:", value=15)),
                                                     column(4,numericInput(ns("stepforW"),"Step of wbounds:", value=2))
                                                 ),
