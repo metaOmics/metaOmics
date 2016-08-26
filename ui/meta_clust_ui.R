@@ -18,24 +18,28 @@ meta_clust_ui <- function(id, label = "meta sparse K means") {
                                                 br(),
 
                                                 selectizeInput(ns("studyforK"), label = "Select studies to be tuned", choices = NULL,multiple=TRUE),
-                                                actionButton(ns("tuneK"), "Tune K for all studies",icon = icon("duplicate", lib = "glyphicon")),                           
+                                                actionButton(ns("tuneK"), "Tune K",icon = icon("refresh", lib = "font-awesome")),                           
                                                 style = "primary"),
                                 bsCollapsePanel("Tune Wbounds (optional)",
                                                 "This panel is for tuning Wbounds",
                                                 tags$hr(),
-                                                numericInput(ns("KforW"),"Number of clusters for tuning wbounds", value=3),
+                                                numericInput(ns("KforW"),"Number of clusters for tuning wbounds", value=5),
                                                 numericInput(ns("BforW"), "Iterations:", value=2),
-                                                numericInput(ns("byW"),"Step of wbounds:", value=2),
-                                                sliderInput(ns("WRange"), "Range of wbounds:",
-                                                            min = 0, max = 30, value = c(1,15),step=2),
-                                                actionButton(ns("tuneW"), "Tune wbounds",icon = icon("stats", lib = "glyphicon")),                              
+                                                
+                                                fluidRow(
+                                                    column(4,numericInput(ns("minforW"),"Minimum of wbounds:", value=1)),
+                                                    column(4,numericInput(ns("maxforW"),"Maximum of wbounds:", value=15)),
+                                                    column(4,numericInput(ns("stepforW"),"Step of wbounds:", value=2))
+                                                ),
+
+                                                actionButton(ns("tuneW"), "Tune wbounds",icon = icon("refresh", lib = "font-awesome")), 
                                                 style="primary"),
 
                                 bsCollapsePanel("Run Meta Sparse K-Means",
                                                 "This panel is for running meta sparse K means. Not optional (obviously)",
                                                 tags$hr(),
                                                 numericInput(ns("k"), "Number of clusters:",
-                                                             value = 3),            
+                                                             value = 5),            
                                                 numericInput(ns("wBounds"), "Wbounds:",
                                                              value = 10),
                                                 selectInput(ns("methods"), label = "Methods for meta sparse K means",
@@ -43,7 +47,7 @@ meta_clust_ui <- function(id, label = "meta sparse K means") {
                                                             selected = "exhaustive"),
                                                 checkboxInput(ns("sizeAdj"),"Adjust sample size",FALSE),
                                                 br(),
-                                                actionButton(ns("clustGo"), "Run meta sparse K means",icon = icon("play", lib = "glyphicon")),
+                                                actionButton(ns("clustGo"), "Run meta sparse K means",icon = icon("rocket", lib = "font-awesome")),
                                                 style="primary")
                                 )
 
