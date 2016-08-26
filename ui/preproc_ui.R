@@ -66,11 +66,11 @@ preproc_ui <- function(id, label= "preprocessing data") {
               tags$hr(),
              
               h4("Impute"), helpIcon(ns("impute_help"), HELP.impute),
-              selectInput(ns("impute"), "Method:", c(None="none", IMPUTE.method.all)),
+              uiOutput(ns("impute.opt")),
               tags$hr(),
              
               h4("Replicate Handling"), helpIcon(ns("replicate_help"), HELP.replicate),
-              selectInput(ns("replicate"), "Method:", c(None="none", REPLICATE.all))
+              uiOutput(ns("replicate.opt"))
             ), style="primary"
           )
         ),

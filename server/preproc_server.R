@@ -1,5 +1,6 @@
 preproc_server <- function(input, output, session) {
 
+  ns <- NS("preproc")
   ##########################
   # Reactive Values        #
   ##########################
@@ -105,18 +106,42 @@ preproc_server <- function(input, output, session) {
           done(session)
         }
         # impute
-        if (input$impute != "none") {
-          wait(session, "Impute Missing Value....")
-          study <- Impute(study, method=input$impute)
-          done(session)
+        missing.count <- sum(unlist(lapply(study@datasets, function(x) sum(is.na(x)))))
+        if (missing.count == 0) {
+          output$impute.opt <- renderUI({
+            tags$p("Congratuations! There is no missing values :)")
+          })
+        } else {
+          if (length(input$impute) == 0) {
+            output$impute.opt <- renderUI({
+              selectInput(ns("impute"), "Method:", IMPUTE.method.all)
+            })
+          } else {
+            wait(session, "Impute Missing Value....")
+            study <- Impute(study, method=input$impute)
+            done(session)
+          }
         }
         # handle replicate
-        if(all(is.na(row.names(study@datasets[[1]]))))
-          sendWarningMessage(session, MSG.annotate.wrong.platform)
-        else if (input$replicate != "none") {
-          wait(session, "Handing Replicate Gene Symbol....")
-          study <- PoolReplicate(study, method=input$replicate)
-          done(session)
+        gene.symbols <- rownames(study@datasets[[1]])
+        if (length(unique(gene.symbols)) == length(gene.symbols)) {
+          output$replicate.opt <- renderUI({
+            tags$p("Congratuations! There is no replicated gene symbols :)")
+          })
+        } else {
+          if (length(input$replicate) == 0) {
+            output$replicate.opt <- renderUI({
+              selectInput(ns("replicate"), "Method:", REPLICATE.all)
+            })
+          } else {
+            if(all(is.na(row.names(study@datasets[[1]]))))
+              sendWarningMessage(session, MSG.annotate.wrong.platform)
+            else {
+              wait(session, "Handing Replicate Gene Symbol....")
+              study <- PoolReplicate(study, method=input$replicate)
+              done(session)
+            }
+          }
         }
         # update preview
         STUDY$preview <- study
