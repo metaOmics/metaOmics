@@ -17,3 +17,4 @@ MSG.study.duplicate <- function(name) {
 }
 
 MSG.no.active = "You haven't select any active study yet. Go to \"Saved Data\" tab and click on the study to make it active"
+MSG.no.working.dir = "Please set a working directory before you continue. Go to \"Settings\" tab and set the working directory"

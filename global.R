@@ -1,12 +1,12 @@
 # This file will be executed prior to app startup to setup the necessary environment
-suppressMessages(library(preproc))
-suppressMessages(library(MetaSparseKmeans))
-suppressMessages(library(MetaDE))
-suppressMessages(library(PMA))
-suppressMessages(library(metaPCA))
-suppressMessages(library(cluster))
-suppressMessages(library(shiny))
-suppressMessages(library(shinyBS))
+library(preproc)
+library(MetaSparseKmeans)
+library(MetaDE)
+library(PMA)
+library(metaPCA)
+library(cluster)
+library(shiny)
+library(shinyBS)
 
 data(preproc.option)
 
@@ -32,3 +32,9 @@ for (f in list.files(path=dir, pattern="*.R")) {
   source(paste(dir, f, sep="/"))
 }
 
+# Setting default working sirectory
+tryCatch({
+  DB.load.working.dir(db)
+}, error=function(error){
+  DB.set.working.dir(db, getwd())
+})

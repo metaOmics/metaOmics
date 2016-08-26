@@ -126,7 +126,7 @@ DB.load.working.dir <- function(db){
   path <- readLines(file.con)
   close(file.con)
   if (length(path) == 0)
-    ""
+    stop(MSG.no.working.dir)
   else
     path
 }
