@@ -1,8 +1,65 @@
 setting_server <- function(input, output, session) {
 
+  ns <- NS("setting")
+
+  # The check and install module for package
+  check.pkg <- function(pkg, label, supported=T, cran.dep=NULL, bioconductor.dep=NULL) {
+    active.id <- paste("activate", pkg, sep=".")
+    install.id <- paste("install", pkg, sep=".")
+    output.id <- paste("opt", pkg, sep=".")
+    log.id <- paste("log", pkg, sep=".")
+    output[[output.id]] <- renderUI({
+      PACKAGES$installed
+      if (supported) {
+        if (installed(pkg)) {
+          # radioButtons(ns(active.id), paste(label, 'is currently installed'),
+          #              inline=T, c(Activate=T, Disable=F), T)
+	  tagList(icon("check-square"), span("installed"))
+        } else {
+          tagList(
+            span(paste(label, "is not installed:")),
+            actionButton(ns(install.id), "install", 
+			 icon=icon("download"), class="btn-info")
+          )
+        }
+      } else {
+        span("We are sorry, this pakage is currently not supported")
+      }
+    })
+
+    observeEvent(input[[install.id]], {
+      if (!GLOBAL.network) {
+	stop(MSG.no.network)
+      }
+      for (package in cran.dep) {
+        if(!(package %in% PACKAGES$installed)) {
+	  sendInfoMessage(session, paste("installing", package, "from CRAN"))
+          install.packages(package, repos='http://cran.us.r-project.org')
+        }
+      }
+      for(package in bioconductor.dep) {
+        if(!(package %in% PACKAGES$installed)) {
+	  sendInfoMessage(session, paste("installing", package, "from Bioconductor"))
+          biocLite(package, ask=F, suppressUpdates=T, suppressAutoUpdate=T)
+        }
+      }
+      sendInfoMessage(session,paste("installing", pkg, "from Github"))
+      devtools::install_github(paste("metaOmic", pkg, sep="/"))
+      
+      PACKAGES$installed <- installed.packages()[,"Package"]
+      sendSuccessMessage(session, paste(pkg, "installed"))
+      sendSuccessMessage(session, MSG.installed, unique=T)
+    })
+  }
+
   ##########################
   # Reactive Values        #
   ##########################
+  PACKAGES <- reactiveValues(installed=installed.packages()[,"Package"])
+
+  installed <- function(pkg) {
+    pkg %in% PACKAGES$installed
+  }
 
   ##########################
   # Validation             #
@@ -11,6 +68,10 @@ setting_server <- function(input, output, session) {
   ##########################
   # Observers              #
   ##########################
+  observeEvent(input$tabChange, {
+    PACKAGES$installed <- installed.packages()[,"Package"]
+  })
+
   observeEvent(
     ignoreNULL = TRUE,
     eventExpr = {
@@ -19,9 +80,13 @@ setting_server <- function(input, output, session) {
     handlerExpr = {
       if (input$directory > 0) {
         path = choose.dir(default = readDirectoryInput(session, 'directory'))
-        updateDirectoryInput(session, 'directory', value = path)
-        DB.set.working.dir(db, path)
-        output$working.dir <- renderText({DB.load.working.dir(db)})
+	if(is.na(path)) {
+	  sendErrorMessage(session, MSG.no.working.dir)
+	} else {
+          updateDirectoryInput(session, 'directory', value = path)
+          DB.set.working.dir(db, path)
+          output$working.dir <- renderText({DB.load.working.dir(db)})
+        }
       }
     }
   )
@@ -29,7 +94,11 @@ setting_server <- function(input, output, session) {
   ##########################
   # Render output/UI       #
   ##########################
-  output$working.dir <- renderText({DB.load.working.dir(db)})
+  # working directory
+  output$working.dir <- renderText({
+    try({ DB.load.working.dir(db) }, session)
+  })
+  # session information
   output$urlText <- renderText({
     server.type <- ""
     if (session$clientData$url_hostname == "127.0.0.1")
@@ -43,4 +112,15 @@ setting_server <- function(input, output, session) {
       "server type: ", server.type,     "\n"
     )
   })
+
+  check.pkg(TOOLSET.de, 'Meta DE', 
+    cran.dep=c("survival", "combinat"),
+    bioconductor.dep=c("limma", "cluster", "samr", "edgeR", "DESeq2", "impute", "Biobase")
+  )
+
+  check.pkg(TOOLSET.clust, 'Meta Clust', cran.dep=c("cluster"))
+  check.pkg(TOOLSET.path, 'Meta PATH', supported=F)
+  check.pkg(TOOLSET.pca, 'Meta PCA', supported=F)
+  check.pkg(TOOLSET.ktsp, 'Meta KTSP', supported=F)
+
 }

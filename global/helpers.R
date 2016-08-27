@@ -1,13 +1,17 @@
-sendWarningMessage <- function(session, msg) {
-  session$sendCustomMessage(type = 'warningMessage', message=msg)
+sendWarningMessage <- function(session, msg, unique=F) {
+  session$sendCustomMessage(type = 'warningMessage', list(message=msg, unique=unique))
 }
 
-sendErrorMessage <- function(session, msg) {
-  session$sendCustomMessage(type = 'errorMessage', message=msg)
+sendErrorMessage <- function(session, msg, unique=F) {
+  session$sendCustomMessage(type='errorMessage', list(message=msg, unique=unique))
 }
 
-sendSuccessMessage <- function(session, msg) {
-  session$sendCustomMessage(type = 'successMessage', message=msg)
+sendSuccessMessage <- function(session, msg, unique=F) {
+  session$sendCustomMessage(type = 'successMessage', list(message=msg, unique=unique))
+}
+
+sendInfoMessage <- function(session, msg, unique=F) {
+  session$sendCustomMessage(type = 'infoMessage', list(message=msg, unique=unique))
 }
 
 wait <- function(session, msg) {
