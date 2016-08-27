@@ -1,4 +1,5 @@
 meta_clust_server <- function(input, output,session) {
+    library(MetaSparseKmeans)
     study <- DB.load.active(db)
     DB <- reactiveValues(acitve=NULL,transpose=NULL)
     

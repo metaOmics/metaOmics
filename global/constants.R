@@ -1,5 +1,12 @@
 DB.dir <- "data"
 
+TOOLSET.de    <- "MetaDE"
+TOOLSET.clust <- "MetaSparseKmeans"
+TOOLSET.path  <- "MetaPATH"
+TOOLSET.pca   <- "MetaPCA"
+TOOLSET.ktsp  <- "MetaKTSP"
+TOOLSET.all <- c(TOOLSET.de, TOOLSET.clust, TOOLSET.path, TOOLSET.pca, TOOLSET.ktsp) 
+
 select.noDefault <- list(
   placeholder = 'Choose from below',
   onInitialize = I('function() { this.setValue(""); }')

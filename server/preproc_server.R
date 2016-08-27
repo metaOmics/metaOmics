@@ -1,5 +1,6 @@
 preproc_server <- function(input, output, session) {
 
+  ns <- NS("preproc")
   ##########################
   # Reactive Values        #
   ##########################
@@ -15,7 +16,7 @@ preproc_server <- function(input, output, session) {
     if(all(dim(dataset) == 0)) stop(MSG.datasetInput.noinput)
     if(dim(dataset)[1] == 0) stop(MSG.datasetInput.norow)
     if(dim(dataset)[2] == 0) stop(MSG.datasetInput.nocol)
-    if((input$study == "") && (input$log == T) && is.discrete(study))
+    if((input$study == "") && (input$log == T) && ntype(study) == NTYPE.discrete)
       stop(MSG.study.nolog)
     name <- study@name
     if(is.null(name) || name == "") stop(MSG.study.noname)
@@ -105,18 +106,42 @@ preproc_server <- function(input, output, session) {
           done(session)
         }
         # impute
-        if (input$impute != "none") {
-          wait(session, "Impute Missing Value....")
-          study <- Impute(study, method=input$impute)
-          done(session)
+        missing.count <- sum(unlist(lapply(study@datasets, function(x) sum(is.na(x)))))
+        if (missing.count == 0) {
+          output$impute.opt <- renderUI({
+            tags$p("Congratuations! There is no missing values :)")
+          })
+        } else {
+          if (length(input$impute) == 0) {
+            output$impute.opt <- renderUI({
+              selectInput(ns("impute"), "Method:", IMPUTE.method.all)
+            })
+          } else {
+            wait(session, "Impute Missing Value....")
+            study <- Impute(study, method=input$impute)
+            done(session)
+          }
         }
         # handle replicate
-        if(all(is.na(row.names(study@datasets[[1]]))))
-          sendWarningMessage(session, MSG.annotate.wrong.platform)
-        else if (input$replicate != "none") {
-          wait(session, "Handing Replicate Gene Symbol....")
-          study <- PoolReplicate(study, method=input$replicate)
-          done(session)
+        gene.symbols <- rownames(study@datasets[[1]])
+        if (length(unique(gene.symbols)) == length(gene.symbols)) {
+          output$replicate.opt <- renderUI({
+            tags$p("Congratuations! There is no replicated gene symbols :)")
+          })
+        } else {
+          if (length(input$replicate) == 0) {
+            output$replicate.opt <- renderUI({
+              selectInput(ns("replicate"), "Method:", REPLICATE.all)
+            })
+          } else {
+            if(all(is.na(row.names(study@datasets[[1]]))))
+              sendWarningMessage(session, MSG.annotate.wrong.platform)
+            else {
+              wait(session, "Handing Replicate Gene Symbol....")
+              study <- PoolReplicate(study, method=input$replicate)
+              done(session)
+            }
+          }
         }
         # update preview
         STUDY$preview <- study
@@ -132,6 +157,7 @@ preproc_server <- function(input, output, session) {
       study <- STUDY$preview
       study@name  <- input$studyName
       study@dtype <- input$dtype
+      study@ntype <- ntype(input$dtype)
       if(stype(study) == STYPE.single) {
         names(study@datasets) <- study@name
       }
@@ -149,7 +175,7 @@ preproc_server <- function(input, output, session) {
     # update dataset select options, and select the newly saved study
     updateSelectizeInput(session, "study", choices=DB$names,
       selected=input$studyName)
-    # update annotation to gene symbol, since saved study should be annotated
+    # update annotation to gene symbol, since saved study shouldn't be annotated
     updateSelectizeInput(session, "id.type", selected=ID.TYPE.geneSymbol)
   }, label="update selected study")
 

@@ -17,4 +17,9 @@ MSG.study.duplicate <- function(name) {
   paste("a study called", name, "exits, please choose another name or delete the study first")
 }
 
-MSG.no.active = "You haven't select any active study yet. Go to \"Saved Data\" tab and click on the study to make it active"
+MSG.no.active <- "You haven't select any active study yet. Go to \"Saved Data\" tab and click on the study to make it active"
+MSG.no.working.dir <- "Please set a working directory before you continue. Go to \"Settings\" tab and set the working directory"
+MSG.no.network <- "no network connection. please connect to network and restart the application."
+MSG.installed <- "restart the application to see a new tab under \"Toolsets\" tab"
+MSG.enabled <- "restart the application to take effect"
+MSG.disabled <- "restart the application to take effect"
