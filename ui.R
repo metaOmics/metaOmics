@@ -1,3 +1,23 @@
+installed <- installed.packages()[,"Package"]
+enabled <- c()
+for (toolset in TOOLSET.all) {
+  if (toolset %in% installed) {
+    enabled <- c(enabled, toolset)
+  }
+}
+
+toolsets <- c("Toolsets")
+if (TOOLSET.de %in% enabled)
+  toolsets <- c(toolsets, list(meta_de_ui("meta_de")))
+if (TOOLSET.clust %in% enabled)
+  toolsets <- c(toolsets, list(meta_clust_ui("meta_clust")))
+
+if (length(toolsets) > 1) {
+  toolsets <- do.call(navbarMenu, toolsets)
+} else {
+  toolsets <- tags$div()
+}
+
 shinyUI(
   navbarPage("metaOmics", id="nav",
     header=tagList(
@@ -20,14 +40,10 @@ shinyUI(
     preproc_ui("preproc"),
     # tab for manipulating saved data
     saved_data_ui("saved_data"),
-    #tab for metaClust
-    navbarMenu("Toolsets",
-      meta_clust_ui("meta_clust"),
-      meta_de_ui("meta_de")
-      # meta_pca_ui("meta_pca")
-    ),
+    # tab for toolsets
+    toolsets,
     tags$div(
-      tags$div(id="loading", 
+      tags$div(id="loading",
         tags$div(id="loadingcontent",
           tags$p(id="loadingspinner", "loading......")
         )

@@ -7,25 +7,28 @@ Shiny.addCustomMessageHandler("simpleAlert",
 
 function messengerAlert(type) {
   return function(msg) {
-    msg = Messenger().post({
-      message: msg,
-      hideAfter: 0,
-      type: type,
-      actions: {
-        cancel: {
-	  label: "close",
-          action: function() {
-            return msg.cancel();
-          }
-        }
-      }
-    });
+    if (msg.unique)
+      Messenger().post({
+        message: msg.message,
+        hideAfter: 0,
+        type: type,
+        showCloseButton: true,
+      });
+     else
+      Messenger().post({
+        message: msg.message,
+        hideAfter: 0,
+        type: type,
+        showCloseButton: true,
+        id: "xdd"
+      });
   }
 }
 
 Shiny.addCustomMessageHandler("successMessage", messengerAlert("success"));
 Shiny.addCustomMessageHandler("warningMessage", messengerAlert("warning"));
 Shiny.addCustomMessageHandler("errorMessage", messengerAlert("error"));
+Shiny.addCustomMessageHandler("infoMessage", messengerAlert("info"));
 
 Shiny.addCustomMessageHandler("resetFile", function(id) {
   $(id).val('');
