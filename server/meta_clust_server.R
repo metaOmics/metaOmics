@@ -7,20 +7,17 @@ meta_clust_server <- function(input, output,session) {
         if(is.null(study)) stop(MSG.no.active)
         if(DB.load.working.dir(db)=="") stop(MSG.no.working.dir)
     }
-
     updateSelectizeInput(session, "studyforK", label="Select studies to be tuned", choices = NULL, server = TRUE)  
+
     observeEvent(input$tabChange, {
         try({
             validate()
-            DB <- reactiveValues(acitve=study,transpose=lapply(study@datasets,t))
-
-            dir.create(paste(DB.load.working.dir(db),"metaClust",sep="/"))
-            
+            study <- DB.load.active(db)                      
             DB$active <- DB.load.active(db)
             DB$transpose <- lapply(DB$active@datasets,t)
-            
-            updateSelectizeInput(session, "studyforK", label="Select studies to be tuned", choices = names(DB$active@datasets), server = TRUE)
+            updateSelectizeInput(session, "studyforK", label="Select studies to be tuned", choices = names(DB$active@datasets), server = TRUE)     
         }, session)
+        dir.create(paste(DB.load.working.dir(db),"metaClust",sep="/"))            
     })
     
     output$plotsK <- renderUI({

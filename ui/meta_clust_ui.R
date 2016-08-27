@@ -28,7 +28,7 @@ meta_clust_ui <- function(id, label = "meta sparse K means") {
                                                 
                                                 fluidRow(
                                                     column(4,numericInput(ns("minforW"),"Minimum of wbounds:", value=2)),
-                                                    column(4,numericInput(ns("maxforW"),"Maximum of wbounds:", value=15)),
+                                                    column(4,numericInput(ns("maxforW"),"Maximum of wbounds:", value=16)),
                                                     column(4,numericInput(ns("stepforW"),"Step of wbounds:", value=2))
                                                 ),
 
