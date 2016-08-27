@@ -12,6 +12,7 @@ MSG.merge.mixedtype <- "You can't merge continuous data with discrete data"
 
 MSG.study.noname <- "Study Name can not be empty"
 MSG.study.nolog <- "the numeric nature of this study is discrete, you should not apply log transform"
+MSG.no.working.dir <- "No working directory specified. Please go to \"Settings\" tab to set up."
 MSG.study.duplicate <- function(name) {
   paste("a study called", name, "exits, please choose another name or delete the study first")
 }

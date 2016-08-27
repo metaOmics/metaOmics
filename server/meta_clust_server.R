@@ -6,21 +6,19 @@ meta_clust_server <- function(input, output,session) {
     validate <- function(){
         study <- DB.load.active(db)
         if(is.null(study)) stop(MSG.no.active)
+        if(DB.load.working.dir(db)=="") stop(MSG.no.working.dir)
     }
-
     updateSelectizeInput(session, "studyforK", label="Select studies to be tuned", choices = NULL, server = TRUE)  
+
     observeEvent(input$tabChange, {
         try({
             validate()
-            DB <- reactiveValues(acitve=study,transpose=lapply(study@datasets,t))
-
-            dir.create(paste(DB.load.working.dir(db),"metaClust",sep="/"))
-            
+            study <- DB.load.active(db)                      
             DB$active <- DB.load.active(db)
             DB$transpose <- lapply(DB$active@datasets,t)
-            
-            updateSelectizeInput(session, "studyforK", label="Select studies to be tuned", choices = names(DB$active@datasets), server = TRUE)
+            updateSelectizeInput(session, "studyforK", label="Select studies to be tuned", choices = names(DB$active@datasets), server = TRUE)     
         }, session)
+        dir.create(paste(DB.load.working.dir(db),"metaClust",sep="/"))            
     })
     
     output$plotsK <- renderUI({
@@ -111,7 +109,9 @@ meta_clust_server <- function(input, output,session) {
 
         try({
             validate()
-            gapStatResult <- calculateGap(DB$transpose,K=input$KforW,wbounds=seq(input$WRange[1],input$WRange[2],by=input$byW),B=input$BforW)
+            if((input$minforW + input$stepforW) > input$maxforW)
+                sendErrorMessage(session, "Minimum of wbounds need to be smaller than maximum of wbounds")
+            gapStatResult <- calculateGap(DB$transpose,K=input$KforW,wbounds=seq(input$minforW,input$maxforW,by=input$stepforW),B=input$BforW)
             png(paste( DB.load.working.dir(db),"/metaClust/mskmGapStatstics.png",sep=""))
             plot(gapStatResult$wbounds,gapStatResult$gapStat,type='b',xlab='mu',ylab='gapStat') 
             arrows(gapStatResult$wbounds, gapStatResult$gapStat-gapStatResult$se.score, 
@@ -134,11 +134,6 @@ meta_clust_server <- function(input, output,session) {
     observe({
         val <- input$KforW
         updateNumericInput(session, "k", value = val)
-    })
-    
-    observe({
-        val <- input$byW
-        updateSliderInput(session, "WRange",value=c(1,15), min=0,max=30,step=val)
     })
 
     observeEvent(input$clustGo, {

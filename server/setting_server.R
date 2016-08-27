@@ -2,6 +2,7 @@ setting_server <- function(input, output, session) {
 
   ns <- NS("setting")
 
+  # The check and install module for package
   check.pkg <- function(pkg, label, supported=T, cran.dep=NULL, bioconductor.dep=NULL) {
     active.id <- paste("activate", pkg, sep=".")
     install.id <- paste("install", pkg, sep=".")
@@ -89,16 +90,6 @@ setting_server <- function(input, output, session) {
       }
     }
   )
-
-  observeEvent(PACKAGES$enabled, {
-    enabled <- PACKAGES$enabled
-    opt <- c("Toolsets")
-    if (TOOLSET.de %in% enabled)
-      opt <- c(opt, meta_de_ui("meta_de"))
-    if (TOOLSET.clust %in% enabled)
-      opt <- c(opt, meta_clust_ui("meta_clust"))
-  })
-
 
   ##########################
   # Render output/UI       #
