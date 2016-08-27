@@ -6,22 +6,10 @@ output: html_document
 
 A graphical user interface to facilitate the application of meta analysis on -Omics study
 
-## Required Packages
+### Required Packages
+shiny
 
-preproc, metaClust, DT, shiny, shinyBS
-
-* To install all the required packages, open R console
-```{r eval=FALSE}
-install.packages(c("utils", "devtools", "DMwR"))
-source("https://bioconductor.org/biocLite.R")
-biocLite("AnnotationDbi")
-
-library(devtools)
-install_github("metaOmic/MetaSparseKmeans")
-install_github("metaOmic/preproc")
-```
-
-## How to start the app
+### How to start the app
 First, clone the project
 ```
 git clone https://github.com/metaOmic/metaOmics
@@ -29,17 +17,13 @@ git clone https://github.com/metaOmic/metaOmics
 
 if the directory of the app is `metaOmics`,
 
-* in command line
-```
-R -e "shiny::runApp('metaOmics', port=9987, launch.browser=T)"
-```
-
 * in R console
 ```{r eval=FALSE}
+install.packages("shiny")
 shiny::runApp('metaOmics', port=9987, launch.browser=T)
 ```
 
-## How to start the documentation
+### How to start the documentation
 
 * Install rmarkdown for R
 ```

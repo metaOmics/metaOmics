@@ -1,10 +1,27 @@
 # This file will be executed prior to app startup to setup the necessary environment
+GLOBAL.network <- T
+tryCatch({
+  source("https://bioconductor.org/biocLite.R")
+}, error=function(error){
+  GLOBAL.network <- F
+})
+
+if(GLOBAL.network) {
+  installed <- installed.packages()[,"Package"]
+  for (package in c("utils", "DMwR", "devtools", "DT", "shinyBS")) {
+    if (!(package %in% installed)) {
+      install.packages(package, repos='http://cran.us.r-project.org')
+    }
+  }
+  if (!("AnnotationDbi" %in% installed)) {
+    biocLite("AnnotationDbi")
+  }
+  if (!("preproc" %in% installed)) {
+    devtools::install_github("metaOmic/preproc")
+  }
+}
+
 library(preproc)
-library(MetaSparseKmeans)
-library(MetaDE)
-library(PMA)
-library(metaPCA)
-library(cluster)
 library(shiny)
 library(shinyBS)
 
@@ -38,3 +55,4 @@ tryCatch({
 }, error=function(error){
   DB.set.working.dir(db, getwd())
 })
+

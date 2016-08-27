@@ -1,4 +1,5 @@
 meta_de_server <- function(input, output, session) {
+  library(MetaDE)
 
   ns <- NS("meta_de")
 
