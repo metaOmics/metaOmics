@@ -53,6 +53,6 @@ for (f in list.files(path=dir, pattern="*.R")) {
 tryCatch({
   DB.load.working.dir(db)
 }, error=function(error){
-  DB.set.working.dir(db, getwd())
+  DB.set.working.dir(db, paste(getwd(), "data", sep="/"))
 })
 
