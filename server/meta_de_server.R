@@ -47,65 +47,6 @@ meta_de_server <- function(input, output, session) {
     })
   })
 
-  observeEvent(input$resp.type, {
-    try({
-      validate()
-      resp <- input$resp.type
-      clinical.options <- names(DB$active@clinicals[[1]])
-      output$resp.type.option <- renderUI({
-        if (resp == RESP.two.class) {
-          tagList(
-            selectInput(ns("two.class.col"), "Label Attribute:", clinical.options),
-            uiOutput(ns("class.option"))
-          )
-        } else if (resp == RESP.multi.class) {
-          tagList(
-            selectInput(ns("multi.class.col"), "Label Attribute:", clinical.options),
-            uiOutput(ns("class.option"))
-          )
-        } else if (resp == RESP.continuous) {
-          selectInput(ns("conti.col"), "Label Attribute:", clinical.options)
-        } else if (resp == RESP.survival) {
-          tagList(
-            selectInput(ns("time.col"), "Time Attribute:", clinical.options),
-            selectInput(ns("indicator.col"), "Indicator Attribute:", clinical.options)
-          )
-        }
-      })
-    }, session)
-  })
-
-  observeEvent(input$two.class.col, {
-    try({
-      validate()
-      resp <- input$resp.type
-      labels <- DB$active@clinicals[[1]][,input$two.class.col]
-      labels <- levels(as.factor(labels))
-      output$class.option <- renderUI({
-        tagList(
-          selectInput(ns("control.label"), "Control Label:", labels, selected=labels[1]),
-          selectInput(ns("expr.label"), "Experimental Label:", labels, selected=labels[2])
-        )
-      })
-    }, session)
-  })
-
-  observeEvent(input$multi.class.col, {
-    try({
-      validate()
-      resp <- input$resp.type
-      labels <- DB$active@clinicals[[1]][,input$multi.class.col]
-      labels <- levels(as.factor(labels))
-      output$class.option <- renderUI({
-        tagList(
-          selectizeInput(ns("group.label"), "Group Labels:", labels, 
-                         multiple=T, options = select.noDefault),
-          selectInput(ns("control.label"), "Control Label:", labels)
-        )
-      })
-    }, session)
-  })
-
   observeEvent(input$run, {
     study <- DB$active
 
@@ -207,4 +148,46 @@ meta_de_server <- function(input, output, session) {
       })
     }, session)
   })
+
+  output$resp.type.option <- renderUI({
+    try({
+      validate()
+      resp <- input$resp.type
+      clinical.options <- names(DB$active@clinicals[[1]])
+      if (resp == RESP.two.class || resp == RESP.multi.class) {
+        tagList(
+          selectInput(ns("label.col"), "Label Attribute:", clinical.options),
+          uiOutput(ns("class.option"))
+        )
+      } else if (resp == RESP.continuous) {
+        selectInput(ns("conti.col"), "Label Attribute:", clinical.options)
+      } else if (resp == RESP.survival) {
+        tagList(
+          selectInput(ns("time.col"), "Time Attribute:", clinical.options),
+          selectInput(ns("indicator.col"), "Indicator Attribute:", clinical.options)
+        )
+      }
+    }, session)
+  })
+
+  output$class.option <- renderUI({
+    try({
+      validate()
+      labels <- DB$active@clinicals[[1]][,input$label.col]
+      labels <- levels(as.factor(labels))
+      if (input$resp.type == RESP.two.class) {
+        tagList(
+          selectInput(ns("control.label"), "Control Label:", labels, selected=labels[1]),
+          selectInput(ns("expr.label"), "Experimental Label:", labels, selected=labels[2])
+        )
+      } else if (input$resp.type == RESP.multi.class) {
+        tagList(
+          selectizeInput(ns("group.label"), "Group Labels:", labels, 
+                         multiple=T, options = select.noDefault),
+          selectInput(ns("control.label"), "Control Label:", labels)
+        )
+      }
+    }, session)
+  })
+
 }
