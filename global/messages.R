@@ -23,3 +23,4 @@ MSG.no.network <- "no network connection. please connect to network and restart 
 MSG.installed <- "restart the application to see a new tab under \"Toolsets\" tab"
 MSG.enabled <- "restart the application to take effect"
 MSG.disabled <- "restart the application to take effect"
+MSG.detect.de.result <- "Detecting Meta DE result in the system, choose \"Yes\" in the \"Use Meta DE Result:\" option to use the result. Choose \"No\" to use the active study"

@@ -40,6 +40,7 @@ meta_de_ui <- function(id, label = "meta DE") {
         h3(textOutput(ns("heatmap.info"))),
 	imageOutput(ns('heatmap'), height="100%"),
         h3("Analysis Summary"),
+        downloadButton(ns('downloadCsv'), 'Download Csv File'),
         DT::dataTableOutput(ns("summary"))
       )
     )

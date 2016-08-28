@@ -2,7 +2,7 @@ DB.dir <- "data"
 
 TOOLSET.de    <- "MetaDE"
 TOOLSET.clust <- "MetaSparseKmeans"
-TOOLSET.path  <- "MetaPATH"
+TOOLSET.path  <- "MetaPath"
 TOOLSET.pca   <- "MetaPCA"
 TOOLSET.ktsp  <- "MetaKTSP"
 TOOLSET.all <- c(TOOLSET.de, TOOLSET.clust, TOOLSET.path, TOOLSET.pca, TOOLSET.ktsp) 
@@ -92,3 +92,57 @@ REM.EB  <- "EB"
 REM.RML <- "RML"
 REM.all <- c(REM.HS, REM.HO, REM.DL, REM.SJ, REM.EB, REM.RML)
 names(REM.all) <- c("HS", "HO", "DL", "SJ", "EB", "RML")
+
+GENESET.KEGG        <- "KEGG.genesets"
+GENESET.GOBP        <- "GOBP.genesets"
+GENESET.GOCC        <- "GOCC.genesets"
+GENESET.GOMF        <- "GOMF.genesets"
+GENESET.Reactome    <- "Reactome.genesets"
+GENESET.BioCarta    <- "BioCarta.genesets"
+GENESET.Phenocarta  <- "Phenocarta.genesets"
+GENESET.Hallmark    <- "Hallmark.genesets"
+GENESET.Positional  <- "Positional.genesets"
+GENESET.CMAP_up     <- "CMAP_up.genesets"
+GENESET.CMAP_down   <- "CMAP_down.genesets"
+GENESET.CGP         <- "CGP.genesets"
+GENESET.Canonical   <- "Canonical.genesets"
+GENESET.CGN         <- "CGN.genesets"
+GENESET.CM          <- "CM.genesets"
+GENESET.Oncogenic   <- "Oncogenic.genesets"
+GENESET.Immunologic <- "Immunologic.genesets"
+GENESET.PID         <- "PID.genesets"
+GENESET.PPI         <- "PPI.genesets"
+GENESET.MIR         <- "MIR.genesets"
+GENESET.TFT         <- "TFT.genesets"
+GENESET.TargetScan  <- "TargetScan.genesets"
+GENESET.miRanda     <- "miRanda.genesets"
+GENESET.JASPAR      <- "JASPAR.genesets"
+GENESET.PITA        <- "PITA.genesets"
+GENESET.all <- c(GENESET.KEGG, GENESET.GOBP, GENESET.GOCC, GENESET.GOMF, GENESET.Reactome, GENESET.BioCarta, GENESET.Phenocarta, GENESET.Hallmark, GENESET.Positional, GENESET.CMAP_up, GENESET.CMAP_down, GENESET.CGP, GENESET.Canonical, GENESET.CGN, GENESET.CM, GENESET.Oncogenic, GENESET.Immunologic, GENESET.PID, GENESET.PPI, GENESET.MIR, GENESET.TFT, GENESET.TargetScan, GENESET.miRanda, GENESET.JASPAR, GENESET.PITA)
+names(GENESET.all) <- c(
+"KEGG",
+"GO Biological Process",
+"GO Cellular Component",
+"GO Molecular Function",
+"Reactome",
+"BioCarta",
+"Phenocarta",
+"Hallmark",
+"Positional",
+"Complement Map up",
+"Complement Map down",
+"Chemical and Genetic Perturbation",
+"Canonical",
+"Cancer Gene Neighborhoods",
+"Cancer Modules",
+"Oncogenic Signatures",
+"Immunologic Signatures",
+"Pathway Interaction Database",
+"Protein-protein Interaction",
+"microRNA targets",
+"Transcription Factor Targets",
+"TargetScan",
+"miRanda",
+"JASPAR",
+"PITA"
+)
