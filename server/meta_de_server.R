@@ -61,11 +61,11 @@ meta_de_server <- function(input, output, session) {
     ref.level <- ""
     select.group <- ""
     if (resp == RESP.two.class) {
-      response <- input$two.class.col
+      response <- input$label.col
       select.group <- c(input$control.label, input$expr.label)
       ref.level <- input$control.label
     } else if (resp == RESP.multi.class) {
-      response <- input$multi.class.col
+      response <- input$label.col
       select.group <- input$multi.class.col
       ref.level <- input$control.label
     } else if (resp == RESP.continuous) {
