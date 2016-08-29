@@ -23,3 +23,4 @@ MSG.no.network <- "no network connection. please connect to network and restart 
 MSG.installed <- "restart the application to see a new tab under \"Toolsets\" tab"
 MSG.enabled <- "restart the application to take effect"
 MSG.disabled <- "restart the application to take effect"
+MSG.file.corrupted <- "the file you uploaded is corrupted"

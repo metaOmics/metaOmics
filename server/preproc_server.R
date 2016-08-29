@@ -63,8 +63,12 @@ preproc_server <- function(input, output, session) {
     if (STUDY$action == STUDY.expression.upload) {
       wait(session, "Parsing Expression File...")
       inFile <- input$exprfile
-      STUDY$ori <- ReadExpr(inFile$datapath, name=inFile$name, dtype=DTYPE.microarray,
-        header=input$header, sep=input$data.sep, quote=input$data.quote, log=input$log)
+      tryCatch({
+        STUDY$ori <- ReadExpr(inFile$datapath, name=inFile$name, dtype=DTYPE.microarray,
+          header=input$header, sep=input$data.sep, quote=input$data.quote, log=input$log)
+      }, error=function(error) {
+        sendErrorMessage(session, MSG.file.corrupted)
+      })
       done(session)
     } else if (STUDY$action == STUDY.select.from.db) {
       STUDY$ori <- DB.load(db, input$study)[[1]]
@@ -72,9 +76,13 @@ preproc_server <- function(input, output, session) {
     } else if (STUDY$action == STUDY.clinical.upload) {
       wait(session, "Parsing Clinical File...")
       inFile <- input$clinical
-      clinical <- ReadClinical(inFile$datapath, sep=input$clinical.sep, 
-                                     quote=input$clinical.quote)
-      STUDY$clinicals <- list(clinical)
+      tryCatch({
+        clinical <- ReadClinical(inFile$datapath, sep=input$clinical.sep, 
+                                       quote=input$clinical.quote)
+        STUDY$clinicals <- list(clinical)
+      }, error=function(error) {
+        sendErrorMessage(session, MSG.file.corrupted)
+      })
       done(session)
     }
   }, label="setting STUDY$ori from file upload or selection")
