@@ -75,7 +75,7 @@ RESP.multi.class <- "multiclass"
 RESP.continuous  <- "continuous"
 RESP.survival    <- "survival"
 RESP.all <- c(RESP.two.class, RESP.multi.class, RESP.continuous, RESP.survival)
-names(RESP.all) <- c("Two Class", "Multi-Class", "Continuous", "Survival")
+names(RESP.all) <- c("Two Class Comparison", "Multi-Class Comparison", "Continuous Outcome", "Survival Outcome")
 
 AW.original      <- "original"
 AW.unconditional <- "uncond"
@@ -146,3 +146,32 @@ names(GENESET.all) <- c(
 "JASPAR",
 "PITA"
 )
+
+DE.METHOD.CPI <- "CPI"
+DE.METHOD.MAPE <- "MAPE"
+DE.METHOD.all <- c(DE.METHOD.CPI, DE.METHOD.MAPE)
+names(DE.METHOD.all) <- c("CPI (Comparative Pathway Integrator)", "MAPE (Meta Analysis Pathway Enrichment)")
+
+ENRICHMENT.KS <- "KS"
+ENRICHMENT.fisher <- "Fisher's exact"
+ENRICHMENT.all <- c(ENRICHMENT.KS, ENRICHMENT.fisher)
+names(ENRICHMENT.all) <- c("Kolmogorov–Smirnov test", "Fisher's exact test")
+
+MAPE.STAT.fisher <- "Fisher"
+MAPE.STAT.maxP <- "maxP"
+MAPE.STAT.minP <- "minP"
+MAPE.STAT.rth <- "rth"
+MAPE.STAT.aw.fisher <- "AW Fisher"
+MAPE.STAT.all <- c(MAPE.STAT.fisher, MAPE.STAT.maxP, MAPE.STAT.minP, MAPE.STAT.rth, MAPE.STAT.aw.fisher)
+names(MAPE.STAT.all) <- c("Fisher's method", "maxP", "minP", "roP", "Adaptively Weighted Fisher's Method")
+
+PERMUTE.sample <- "sameple"
+PERMUTE.gene <- "gene"
+PERMUTE.all <- c(PERMUTE.sample, PERMUTE.gene)
+names(PERMUTE.all) <- c("Permute Sample", "Permute Gene")
+
+QVALUE.estimate <- "estimate"
+QVALUE.permutation <- "permutation"
+QVALUE.all <- c(QVALUE.estimate, QVALUE.permutation)
+names(QVALUE.all) <- c("Estimate", "Permutation")
+

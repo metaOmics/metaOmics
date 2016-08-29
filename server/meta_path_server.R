@@ -30,6 +30,10 @@ meta_path_server <- function(input, output, session) {
     })
   })
 
+
+  ##########################
+  # Render output/UI       #
+  ##########################
   output$srcSelect <- renderUI({
     if (!is.null(DE$result)) {
       radioButtons(ns("useDE"), 'Use Meta DE Result:', inline=T,
@@ -38,8 +42,35 @@ meta_path_server <- function(input, output, session) {
     }
   })
 
+  output$method.opt <- renderUI({
+    if (input$method == DE.METHOD.MAPE) {
+      selectizeInput(ns('stat'), "meta p-value method:", MAPE.STAT.all)
+    }
+  })
 
-  ##########################
-  # Render output/UI       #
-  ##########################
+  output$stat.opt <- renderUI({
+    if (length(input$stat) > 0 && input$stat == MAPE.STAT.rth) {
+      numericInput(ns("rth.value"), "rth value", NULL)
+    }
+  })
+
+  output$enrichment.opt <- renderUI({
+    if (input$enrichment == ENRICHMENT.KS) {
+      radioButtons(ns("permute"), "Permutation to get p-value",
+                   c(YES=T, No=F), T)
+    } else if (input$enrichment == ENRICHMENT.fisher) {
+      numericInput(ns("Degene.number"), "number of DE genes", NULL)
+    }
+  })
+
+  output$permute.opt <- renderUI({
+    if (length(input$permute) > 0 && input$permute == T && 
+        input$enrichment == ENRICHMENT.KS) {
+      tagList(
+        selectizeInput(ns('permutation'), "Permutation Method", PERMUTE.all),
+        numericInput(ns("nperm"), "Number of Permutation", NULL),
+        selectizeInput(ns('qvalue.cal'), "q-value Calculation Method", QVALUE.all)
+      )
+    }
+  })
 }
