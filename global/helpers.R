@@ -31,8 +31,14 @@ helpIcon <- function(id, msg) {
 
 try <- function(code, session) {
   tryCatch(code,
-    warning=function(w) {sendWarningMessage(session, w$message)},
-    error=function(e) {sendErrorMessage(session, e$message)}
+    warning=function(w) {
+      sendWarningMessage(session, w$message)
+      done(session)
+    },
+    error=function(e) {
+      sendErrorMessage(session, e$message)
+      done(session)
+    }
   )
 }
 

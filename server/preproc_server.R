@@ -211,9 +211,9 @@ preproc_server <- function(input, output, session) {
   }))
   # annotation option
   selectPlatform <- selectizeInput("preproc-platform", "Platform:", 
-    as.list(PLATFORM.all), options = select.noDefault)
+    PLATFORM.all, options = select.noDefault)
   selectSpecies <- selectizeInput("preproc-species", "Species:", 
-    as.list(SPECIES.all), options = select.noDefault)
+    SPECIES.all, options = select.noDefault)
   output$id.type.option <- renderUI({
     switch (input$id.type,
       ProbeID=selectPlatform,
