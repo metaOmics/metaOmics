@@ -4,10 +4,8 @@ meta_path_ui <- function(id, label = "meta path") {
     sidebarLayout(
       sidebarPanel(
         uiOutput(ns('srcSelect')),
-        selectizeInput(ns('resp.type'), "Response Type:", RESP.all),
+        uiOutput(ns('resp.opt')),
         selectizeInput(ns('pathway'), "Pathway Dayabases:", GENESET.all, multiple=T),
-        numericInput(ns("q_cutoff"), "FDR cut off", NULL),
-        numericInput(ns("Num_Clusters"), "number of clusters", NULL),
         tags$hr(),
         bsCollapse(id="meta_de-advanced",
           bsCollapsePanel("Advanced Options",
@@ -26,6 +24,12 @@ meta_path_ui <- function(id, label = "meta path") {
         actionButton(ns('run'), 'Run', icon=icon("rocket"), class="btn-success btn-run")
       ),
       mainPanel(
+        fluidRow(
+          column(6, numericInput(ns("q_cutoff"), "FDR cut off", NULL)),
+          column(6, numericInput(ns("Num_Clusters"), "number of clusters", NULL))
+        ),
+        h3("Analysis Summary"),
+        DT::dataTableOutput(ns("summary"))
       )
     )
   )

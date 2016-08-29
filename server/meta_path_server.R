@@ -27,6 +27,8 @@ meta_path_server <- function(input, output, session) {
       file.path <- paste(DB.load.working.dir(db), "Meta DE", "result.rds", sep="/")
       DE$result <- readRDS(file.path)
       sendInfoMessage(session, MSG.detect.de.result)
+    }, error=function(error){
+      sendInfoMessage(session, MSG.no.de.result)
     })
   })
 
@@ -40,6 +42,11 @@ meta_path_server <- function(input, output, session) {
         c(Yes=T, No=F), T
       )
     }
+  })
+
+  output$resp.opt <- renderUI({
+    if(is.null(DE$result) || (length(input$useDE) > 0 && input$useDE == F))
+      selectizeInput(ns('resp.type'), "Response Type:", RESP.all)
   })
 
   output$method.opt <- renderUI({
