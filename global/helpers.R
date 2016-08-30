@@ -42,4 +42,6 @@ try <- function(code, session) {
   )
 }
 
+Try <- try
+
 NS <- function(prefix) { function(name) {paste(prefix, name, sep="-")} }

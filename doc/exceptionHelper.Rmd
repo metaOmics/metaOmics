@@ -1,0 +1,103 @@
+---
+runtime: shiny
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(shiny)
+library(shinyBS)
+library(preproc)
+source("global/constants.R")
+source("global/messages.R")
+source("global/help.R")
+source("global/database.R")
+source("global/helpers.R")
+```
+
+<script>
+loading = document.createElement('div')
+loading.innerHTML = '<div id="loading"><div id="loadingcontent"><p id="loadingspinner">loading......</p></div></div>'
+header = document.getElementById("header")
+header.insertBefore(loading, header.childNodes[0])
+</script>
+
+## Try(code, session) 
+If you enclose a block of code in `Try` block, the warning messages 
+and error messages will be output to browser as notifications.
+
+```{r}
+# UI code
+# UI code
+tagList(
+  textInput("age1", "try enter your actual age, 0, and some text like 
+            \"secret\", or a negative age"),
+  actionButton("submit", "Submit")
+)
+
+# Server code for exception handling
+observeEvent(input$submit, {
+  Try({
+    if (isolate(input$age1) == "")
+      stop("You must input an age!")
+    age <- strtoi(isolate(input$age1))
+    if (is.na(age) || age < 0)
+      stop("age must be a positive integer")
+    if (age == 0)
+      warning("Really!? You were born to know how to use computer?")
+    sendSuccessMessage(session, paste("Your age is", age))
+  }, session)
+})
+```
+
+<br />
+<br />
+
+## Put Validator in Try
+It is quite often that we need to validate similar things in many different block.
+It would be cumbersome and error-prone if we were to write the validation each time. So
+we will just write a function called `validate`, and call tihs function at the beginning
+of our `Try` block everytime.
+
+```{r}
+# UI code
+tagList(
+  textInput("age2", "try enter your actual age, 0, and some text like 
+            \"secret\", or a negative age"),
+  fluidRow(
+    column(6, actionButton("drive", "Can I Drive?")),
+    column(6, actionButton("beer", "Can I Get a Beer?"))
+  )
+)
+
+# Server code for exception handling
+validator <- function(input) {
+  if (isolate(input$age2) == "")
+    stop("You must input an age!")
+  age <- strtoi(isolate(input$age2))
+  if (is.na(age) || age < 0)
+    stop("age must be a positive integer")
+  if (age == 0)
+    warning("Really!? You were born to know how to use computer?")
+}
+
+observeEvent(input$drive, {
+  Try({
+    validator(input)
+    if (input$age2 >= 16)
+      sendSuccessMessage(session, "Yes, go get your liscence!")
+    else
+      sendErrorMessage(session, "No, Wait until you are 16!")
+  }, session)
+})
+
+observeEvent(input$beer, {
+  Try({
+    validator(input)
+    if (input$age2 >= 21)
+      sendSuccessMessage(session, "Yes, go get a Corona!")
+    else
+      sendErrorMessage(session, "Sorry, in US, you gotta be at least 21 to drink")
+  }, session)
+})
+```
