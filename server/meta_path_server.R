@@ -8,13 +8,21 @@ meta_path_server <- function(input, output, session) {
     opt <- list()
     if (is.null(DE$result) || (length(input$useDE) > 0 && input$useDE == F)) {
       opt$arraydata <- DB$active@datasets
+      opt$clinical.data <- DB$active@clinicals
       opt$resp.type <- input$resp.type
+      opt$label <- input$label
+      if (input$resp.type == RESP.survival) {
+        opt$censoring <- input$censoring
+      }
     } else {
       opt$meta.p <- DE$result$meta.analysis$pval
       opt$ind.p <- DE$result$ind.p
       opt$MetaDE <- T
     }
-    opt$pathway     <- lapply(input$pathway, function(name) get(name))
+    opt$pathway <- c()
+    for (pathway in input$pathway) {
+      opt$pathway <- c(opt$pathway, get(pathway))
+    }
     opt$method      <- input$method
     opt$enrichment  <- input$enrichment
 
@@ -38,6 +46,7 @@ meta_path_server <- function(input, output, session) {
 
     opt$size.min <- input$size.min
     opt$size.max <- input$size.max
+
     opt
   }
 
@@ -46,6 +55,7 @@ meta_path_server <- function(input, output, session) {
   ##########################
   DB <- reactiveValues(active=DB.load.active(db))
   DE <- reactiveValues(result=NULL)
+  MAPE <- reactiveValues(result=NULL)
 
   ##########################
   # Validation             #
@@ -71,7 +81,9 @@ meta_path_server <- function(input, output, session) {
 
   observeEvent(input$run, {
     try({
-      do.call(MAPE2.0, getOption(input))
+      wait(session, "performing Meta Path Analysis")
+      MAPE$result <- do.call(MAPE2.0, getOption(input))
+      done(session)
     }, session)
   })
 
@@ -87,8 +99,28 @@ meta_path_server <- function(input, output, session) {
   })
 
   output$resp.opt <- renderUI({
-    if(is.null(DE$result) || (length(input$useDE) > 0 && input$useDE == F))
-      selectizeInput(ns('resp.type'), "Response Type:", RESP.all)
+    if(is.null(DE$result) || (length(input$useDE) > 0 && input$useDE == F)) {
+      tagList(
+        selectizeInput(ns('resp.type'), "Response Type:", RESP.all),
+        uiOutput(ns("resp.type.option"))
+      )
+    }
+  })
+
+  output$resp.type.option <- renderUI({
+    if(length(input$resp.type) > 0) {
+      resp <- input$resp.type
+      clinical.options <- names(DB$active@clinicals[[1]])
+      if (resp == RESP.two.class || resp == RESP.multi.class
+          || resp == RESP.continuous) {
+        selectInput(ns("label"), "Label Attribute:", clinical.options)
+      } else if (resp == RESP.survival) {
+        tagList(
+          selectInput(ns("label"), "Time Attribute:", clinical.options),
+          selectInput(ns("censoring"), "Indicator Attribute:", clinical.options)
+        )
+      }
+    }
   })
 
   output$method.opt <- renderUI({
@@ -122,4 +154,9 @@ meta_path_server <- function(input, output, session) {
       )
     }
   })
+
+  output$summary <- DT::renderDataTable(DT::datatable({
+    if (!is.null(MAPE$result))
+      MAPE$result$summary
+  }))
 }

@@ -102,7 +102,9 @@ meta_de_server <- function(input, output, session) {
         nperm=nperm,
         tail=tail
       )
+      cat(file=stderr(), "1\n")
       DE$summary <- summary.meta(DE$result, isolate(input$meta.method))
+      cat(file=stderr(), "2\n")
       dir.path <- paste(DB.load.working.dir(db), "Meta DE", sep="/")
       if (!file.exists(dir.path)) dir.create(dir.path)
       file.path <- paste(dir.path, "summary.csv", sep="/")
