@@ -5,7 +5,9 @@ meta_path_ui <- function(id, label = "meta path") {
       sidebarPanel(
         uiOutput(ns('srcSelect')),
         uiOutput(ns('resp.opt')),
-        selectizeInput(ns('pathway'), "Pathway Dayabases:", GENESET.all, multiple=T),
+        selectizeInput(ns('pathway'), "Pathway Dayabases:", GENESET.all, multiple=T,
+                       selected=c(GENESET.BioCarta, GENESET.GOBP, 
+                               GENESET.GOMF, GENESET.KEGG, GENESET.Reactome)),
         tags$hr(),
         bsCollapse(id="meta_de-advanced",
           bsCollapsePanel("Advanced Options",
@@ -16,8 +18,8 @@ meta_path_ui <- function(id, label = "meta path") {
             selectizeInput(ns('enrichment'), "Pathway Enrichment Method:", ENRICHMENT.all),
             uiOutput(ns('enrichment.opt')),
             uiOutput(ns('permute.opt')),
-            numericInput(ns("size.min"), "pathway min gene size", NULL),
-            numericInput(ns("size.max"), "pathway max gene size", NULL)
+            numericInput(ns("size.min"), "pathway min gene size", 15),
+            numericInput(ns("size.max"), "pathway max gene size", 500)
             ), style="info"
           )
         ),

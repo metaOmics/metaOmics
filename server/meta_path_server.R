@@ -4,6 +4,43 @@ meta_path_server <- function(input, output, session) {
 
   ns <- NS("meta_path")
 
+  getOption <- function(input) {
+    opt <- list()
+    if (is.null(DE$result) || (length(input$useDE) > 0 && input$useDE == F)) {
+      opt$arraydata <- DB$active@datasets
+      opt$resp.type <- input$resp.type
+    } else {
+      opt$meta.p <- DE$result$meta.analysis$pval
+      opt$ind.p <- DE$result$ind.p
+      opt$MetaDE <- T
+    }
+    opt$pathway     <- lapply(input$pathway, function(name) get(name))
+    opt$method      <- input$method
+    opt$enrichment  <- input$enrichment
+
+    if (input$method == DE.METHOD.MAPE)
+      opt$stat <- input$stat
+    if (length(input$stat) > 0 && input$stat == MAPE.STAT.rth)
+      opt$rth.value <- input$rth.value
+
+    if (input$enrichment == ENRICHMENT.KS) {
+      opt$permute  <- input$permute
+    } else if (input$enrichment == ENRICHMENT.fisher) {
+      opt$Degene.number <- input$Degene.number
+    }
+
+    if (length(input$permute) > 0 && input$permute == T && 
+        input$enrichment == ENRICHMENT.KS) {
+      opt$permutation <- input$permutation
+      opt$nperm <- input$nperm
+      opt$qvalue.cal <- input$qvalue.cal
+    }
+
+    opt$size.min <- input$size.min
+    opt$size.max <- input$size.max
+    opt
+  }
+
   ##########################
   # Reactive Values        #
   ##########################
@@ -32,6 +69,11 @@ meta_path_server <- function(input, output, session) {
     })
   })
 
+  observeEvent(input$run, {
+    try({
+      do.call(MAPE2.0, getOption(input))
+    }, session)
+  })
 
   ##########################
   # Render output/UI       #
@@ -57,14 +99,14 @@ meta_path_server <- function(input, output, session) {
 
   output$stat.opt <- renderUI({
     if (length(input$stat) > 0 && input$stat == MAPE.STAT.rth) {
-      numericInput(ns("rth.value"), "rth value", NULL)
+      numericInput(ns("rth.value"), "rth value", 1)
     }
   })
 
   output$enrichment.opt <- renderUI({
     if (input$enrichment == ENRICHMENT.KS) {
       radioButtons(ns("permute"), "Permutation to get p-value",
-                   c(YES=T, No=F), T)
+                   c(YES=T, No=F), F)
     } else if (input$enrichment == ENRICHMENT.fisher) {
       numericInput(ns("Degene.number"), "number of DE genes", NULL)
     }
@@ -75,7 +117,7 @@ meta_path_server <- function(input, output, session) {
         input$enrichment == ENRICHMENT.KS) {
       tagList(
         selectizeInput(ns('permutation'), "Permutation Method", PERMUTE.all),
-        numericInput(ns("nperm"), "Number of Permutation", NULL),
+        numericInput(ns("nperm"), "Number of Permutation", 500),
         selectizeInput(ns('qvalue.cal'), "q-value Calculation Method", QVALUE.all)
       )
     }
