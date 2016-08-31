@@ -3,11 +3,113 @@ meta_de_server <- function(input, output, session) {
 
   ns <- NS("meta_de")
 
+  getOption <- function(input) {
+
+    study <- DB$active
+    n <- length(study@datasets)
+    opt <- list(ind.method=rep(IND.limma, n), covariate=NULL, rth=NULL, select.group=NULL , ref.level=NULL, REM.type=NULL)
+
+    opt$data <- study@datasets
+    opt$clin.data <- study@clinicals
+    opt$data.type <- study@dtype
+    method <- input$meta.method
+    opt$meta.method <- method
+    if (method == META.roP || method == META.roP.OC) {
+      opt$rth <- input$rth
+    } else if (method == META.AW) {
+      if (length(input$AW.type) == 0)
+        opt$AW.type <- AW.original
+      else
+        opt$AW.type <- input$AW.type
+    } else if (method == META.REM) {
+      if (length(input$REM.type) == 0)
+        opt$REM.type <- REM.HO
+      else
+        opt$REM.type <- input$REM.type
+    }
+
+    if (input$meta.type == META.TYPE.p) {
+      opt$ind.method <- unlist(lapply(1:n, function(index) {
+        tag.id <- paste("ind", index, sep="")
+        if (length(input[[tag.id]]) == 0)
+          IND.limma
+        else
+          input[[tag.id]]
+      }))
+    } else if (input$meta.type == META.TYPE.effect) {
+      opt$paired <- unlist(lapply(1:n, function(index) {
+        tag.id <- paste("paired", index, sep="")
+        if (length(input[[tag.id]]) == 0)
+          F
+        else
+          input[[tag.id]] == T
+      }))
+    }
+
+    resp <- input$resp.type
+    clinical.options <- names(DB$active@clinicals[[1]])
+    labels <- DB$active@clinicals[[1]][,clinical.options[1]]
+    labels <- levels(as.factor(labels))
+
+    opt$resp.type <- resp
+    if (resp == RESP.two.class) {
+      if (length(input$label.col) > 0) {
+        opt$response <- input$label.col
+        opt$select.group <- c(input$control.label, input$expr.label)
+        opt$ref.level <- input$control.label
+      } else {
+        opt$response <- clinical.options[1]
+        opt$select.group <- c(labels[1], labels[2])
+        opt$ref.level <- labels[1]
+      }
+    } else if (resp == RESP.multi.class) {
+      if (length(input$label.col) > 0) {
+        opt$response <- input$label.col
+        opt$select.group <- input$multi.class.col
+        opt$ref.level <- input$control.label
+      } else {
+        opt$response <- clinical.options[1]
+        opt$select.group <- labels
+        opt$ref.level <- labels[1]
+      }
+    } else if (resp == RESP.continuous) {
+      if (length(input$label.col) > 0) {
+        opt$response <- input$conti.col
+      } else {
+        opt$response <- clinical.options[1]
+      }
+    } else if (resp == RESP.survival) {
+      if (length(input$time.col) > 0 && length(input$indicator.col)) {
+        opt$response <- c(input$time.col, input$indicator.col)
+      } else {
+        opt$response <- c(clinical.options[1], clinical.options[2])
+      }
+    }
+
+    if (length(input$covariate) == 0 || input$covariate == "None") {
+    } else {
+      opt$covariate <- input$covariate
+    }
+
+    if (length(input$parametric) > 0)
+      opt$parametric <- (input$parametric == T)
+    if (length(input$tail) > 0)
+      opt$tail <- input$tail
+    if (length(input$nperm) == 0)
+      opt$nperm <- input$nperm
+
+    tmp <- opt
+    tmp$clin.data <- NULL
+    tmp$data <- NULL
+    print(tmp)
+    opt
+  }
+
   ##########################
   # Reactive Values        #
   ##########################
   DB <- reactiveValues(active=DB.load.active(db))
-  DE <- reactiveValues(result=NULL)
+  DE <- reactiveValues(result=NULL, summary=NULL)
 
   ##########################
   # Validation             #
@@ -22,20 +124,81 @@ meta_de_server <- function(input, output, session) {
   ##########################
   observeEvent(input$tabChange, {
     DB$active <- DB.load.active(db)
-    session$sendCustomMessage(type='initCollapse', message="")
+    DB$working.dir <- DB.load.working.dir(db)
   })
 
-  observeEvent(input$asymptotic.p, {
-    output$asym.option <- renderUI({
-      if (input$asymptotic.p == F) {
-        numericInput("meta_de-nperm", "number of permutation", value=100)
+  observeEvent(input$run, {
+    wait(session, "running meta DE, should be soon")
+    try({
+      if (input$meta.method == META.AW) {
+        DE$result <- posthoc.aw(do.call(MetaDE, getOption(input)))
+      } else {
+        DE$result <- do.call(MetaDE, getOption(input))
       }
-    })
+      DE$summary <- summary.meta(DE$result, input$meta.method)
+      dir.path <- paste(DB.load.working.dir(db), "Meta DE", sep="/")
+      if (!file.exists(dir.path)) dir.create(dir.path)
+      file.path <- paste(dir.path, "summary.csv", sep="/")
+      write.csv(DE$summary, file=file.path)
+      sendSuccessMessage(session, paste("summary file written to", file.path))
+      file.path <- paste(dir.path, "result.rds", sep="/")
+      saveRDS(DE$result, file=file.path)
+      sendSuccessMessage(session, paste("raw data written to", file.path), unique=T)
+    }, session)
+    done(session)
   })
 
-  observeEvent(input$meta.method, {
+  observeEvent(input$plot, {
+    outfile <- tempfile(fileext='.png')
+    height <- 800 * input$scale
+    width <- 400 * length(DB$active@datasets) * input$scale
+    wait(session, paste("Plotting result with scale:", input$scale))
+    try({
+      png(outfile, res=120, width=width, height=height)
+      heatmap.sig.genes(isolate(DE$result), meta.method=isolate(input$meta.method),
+                        fdr.cut=isolate(input$fdr.cut), color="GR")
+      dev.off()
+    }, session)
+    output$heatmap <- renderImage(
+      list(src=outfile, contentType='image/png', alt="heatmap",
+           width=width, height=height)
+    , deleteFile=TRUE)
+    done(session)
+  })
+
+  ##########################
+  # Render output/UI       #
+  ##########################
+  output$meta.type.opt <- renderUI({
+    meta.type <- input$meta.type
+    if (meta.type == META.TYPE.p) {
+      tagList(
+        uiOutput(ns("meta.p.opt")),
+        uiOutput(ns("meta.method.opt"))
+      )
+    } else if (meta.type == META.TYPE.effect) {
+      tagList(
+        selectizeInput(ns("meta.method"), "Meta Method", as.list(META.effect.all)),
+        uiOutput(ns("meta.method.opt"))
+      )
+    } else if (meta.type == META.TYPE.other) {
+      selectizeInput(ns("meta.method"), "Meta Method", as.list(META.other.all))
+    }
+  })
+
+  output$meta.p.opt <- renderUI({
+    if(input$meta.type == META.TYPE.p && length(input$advanced.method) > 0) {
+      if (input$advanced.method)
+        selectizeInput(ns("meta.method"), "Meta Method", as.list(META.p.all))
+      else
+        selectizeInput(ns("meta.method"), "Meta Method", as.list(META.p.core))
+    }
+  })
+
+  output$meta.method.opt <- renderUI({
     method <- input$meta.method
-    output$meta.method.option <- renderUI({
+    advanced <- input$advanced.method
+    if (length(method) > 0 && length(advanced) > 0 && advanced == T) {
       if (method == META.roP || method == META.roP.OC) {
         n <- length(DB$active@datasets)
         sliderInput(ns("rth"), "rth", min=1, max=n, value=1, step=1)
@@ -44,110 +207,38 @@ meta_de_server <- function(input, output, session) {
       } else if (method == META.REM) {
         selectInput(ns("REM.type"), "REM Type", REM.all)
       }
-    })
+    }
   })
 
-  observeEvent(input$run, {
+  output$ind.method.opt <- renderUI({
     study <- DB$active
-
-    ind.method <- unlist(lapply(1:length(study@datasets), function(index) {
-      tag.id <- paste("ind", index, sep="")
-      input[[tag.id]]
-    }))
-
-    resp <- input$resp.type
-    response <- ""
-    ref.level <- ""
-    select.group <- ""
-    if (resp == RESP.two.class) {
-      response <- input$label.col
-      select.group <- c(input$control.label, input$expr.label)
-      ref.level <- input$control.label
-    } else if (resp == RESP.multi.class) {
-      response <- input$label.col
-      select.group <- input$multi.class.col
-      ref.level <- input$control.label
-    } else if (resp == RESP.continuous) {
-      response <- input$conti.col
-    } else if (resp == RESP.survival) {
-      response <- c(input$time.col, input$indicator.col)
-    }
-
-    asymptotic.p <- input$asymptotic.p
-    if (length(asymptotic.p) == 0) asymptotic.p <- F
-    tail <- input$tail
-    if (length(tail) == 0) tail <- "abs"
-    nperm <- input$nperm
-    if (length(nperm) == 0) nperm <- 100
-
-    wait(session, "running meta DE, should be soon")
-    try({
-      DE$result <- MetaDE(
-        data=study@datasets,
-        clin.data=study@clinicals,
-        data.type=study@dtype,
-        resp.type=input$resp.type,
-        response=response,
-        covariate=NULL,
-        ind.method=ind.method,
-        meta.method=input$meta.method,
-        select.group=select.group,
-        ref.level=ref.level,
-        paired=rep(FALSE,length(study@datasets)),
-        rth=input$rth,
-        AW.type=input$AW.type,
-        REM.type=input$REM.type,
-        asymptotic.p=asymptotic.p,
-        nperm=nperm,
-        tail=tail
-      )
-    }, session)
-    output$summary <- DT::renderDataTable(DT::datatable({
-      summary.de <- summary.meta(DE$result, isolate(input$meta.method))
-      count <- sum(summary.de$FDR <= input$fdr.cut)
-      output$heatmap.info <- renderText({
-        paste(isolate(input$meta.method), "with", tail, "alternative hypothesis,",
-              count, "significant genes left after cut off.")
-      })
-      summary.de
-    }))
-    done(session)
-  })
-
-  observe({
-    if (!is.null(DE$result)) {
-      output$heatmap <- renderImage({
-        outfile <- tempfile(fileext='.png')
-        height <- 800 * input$scale
-        width <- 400 * length(DB$active@datasets) * input$scale
-        wait(session, paste("Plotting result with FDR",
-          input$fdr.cut, "and scale to", input$scale))
-        try({
-          png(outfile, res=120, width=width, height=height)
-          heatmap.sig.genes(isolate(DE$result), meta.method=isolate(input$meta.method),
-                            fdr.cut=isolate(input$fdr.cut), color="GR")
-          dev.off()
-        }, session)
-        done(session)
-        list(src=outfile, contentType='image/png', alt="heatmap",
-             width=width, height=height)
-      }, deleteFile=TRUE)
-    }
-  })
-
-  ##########################
-  # Render output/UI       #
-  ##########################
-  output$ind.method <- renderUI({
-    try({
-      study <- DB$active
+    if (!is.null(study)) {
       study.names <- names(study@datasets)
-      lapply(seq_along(study.names), function(index) {
-        tag.id <- ns(paste("ind", index, sep=""))
-        selectizeInput(tag.id, study.names[index], IND.all)
-      })
-    }, session)
+      if (input$meta.type == META.TYPE.p) {
+        bsCollapsePanel("Setting Individual Study Method",
+          lapply(seq_along(study.names), function(index) {
+            tag.id <- ns(paste("ind", index, sep=""))
+            selectizeInput(tag.id, study.names[index], IND.all)
+          }), style="primary"
+        )
+      } else if (input$meta.type == META.TYPE.effect) {
+        bsCollapsePanel("Setting Individual Study Paired Option",
+          lapply(seq_along(study.names), function(index) {
+            tag.id <- ns(paste("paired", index, sep=""))
+            radioButtons(tag.id, paste(study.names[index], "paired?"),
+                         c(Yes=T, No=F), F, inline=T)
+          }), style="primary"
+        )
+      }
+    }
   })
+
+  output$downloadCsv <- downloadHandler(
+    filename=function(){"metaDE.result.csv"},
+    content=function(file) {
+      write.csv(DE$summary, file=file)
+    }
+  )
 
   output$resp.type.option <- renderUI({
     try({
@@ -188,6 +279,43 @@ meta_de_server <- function(input, output, session) {
         )
       }
     }, session)
+  })
+
+  output$summary <- DT::renderDataTable(DT::datatable({
+    DE$summary
+  }))
+
+  output$geneLeft <- renderText({
+    if (!is.null(DE$summary)) {
+      count <- sum(DE$summary$FDR <= input$fdr.cut)
+      paste(count, "genes left after cut off")
+    }
+  })
+
+  output$para.opt <- renderUI({
+    if (input$parametric == F) {
+      numericInput("meta_de-nperm", "number of permutation", value=100)
+    }
+  })
+
+  output$covariate.opt <- renderUI({
+    clinical.options <- names(DB$active@clinicals[[1]])
+    selectInput(ns("covariate"), "Covariate:", c(None="None", clinical.options))
+  })
+
+  output$plot.opt <- renderUI({
+    if (!is.null(DE$result)) {
+      tagList(
+        fluidRow(
+          column(3, numericInput(ns("fdr.cut"), "FDR Cutoff", value=1e-9)),
+          column(3, textOutput(ns("geneLeft"), container=div)),
+          column(3, sliderInput(ns("scale"), "Image Size", value=1, min=0.5, max=4)),
+          column(3, actionButton(ns("plot"), "Plot DE Genes Heatmap",
+                      icon=icon("paint-brush"), class="btn-success btn-run lower-btn"))
+        ),
+        imageOutput(ns('heatmap'), height="100%")
+      )
+    }
   })
 
 }

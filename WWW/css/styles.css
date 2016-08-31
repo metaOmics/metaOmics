@@ -173,3 +173,18 @@ h4 {
    background-color: #89fb9d;
    border-color: #76d07e;
 }
+
+.messenger-message-inner {
+  word-wrap: break-word
+}
+
+.lower-btn {
+  margin-top: 25px;
+}
+
+#meta_path-pathwayLeft, #meta_de-geneLeft {
+  margin-top: 25px;
+  font-size: large;
+  padding: 5px;
+  background-color: rgba(225, 255, 111, 0.41);
+}

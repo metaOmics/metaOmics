@@ -3,11 +3,20 @@ navbar:
   title: "metaOmic Documentation"
   left:
     - text: "Home"
+      icon: fa-home
       href: index.Rmd
     - text: "File Organization"
+      icon: fa-file-code-o
       href: file.Rmd
-    - text: "helpers"
-      href: helpers.Rmd 
+    - text: "Helpers"
+      icon: fa-rocket
+      menu:
+        - text: "Informative"
+          icon: fa-comment
+          href: informativeHelper.Rmd
+        - text: "Exception Handling"
+          icon: fa-exclamation-circle
+          href: exceptionHelper.Rmd
     - text: "Database"
       href: databases.Rmd 
     - text: "Git"
