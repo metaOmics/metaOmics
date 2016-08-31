@@ -129,9 +129,13 @@ meta_de_server <- function(input, output, session) {
 
   observeEvent(input$run, {
     wait(session, "running meta DE, should be soon")
-      DE$result <- do.call(MetaDE, getOption(input))
     try({
-      DE$summary <- summary.meta(DE$result, isolate(input$meta.method))
+      if (input$meta.method == META.AW) {
+        DE$result <- posthoc.aw(do.call(MetaDE, getOption(input)))
+      } else {
+        DE$result <- do.call(MetaDE, getOption(input))
+      }
+      DE$summary <- summary.meta(DE$result, input$meta.method)
       dir.path <- paste(DB.load.working.dir(db), "Meta DE", sep="/")
       if (!file.exists(dir.path)) dir.create(dir.path)
       file.path <- paste(dir.path, "summary.csv", sep="/")
