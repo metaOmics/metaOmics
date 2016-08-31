@@ -106,10 +106,15 @@ meta_path_server <- function(input, output, session) {
     result <- MAPE$result
     q_cutoff <- input$q_cutoff
     wait(session, "Plotting consensus CDF and Delta area")
-    try({
+    tryCatch({
       MAPE.kappa_result = MAPE.Kappa(summary=result$summary, software=result$method,
 	pathway=result$pathway, max_k=20, q_cutoff=q_cutoff, output_dir=DB$working)
-    }, session)
+    }, error=function(error){
+      if(error$message == "Number of clusters 'k' must be in {1,2, .., n-1}; hence n >= 2")
+        sendErrorMessage(session, MSG.too.few.pathway)
+      else
+        sendErrorMessage(session, error$message)
+    })
 
     output$consensus <- renderImage({
       img.src <- paste(DB$working, "consensus021.png", sep="/")
