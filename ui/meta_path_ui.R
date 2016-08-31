@@ -12,8 +12,8 @@ meta_path_ui <- function(id, label = "meta path") {
         bsCollapse(id="meta_de-advanced",
           bsCollapsePanel("Advanced Options",
           tagList(
-            selectizeInput(ns('method'), "Software:", DE.METHOD.all),
             uiOutput(ns('method.opt')),
+            uiOutput(ns("mape.opt")),
             uiOutput(ns('stat.opt')),
             selectizeInput(ns('enrichment'), "Pathway Enrichment Method:", ENRICHMENT.all),
             uiOutput(ns('enrichment.opt')),

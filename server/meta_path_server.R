@@ -23,13 +23,18 @@ meta_path_server <- function(input, output, session) {
     for (pathway in input$pathway) {
       opt$pathway <- c(opt$pathway, get(pathway))
     }
-    opt$method      <- input$method
     opt$enrichment  <- input$enrichment
 
-    if (input$method == DE.METHOD.MAPE)
-      opt$stat <- input$stat
-    if (length(input$stat) > 0 && input$stat == MAPE.STAT.rth)
-      opt$rth.value <- input$rth.value
+    if (length(input$method) > 0) {
+      opt$method      <- input$method
+      if (input$method == MAPE.MAPE) {
+	opt$stat <- input$stat
+	if (input$stat == MAPE.STAT.rth)
+	  opt$rth.value <- input$rth.value
+      }
+    } else if (length(input$useDE) == 0 || input$useDE == F) {
+      opt$method <- MAPE.CPI
+    }
 
     if (input$enrichment == ENRICHMENT.KS) {
       opt$permute  <- input$permute
@@ -46,6 +51,11 @@ meta_path_server <- function(input, output, session) {
 
     opt$size.min <- input$size.min
     opt$size.max <- input$size.max
+    tmp <- opt
+    tmp$arraydata <- NULL
+    tmp$clinical.data <- NULL
+    tmp$pathway <- NULL
+    print(tmp)
 
     opt
   }
@@ -150,7 +160,13 @@ meta_path_server <- function(input, output, session) {
   })
 
   output$method.opt <- renderUI({
-    if (input$method == DE.METHOD.MAPE) {
+    if (length(input$useDE) == 0 || input$useDE == F) {
+      selectizeInput(ns('method'), "Software:", MAPE.all)
+    }
+  })
+
+  output$mape.opt <- renderUI({
+    if (length(input$method) > 0 && input$method == MAPE.MAPE) {
       selectizeInput(ns('stat'), "meta p-value method:", MAPE.STAT.all)
     }
   })
@@ -190,10 +206,23 @@ meta_path_server <- function(input, output, session) {
     if (!is.null(MAPE$result))
       fluidRow(
         column(4, numericInput(ns("q_cutoff"), "FDR cut off", 0.1)),
-        column(8, actionButton(ns('plot'), 'Plot (consensus CDF / Delta area)', 
+        column(4, textOutput(ns("pathwayLeft"), container=div)),
+        column(4, actionButton(ns('plot'), 'Plot (consensus CDF / Delta area)', 
                     icon=icon("paint-brush"), class="btn-success btn-run lower-btn")
         )
       )
+  })
+  
+  output$pathwayLeft <- renderText({
+    if (!is.null(MAPE$result)) {
+      left <- 0
+      if (MAPE$result$method == MAPE.MAPE) {
+        left <- sum(MAPE$result$summary["MAPE_I"] <= input$q_cutoff)
+      } else {
+        left <- sum(MAPE$result$summary["q_value_meta"] <= input$q_cutoff)
+      }
+      paste(left, "pathways left after cutoff")
+    }
   })
 
 }

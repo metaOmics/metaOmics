@@ -159,10 +159,10 @@ names(GENESET.all) <- c(
 "PITA"
 )
 
-DE.METHOD.CPI <- "CPI"
-DE.METHOD.MAPE <- "MAPE"
-DE.METHOD.all <- c(DE.METHOD.CPI, DE.METHOD.MAPE)
-names(DE.METHOD.all) <- c("CPI (Comparative Pathway Integrator)", "MAPE (Meta Analysis Pathway Enrichment)")
+MAPE.CPI <- "CPI"
+MAPE.MAPE <- "MAPE"
+MAPE.all <- c(MAPE.CPI, MAPE.MAPE)
+names(MAPE.all) <- c("CPI (Comparative Pathway Integrator)", "MAPE (Meta Analysis Pathway Enrichment)")
 
 ENRICHMENT.KS <- "KS"
 ENRICHMENT.fisher <- "Fisher's exact"
