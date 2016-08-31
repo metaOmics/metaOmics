@@ -34,7 +34,7 @@ meta_path_server <- function(input, output, session) {
     if (input$enrichment == ENRICHMENT.KS) {
       opt$permute  <- input$permute
     } else if (input$enrichment == ENRICHMENT.fisher) {
-      opt$Degene.number <- input$Degene.number
+      opt$DEgene.number <- input$DEgene.number
     }
 
     if (length(input$permute) > 0 && input$permute == T && 
@@ -166,7 +166,7 @@ meta_path_server <- function(input, output, session) {
       radioButtons(ns("permute"), "Permutation to get p-value",
                    c(YES=T, No=F), F)
     } else if (input$enrichment == ENRICHMENT.fisher) {
-      numericInput(ns("Degene.number"), "number of DE genes", NULL)
+      numericInput(ns("DEgene.number"), "number of DE genes", NULL)
     }
   })
 
