@@ -6,7 +6,8 @@ meta_de_server <- function(input, output, session) {
   getOption <- function(input) {
 
     study <- DB$active
-    opt <- list(covariate=NULL, rth=NULL, select.group=NULL , ref.level=NULL, REM.type=NULL)
+    n <- length(study@datasets)
+    opt <- list(ind.method=rep(IND.limma, n), covariate=NULL, rth=NULL, select.group=NULL , ref.level=NULL, REM.type=NULL)
 
     opt$data <- study@datasets
     opt$clin.data <- study@clinicals
@@ -25,15 +26,23 @@ meta_de_server <- function(input, output, session) {
         opt$REM.type <- REM.HO
       else
         opt$REM.type <- input$REM.type
-      opt$paired <- rep(FALSE,length(study@datasets))
-    } else if (method == META.FEM) {
-      opt$paired <- rep(FALSE,length(study@datasets))
     }
 
     if (input$meta.type == META.TYPE.p) {
-      opt$ind.method <- unlist(lapply(1:length(study@datasets), function(index) {
+      opt$ind.method <- unlist(lapply(1:n, function(index) {
         tag.id <- paste("ind", index, sep="")
-        input[[tag.id]]
+        if (length(input[[tag.id]]) == 0)
+          IND.limma
+        else
+          input[[tag.id]]
+      }))
+    } else if (input$meta.type == META.TYPE.effect) {
+      opt$paired <- unlist(lapply(1:n, function(index) {
+        tag.id <- paste("paired", index, sep="")
+        if (length(input[[tag.id]]) == 0)
+          F
+        else
+          input[[tag.id]] == T
       }))
     }
 
@@ -83,7 +92,7 @@ meta_de_server <- function(input, output, session) {
     }
 
     if (length(input$parametric) > 0)
-      opt$parametric <- input$parametric
+      opt$parametric <- (input$parametric == T)
     if (length(input$tail) > 0)
       opt$tail <- input$tail
     if (length(input$nperm) == 0)
@@ -120,11 +129,9 @@ meta_de_server <- function(input, output, session) {
 
   observeEvent(input$run, {
     wait(session, "running meta DE, should be soon")
-    try({
       DE$result <- do.call(MetaDE, getOption(input))
-      cat(file=stderr(), "1\n")
+    try({
       DE$summary <- summary.meta(DE$result, isolate(input$meta.method))
-      cat(file=stderr(), "2\n")
       dir.path <- paste(DB.load.working.dir(db), "Meta DE", sep="/")
       if (!file.exists(dir.path)) dir.create(dir.path)
       file.path <- paste(dir.path, "summary.csv", sep="/")
@@ -204,14 +211,24 @@ meta_de_server <- function(input, output, session) {
 
   output$ind.method.opt <- renderUI({
     study <- DB$active
-    if (input$meta.type == META.TYPE.p && !is.null(study)) {
+    if (!is.null(study)) {
       study.names <- names(study@datasets)
-      bsCollapsePanel("Setting Individual Study Method",
-        lapply(seq_along(study.names), function(index) {
-          tag.id <- ns(paste("ind", index, sep=""))
-          selectizeInput(tag.id, study.names[index], IND.all)
-        }), style="primary"
-      )
+      if (input$meta.type == META.TYPE.p) {
+        bsCollapsePanel("Setting Individual Study Method",
+          lapply(seq_along(study.names), function(index) {
+            tag.id <- ns(paste("ind", index, sep=""))
+            selectizeInput(tag.id, study.names[index], IND.all)
+          }), style="primary"
+        )
+      } else if (input$meta.type == META.TYPE.effect) {
+        bsCollapsePanel("Setting Individual Study Paired Option",
+          lapply(seq_along(study.names), function(index) {
+            tag.id <- ns(paste("paired", index, sep=""))
+            radioButtons(tag.id, paste(study.names[index], "paired?"),
+                         c(Yes=T, No=F), F, inline=T)
+          }), style="primary"
+        )
+      }
     }
   })
 

@@ -71,8 +71,9 @@ IND.limmaVoom <- "limmaVoom"
 IND.edgeR     <- "edgeR"
 IND.DESeq2    <- "DESeq2"
 IND.pearsonr  <- "pearsonr"
-IND.all <- c(IND.limma, IND.sam, IND.limmaVoom, IND.edgeR, IND.DESeq2, IND.pearsonr)
-names(IND.all) <- IND.all
+IND.spearmanr <- "spearmanr"
+IND.all <- c(IND.limma, IND.sam, IND.limmaVoom, IND.edgeR, IND.DESeq2, IND.pearsonr, IND.spearmanr)
+names(IND.all) <- c("LIMMA (Linear Model for Microarrray data)", "SAM (Significance Analysis of Microarrays)", "voom method in limma", "edgeR", "DESeq2", "pearson correlation", "spearman correlation")
 
 TAIL.abs  <- "abs"
 TAIL.high <- "high"
@@ -102,7 +103,7 @@ REM.SJ  <- "SJ"
 REM.EB  <- "EB"
 REM.RML <- "RML"
 REM.all <- c(REM.HO, REM.HS, REM.DL, REM.SJ, REM.EB, REM.RML)
-names(REM.all) <- c("HO", "HS", "DL", "SJ", "EB", "RML")
+names(REM.all) <- c("HO (Hedges-Olkin)", "HS (Hunter-Schmidt)", "DL (DerSimonian-Laird)", "SJ (Sidik-Jonkman)", "Empirical Bayes", "Restricted Maximum Likelihood")
 
 GENESET.KEGG        <- "KEGG.genesets"
 GENESET.GOBP        <- "GOBP.genesets"

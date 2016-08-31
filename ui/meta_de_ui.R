@@ -5,13 +5,11 @@ meta_de_ui <- function(id, label = "meta DE") {
       sidebarPanel(
         selectizeInput(ns("meta.type"), "Meta Method Type", as.list(META.TYPE.all)),
         uiOutput(ns("meta.type.opt")),
-        uiOutput(ns("ind.method.opt")),
-        bsCollapse(id="meta_de-opts",
-          bsCollapsePanel("Response Type",
-            selectizeInput(ns("resp.type"), "", as.list(RESP.all)),
-            uiOutput(ns("resp.type.option")), style="primary"
-          )
+        bsCollapsePanel("Response Type",
+          selectizeInput(ns("resp.type"), "", as.list(RESP.all)),
+          uiOutput(ns("resp.type.option")), style="primary"
         ),
+        uiOutput(ns("ind.method.opt")),
 	tags$hr(),
         bsCollapse(id="meta_de-advanced",
           bsCollapsePanel("Advanced Options",
