@@ -7,7 +7,7 @@ meta_de_server <- function(input, output, session) {
   # Reactive Values        #
   ##########################
   DB <- reactiveValues(active=DB.load.active(db))
-  DE <- reactiveValues(result=NULL)
+  DE <- reactiveValues(result=NULL, summary=NULL)
 
   ##########################
   # Validation             #
@@ -22,6 +22,7 @@ meta_de_server <- function(input, output, session) {
   ##########################
   observeEvent(input$tabChange, {
     DB$active <- DB.load.active(db)
+    DB$working.dir <- DB.load.working.dir(db)
     session$sendCustomMessage(type='initCollapse', message="")
   })
 
@@ -101,17 +102,33 @@ meta_de_server <- function(input, output, session) {
         nperm=nperm,
         tail=tail
       )
+      cat(file=stderr(), "1\n")
+      DE$summary <- summary.meta(DE$result, isolate(input$meta.method))
+      cat(file=stderr(), "2\n")
+      dir.path <- paste(DB.load.working.dir(db), "Meta DE", sep="/")
+      if (!file.exists(dir.path)) dir.create(dir.path)
+      file.path <- paste(dir.path, "summary.csv", sep="/")
+      write.csv(DE$summary, file=file.path)
+      sendSuccessMessage(session, paste("summary file written to", file.path))
+      file.path <- paste(dir.path, "result.rds", sep="/")
+      saveRDS(DE$result, file=file.path)
+      sendSuccessMessage(session, paste("raw data written to", file.path), unique=T)
     }, session)
-    output$summary <- DT::renderDataTable(DT::datatable({
-      summary.de <- summary.meta(DE$result, isolate(input$meta.method))
-      count <- sum(summary.de$FDR <= input$fdr.cut)
-      output$heatmap.info <- renderText({
-        paste(isolate(input$meta.method), "with", tail, "alternative hypothesis,",
-              count, "significant genes left after cut off.")
-      })
-      summary.de
-    }))
     done(session)
+  })
+
+  output$summary <- DT::renderDataTable(DT::datatable({
+    DE$summary
+  }))
+
+  output$heatmap.info <- renderText({
+    count <- sum(DE$summary$FDR <= input$fdr.cut)
+    if (!is.null(DE$result)) {
+      tail <- input$tail
+      if (length(tail) == 0) tail <- "abs"
+      paste(isolate(input$meta.method), "with", tail, "alternative hypothesis,",
+            count, "significant genes left after cut off.")
+    }
   })
 
   observe({
@@ -148,6 +165,13 @@ meta_de_server <- function(input, output, session) {
       })
     }, session)
   })
+
+  output$downloadCsv <- downloadHandler(
+    filename=function(){"metaDE.result.csv"},
+    content=function(file) {
+      write.csv(DE$summary, file=file)
+    }
+  )
 
   output$resp.type.option <- renderUI({
     try({
@@ -189,5 +213,4 @@ meta_de_server <- function(input, output, session) {
       }
     }, session)
   })
-
 }

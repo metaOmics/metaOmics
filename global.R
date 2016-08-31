@@ -3,7 +3,7 @@ GLOBAL.network <- T
 tryCatch({
   source("https://bioconductor.org/biocLite.R")
 }, error=function(error){
-  GLOBAL.network <- F
+  GLOBAL.network <<- F
 })
 
 if(GLOBAL.network) {

@@ -28,27 +28,26 @@ setting_server <- function(input, output, session) {
     })
 
     observeEvent(input[[install.id]], {
-      if (!GLOBAL.network) {
-	stop(MSG.no.network)
-      }
-      for (package in cran.dep) {
-        if(!(package %in% PACKAGES$installed)) {
-	  sendInfoMessage(session, paste("installing", package, "from CRAN"))
-          install.packages(package, repos='http://cran.us.r-project.org')
+      try({
+        for (package in cran.dep) {
+          if(!(package %in% PACKAGES$installed)) {
+            sendInfoMessage(session, paste("installing", package, "from CRAN"))
+            install.packages(package, repos='http://cran.us.r-project.org')
+          }
         }
-      }
-      for(package in bioconductor.dep) {
-        if(!(package %in% PACKAGES$installed)) {
-	  sendInfoMessage(session, paste("installing", package, "from Bioconductor"))
-          biocLite(package, ask=F, suppressUpdates=T, suppressAutoUpdate=T)
+        for(package in bioconductor.dep) {
+          if(!(package %in% PACKAGES$installed)) {
+            sendInfoMessage(session, paste("installing", package, "from Bioconductor"))
+            biocLite(package, ask=F, suppressUpdates=T, suppressAutoUpdate=T)
+          }
         }
-      }
-      sendInfoMessage(session,paste("installing", pkg, "from Github"))
-      devtools::install_github(paste("metaOmic", pkg, sep="/"))
-      
-      PACKAGES$installed <- installed.packages()[,"Package"]
-      sendSuccessMessage(session, paste(pkg, "installed"))
-      sendSuccessMessage(session, MSG.installed, unique=T)
+        sendInfoMessage(session,paste("installing", pkg, "from Github"))
+        devtools::install_github(paste("metaOmic", pkg, sep="/"))
+        
+        PACKAGES$installed <- installed.packages()[,"Package"]
+        sendSuccessMessage(session, paste(pkg, "installed"))
+        sendSuccessMessage(session, MSG.installed, unique=T)
+      }, session)
     })
   }
 
@@ -119,7 +118,9 @@ setting_server <- function(input, output, session) {
   )
 
   check.pkg(TOOLSET.clust, 'Meta Clust', cran.dep=c("cluster"))
-  check.pkg(TOOLSET.path, 'Meta PATH', supported=F)
+  check.pkg(TOOLSET.path, 'Meta PATH',
+	    cran.dep=c("gplots", "ggplot2", "shape"),
+	    bioconductor.dep=c("Biobase", "GSEABase", "genefilter", "impute", "ConsensusClusterPlus", "irr", "cluster", "AnnotationDbi", "Rgraphviz"))
   check.pkg(TOOLSET.pca, 'Meta PCA', supported=F)
   check.pkg(TOOLSET.ktsp, 'Meta KTSP', supported=F)
 
