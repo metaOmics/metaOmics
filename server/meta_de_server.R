@@ -3,6 +3,99 @@ meta_de_server <- function(input, output, session) {
 
   ns <- NS("meta_de")
 
+  getOption <- function(input) {
+
+    study <- DB$active
+    opt <- list(covariate=NULL, rth=NULL, select.group=NULL , ref.level=NULL, REM.type=NULL)
+
+    opt$data <- study@datasets
+    opt$clin.data <- study@clinicals
+    opt$data.type <- study@dtype
+    method <- input$meta.method
+    opt$meta.method <- method
+    if (method == META.roP || method == META.roP.OC) {
+      opt$rth <- input$rth
+    } else if (method == META.AW) {
+      if (length(input$AW.type) == 0)
+        opt$AW.type <- AW.original
+      else
+        opt$AW.type <- input$AW.type
+    } else if (method == META.REM) {
+      if (length(input$REM.type) == 0)
+        opt$REM.type <- REM.HO
+      else
+        opt$REM.type <- input$REM.type
+      opt$paired <- rep(FALSE,length(study@datasets))
+    } else if (method == META.FEM) {
+      opt$paired <- rep(FALSE,length(study@datasets))
+    }
+
+    if (input$meta.type == META.TYPE.p) {
+      opt$ind.method <- unlist(lapply(1:length(study@datasets), function(index) {
+        tag.id <- paste("ind", index, sep="")
+        input[[tag.id]]
+      }))
+    }
+
+    resp <- input$resp.type
+    clinical.options <- names(DB$active@clinicals[[1]])
+    labels <- DB$active@clinicals[[1]][,clinical.options[1]]
+    labels <- levels(as.factor(labels))
+
+    opt$resp.type <- resp
+    if (resp == RESP.two.class) {
+      if (length(input$label.col) > 0) {
+        opt$response <- input$label.col
+        opt$select.group <- c(input$control.label, input$expr.label)
+        opt$ref.level <- input$control.label
+      } else {
+        opt$response <- clinical.options[1]
+        opt$select.group <- c(labels[1], labels[2])
+        opt$ref.level <- labels[1]
+      }
+    } else if (resp == RESP.multi.class) {
+      if (length(input$label.col) > 0) {
+        opt$response <- input$label.col
+        opt$select.group <- input$multi.class.col
+        opt$ref.level <- input$control.label
+      } else {
+        opt$response <- clinical.options[1]
+        opt$select.group <- labels
+        opt$ref.level <- labels[1]
+      }
+    } else if (resp == RESP.continuous) {
+      if (length(input$label.col) > 0) {
+        opt$response <- input$conti.col
+      } else {
+        opt$response <- clinical.options[1]
+      }
+    } else if (resp == RESP.survival) {
+      if (length(input$time.col) > 0 && length(input$indicator.col)) {
+        opt$response <- c(input$time.col, input$indicator.col)
+      } else {
+        opt$response <- c(clinical.options[1], clinical.options[2])
+      }
+    }
+
+    if (length(input$covariate) == 0 || input$covariate == "None") {
+    } else {
+      opt$covariate <- input$covariate
+    }
+
+    if (length(input$parametric) > 0)
+      opt$parametric <- input$parametric
+    if (length(input$tail) > 0)
+      opt$tail <- input$tail
+    if (length(input$nperm) == 0)
+      opt$nperm <- input$nperm
+
+    tmp <- opt
+    tmp$clin.data <- NULL
+    tmp$data <- NULL
+    print(tmp)
+    opt
+  }
+
   ##########################
   # Reactive Values        #
   ##########################
@@ -23,85 +116,12 @@ meta_de_server <- function(input, output, session) {
   observeEvent(input$tabChange, {
     DB$active <- DB.load.active(db)
     DB$working.dir <- DB.load.working.dir(db)
-    session$sendCustomMessage(type='initCollapse', message="")
-  })
-
-  observeEvent(input$asymptotic.p, {
-    output$asym.option <- renderUI({
-      if (input$asymptotic.p == F) {
-        numericInput("meta_de-nperm", "number of permutation", value=100)
-      }
-    })
-  })
-
-  observeEvent(input$meta.method, {
-    method <- input$meta.method
-    output$meta.method.option <- renderUI({
-      if (method == META.roP || method == META.roP.OC) {
-        n <- length(DB$active@datasets)
-        sliderInput(ns("rth"), "rth", min=1, max=n, value=1, step=1)
-      } else if (method == META.AW) {
-        selectInput(ns("AW.type"), "AW Type", AW.all)
-      } else if (method == META.REM) {
-        selectInput(ns("REM.type"), "REM Type", REM.all)
-      }
-    })
   })
 
   observeEvent(input$run, {
-    study <- DB$active
-
-    ind.method <- unlist(lapply(1:length(study@datasets), function(index) {
-      tag.id <- paste("ind", index, sep="")
-      input[[tag.id]]
-    }))
-
-    resp <- input$resp.type
-    response <- ""
-    ref.level <- ""
-    select.group <- ""
-    if (resp == RESP.two.class) {
-      response <- input$label.col
-      select.group <- c(input$control.label, input$expr.label)
-      ref.level <- input$control.label
-    } else if (resp == RESP.multi.class) {
-      response <- input$label.col
-      select.group <- input$multi.class.col
-      ref.level <- input$control.label
-    } else if (resp == RESP.continuous) {
-      response <- input$conti.col
-    } else if (resp == RESP.survival) {
-      response <- c(input$time.col, input$indicator.col)
-    }
-
-    asymptotic.p <- input$asymptotic.p
-    if (length(asymptotic.p) == 0) asymptotic.p <- F
-    tail <- input$tail
-    if (length(tail) == 0) tail <- "abs"
-    nperm <- input$nperm
-    if (length(nperm) == 0) nperm <- 100
-
     wait(session, "running meta DE, should be soon")
     try({
-      DE$result <- MetaDE(
-        data=study@datasets,
-        clin.data=study@clinicals,
-        data.type=study@dtype,
-        resp.type=input$resp.type,
-        response=response,
-        covariate=NULL,
-        ind.method=ind.method,
-        meta.method=input$meta.method,
-        select.group=select.group,
-        ref.level=ref.level,
-        paired=rep(FALSE,length(study@datasets)),
-        rth=input$rth,
-        AW.type=input$AW.type,
-        REM.type=input$REM.type,
-        asymptotic.p=asymptotic.p,
-        nperm=nperm,
-        tail=tail
-      )
+      DE$result <- do.call(MetaDE, getOption(input))
       cat(file=stderr(), "1\n")
       DE$summary <- summary.meta(DE$result, isolate(input$meta.method))
       cat(file=stderr(), "2\n")
@@ -115,20 +135,6 @@ meta_de_server <- function(input, output, session) {
       sendSuccessMessage(session, paste("raw data written to", file.path), unique=T)
     }, session)
     done(session)
-  })
-
-  output$summary <- DT::renderDataTable(DT::datatable({
-    DE$summary
-  }))
-
-  output$heatmap.info <- renderText({
-    count <- sum(DE$summary$FDR <= input$fdr.cut)
-    if (!is.null(DE$result)) {
-      tail <- input$tail
-      if (length(tail) == 0) tail <- "abs"
-      paste(isolate(input$meta.method), "with", tail, "alternative hypothesis,",
-            count, "significant genes left after cut off.")
-    }
   })
 
   observe({
@@ -155,15 +161,58 @@ meta_de_server <- function(input, output, session) {
   ##########################
   # Render output/UI       #
   ##########################
-  output$ind.method <- renderUI({
-    try({
-      study <- DB$active
+  output$meta.type.opt <- renderUI({
+    meta.type <- input$meta.type
+    if (meta.type == META.TYPE.p) {
+      tagList(
+        uiOutput(ns("meta.p.opt")),
+        uiOutput(ns("meta.method.opt"))
+      )
+    } else if (meta.type == META.TYPE.effect) {
+      tagList(
+        selectizeInput(ns("meta.method"), "Meta Method", as.list(META.effect.all)),
+        uiOutput(ns("meta.method.opt"))
+      )
+    } else if (meta.type == META.TYPE.other) {
+      selectizeInput(ns("meta.method"), "Meta Method", as.list(META.other.all))
+    }
+  })
+
+  output$meta.p.opt <- renderUI({
+    if(input$meta.type == META.TYPE.p && length(input$advanced.method) > 0) {
+      if (input$advanced.method)
+        selectizeInput(ns("meta.method"), "Meta Method", as.list(META.p.all))
+      else
+        selectizeInput(ns("meta.method"), "Meta Method", as.list(META.p.core))
+    }
+  })
+
+  output$meta.method.opt <- renderUI({
+    method <- input$meta.method
+    advanced <- input$advanced.method
+    if (length(method) > 0 && length(advanced) > 0 && advanced == T) {
+      if (method == META.roP || method == META.roP.OC) {
+        n <- length(DB$active@datasets)
+        sliderInput(ns("rth"), "rth", min=1, max=n, value=1, step=1)
+      } else if (method == META.AW) {
+        selectInput(ns("AW.type"), "AW Type", AW.all)
+      } else if (method == META.REM) {
+        selectInput(ns("REM.type"), "REM Type", REM.all)
+      }
+    }
+  })
+
+  output$ind.method.opt <- renderUI({
+    study <- DB$active
+    if (input$meta.type == META.TYPE.p && !is.null(study)) {
       study.names <- names(study@datasets)
-      lapply(seq_along(study.names), function(index) {
-        tag.id <- ns(paste("ind", index, sep=""))
-        selectizeInput(tag.id, study.names[index], IND.all)
-      })
-    }, session)
+      bsCollapsePanel("Setting Individual Study Method",
+        lapply(seq_along(study.names), function(index) {
+          tag.id <- ns(paste("ind", index, sep=""))
+          selectizeInput(tag.id, study.names[index], IND.all)
+        }), style="primary"
+      )
+    }
   })
 
   output$downloadCsv <- downloadHandler(
@@ -213,4 +262,30 @@ meta_de_server <- function(input, output, session) {
       }
     }, session)
   })
+
+  output$summary <- DT::renderDataTable(DT::datatable({
+    DE$summary
+  }))
+
+  output$heatmap.info <- renderText({
+    count <- sum(DE$summary$FDR <= input$fdr.cut)
+    if (!is.null(DE$result)) {
+      tail <- input$tail
+      if (length(tail) == 0) tail <- "abs"
+      paste(isolate(input$meta.method), "with", tail, "alternative hypothesis,",
+            count, "significant genes left after cut off.")
+    }
+  })
+
+  output$para.opt <- renderUI({
+    if (input$parametric == F) {
+      numericInput("meta_de-nperm", "number of permutation", value=100)
+    }
+  })
+
+  output$covariate.opt <- renderUI({
+    clinical.options <- names(DB$active@clinicals[[1]])
+    selectInput(ns("covariate"), "Covariate:", c(None="None", clinical.options))
+  })
+
 }

@@ -16,6 +16,12 @@ STUDY.expression.upload = "uploadExpression"
 STUDY.clinical.upload   = "uploadClinical"
 STUDY.select.from.db    = "selectStudy"
 
+META.TYPE.p <- "p"
+META.TYPE.effect <- "effect"
+META.TYPE.other <- "other"
+META.TYPE.all <- c(META.TYPE.p, META.TYPE.effect, META.TYPE.other)
+names(META.TYPE.all) <- c("Combine P-Value", "Combine Effect Size", "Others")
+
 META.maxP        <- "maxP"
 META.maxP.OC     <- "maxP.OC"
 META.minP        <- "minP"
@@ -54,6 +60,11 @@ names(META.all) <- c(
   "Rank Product"
 )
 
+META.p.core <- META.all[c(5, 7)]
+META.p.all <- META.all[c(5, 7, 6, 1, 2, 3, 4, 8, 9, 10, 11)]
+META.effect.all <- META.all[c(15, 16)]
+META.other.all <- META.all[c(12, 13, 14, 17)]
+
 IND.limma     <- "limma"
 IND.sam       <- "sam"
 IND.limmaVoom <- "limmaVoom"
@@ -84,14 +95,14 @@ AW.all <- c(AW.original, AW.unconditional, AW.conditional)
 names(AW.all) <- c("Original", "Conditional", "Un-conditional")
 
 REM.type = c("HS","HO", "DL", "SJ", "EB", "RML" )
-REM.HS  <- "HS"
 REM.HO  <- "HO"
+REM.HS  <- "HS"
 REM.DL  <- "DL"
 REM.SJ  <- "SJ"
 REM.EB  <- "EB"
 REM.RML <- "RML"
-REM.all <- c(REM.HS, REM.HO, REM.DL, REM.SJ, REM.EB, REM.RML)
-names(REM.all) <- c("HS", "HO", "DL", "SJ", "EB", "RML")
+REM.all <- c(REM.HO, REM.HS, REM.DL, REM.SJ, REM.EB, REM.RML)
+names(REM.all) <- c("HO", "HS", "DL", "SJ", "EB", "RML")
 
 GENESET.KEGG        <- "KEGG.genesets"
 GENESET.GOBP        <- "GOBP.genesets"

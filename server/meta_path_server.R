@@ -189,9 +189,9 @@ meta_path_server <- function(input, output, session) {
   output$heatmap.opt <- renderUI({
     if (!is.null(MAPE$result))
       fluidRow(
-        column(6, numericInput(ns("q_cutoff"), "FDR cut off", 0.1)),
-        column(6, actionButton(ns('plot'), 'Plot (consensus CDF / Delta area)', 
-                               icon=icon("rocket"), class="btn-success btn-run")
+        column(4, numericInput(ns("q_cutoff"), "FDR cut off", 0.1)),
+        column(8, actionButton(ns('plot'), 'Plot (consensus CDF / Delta area)', 
+                    icon=icon("paint-brush"), class="btn-success btn-run lower-btn")
         )
       )
   })

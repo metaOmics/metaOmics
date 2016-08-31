@@ -177,3 +177,7 @@ h4 {
 .messenger-message-inner {
   word-wrap: break-word
 }
+
+.lower-btn {
+  margin-top: 25px;
+}

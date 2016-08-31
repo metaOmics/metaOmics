@@ -3,14 +3,10 @@ meta_de_ui <- function(id, label = "meta DE") {
   tabPanel("Meta DE", value=id,
     sidebarLayout(
       sidebarPanel(
-        bsCollapse(id="meta_de-opts", multiple=TRUE,
-          bsCollapsePanel("Setting Individual Study Method",
-            uiOutput(ns("ind.method")), style="primary"
-          ),
-          bsCollapsePanel("Meta Method",
-            selectizeInput(ns("meta.method"), "", as.list(META.all)),
-            uiOutput(ns("meta.method.option")), style="primary"
-          ),
+        selectizeInput(ns("meta.type"), "Meta Method Type", as.list(META.TYPE.all)),
+        uiOutput(ns("meta.type.opt")),
+        uiOutput(ns("ind.method.opt")),
+        bsCollapse(id="meta_de-opts",
           bsCollapsePanel("Response Type",
             selectizeInput(ns("resp.type"), "", as.list(RESP.all)),
             uiOutput(ns("resp.type.option")), style="primary"
@@ -20,10 +16,12 @@ meta_de_ui <- function(id, label = "meta DE") {
         bsCollapse(id="meta_de-advanced",
           bsCollapsePanel("Advanced Options",
             tagList(
-              radioButtons(ns("asymptotic.p"), 'Asymptotic P', inline=T,
-                c(No=F, Yes=T), F
-              ),
-              uiOutput(ns("asym.option")),
+              radioButtons(ns("advanced.method"), "Use complete options",
+                           c(Yes=T, No=F), F, inline=T),
+              radioButtons(ns("parametric"), 'Parametric', inline=T,
+                c(No=F, Yes=T), F),
+              uiOutput(ns("para.opt")),
+              uiOutput(ns("covariate.opt")),
               selectizeInput(ns("tail"), "Alternative Hypothesis", TAIL.all)
             ), style="info"
           )
