@@ -53,7 +53,7 @@ meta_path_server <- function(input, output, session) {
   ##########################
   # Reactive Values        #
   ##########################
-  DB <- reactiveValues(active=DB.load.active(db))
+  DB <- reactiveValues(active=DB.load.active(db), working=NULL)
   DE <- reactiveValues(result=NULL)
   MAPE <- reactiveValues(result=NULL)
 
@@ -70,6 +70,7 @@ meta_path_server <- function(input, output, session) {
   ##########################
   observeEvent(input$tabChange, {
     DB$active <- DB.load.active(db)
+    DB$working <- paste(DB.load.working.dir(db), "Meta PATH", sep="/")
     tryCatch({
       file.path <- paste(DB.load.working.dir(db), "Meta DE", "result.rds", sep="/")
       DE$result <- readRDS(file.path)
@@ -83,8 +84,33 @@ meta_path_server <- function(input, output, session) {
     try({
       wait(session, "performing Meta Path Analysis")
       MAPE$result <- do.call(MAPE2.0, getOption(input))
+      file.path <- paste(DB$working, "result.rds", sep="/")
+      saveRDS(MAPE$result, file=file.path)
+      sendSuccessMessage(session, paste("result raw data written to", file.path))
       done(session)
     }, session)
+  })
+
+  observeEvent(input$plot, {
+
+    result <- MAPE$result
+    q_cutoff <- input$q_cutoff
+    wait(session, "Plotting consensus CDF and Delta area")
+    try({
+      MAPE.kappa_result = MAPE.Kappa(summary=result$summary, software=result$method,
+	pathway=result$pathway, max_k=20, q_cutoff=q_cutoff, output_dir=DB$working)
+    }, session)
+
+    output$consensus <- renderImage({
+      img.src <- paste(DB$working, "consensus021.png", sep="/")
+      list(src=img.src, contentType='image/png', alt="consensus plot")
+    })
+
+    output$delta <- renderImage({
+      img.src <- paste(DB$working, "consensus022.png", sep="/")
+      list(src=img.src, contentType='image/png', alt="delta area plot")
+    })
+    done(session)
   })
 
   ##########################
@@ -159,4 +185,15 @@ meta_path_server <- function(input, output, session) {
     if (!is.null(MAPE$result))
       MAPE$result$summary
   }))
+
+  output$heatmap.opt <- renderUI({
+    if (!is.null(MAPE$result))
+      fluidRow(
+        column(6, numericInput(ns("q_cutoff"), "FDR cut off", 0.1)),
+        column(6, actionButton(ns('plot'), 'Plot (consensus CDF / Delta area)', 
+                               icon=icon("rocket"), class="btn-success btn-run")
+        )
+      )
+  })
+
 }

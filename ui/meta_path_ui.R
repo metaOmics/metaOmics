@@ -26,9 +26,12 @@ meta_path_ui <- function(id, label = "meta path") {
         actionButton(ns('run'), 'Run', icon=icon("rocket"), class="btn-success btn-run")
       ),
       mainPanel(
-        fluidRow(
-          column(6, numericInput(ns("q_cutoff"), "FDR cut off", NULL)),
-          column(6, numericInput(ns("Num_Clusters"), "number of clusters", NULL))
+	uiOutput(ns('heatmap.opt')),
+        tags$div(class="DocumentList",
+          tags$ul(class="list-inline",
+            tags$li(class="DocumentItem", imageOutput(ns('consensus'), height="100%")),
+            tags$li(class="DocumentItem", imageOutput(ns('delta'), height="100%"))
+          )
         ),
         h3("Analysis Summary"),
         DT::dataTableOutput(ns("summary"))
