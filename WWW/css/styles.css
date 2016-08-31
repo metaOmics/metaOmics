@@ -182,7 +182,7 @@ h4 {
   margin-top: 25px;
 }
 
-#meta_path-pathwayLeft {
+#meta_path-pathwayLeft, #meta_de-geneLeft {
   margin-top: 25px;
   font-size: large;
   padding: 5px;

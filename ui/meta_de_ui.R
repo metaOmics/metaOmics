@@ -28,13 +28,7 @@ meta_de_ui <- function(id, label = "meta DE") {
         actionButton(ns('run'), 'Run', icon=icon("rocket"), class="btn-success btn-run")
       ),
       mainPanel(
-        h3("Heat Map"),
-        fluidRow(
-          column(6, numericInput(ns("fdr.cut"), "FDR Cutoff", value=1e-9)),
-          column(6, sliderInput(ns("scale"), "Image Size", value=1, min=0.5, max=4))
-        ),
-        h3(textOutput(ns("heatmap.info"))),
-	imageOutput(ns('heatmap'), height="100%"),
+        uiOutput(ns("plot.opt")),
         h3("Analysis Summary"),
         downloadButton(ns('downloadCsv'), 'Download Csv File'),
         DT::dataTableOutput(ns("summary"))

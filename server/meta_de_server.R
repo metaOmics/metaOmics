@@ -148,25 +148,22 @@ meta_de_server <- function(input, output, session) {
     done(session)
   })
 
-  observe({
-    if (!is.null(DE$result)) {
-      output$heatmap <- renderImage({
-        outfile <- tempfile(fileext='.png')
-        height <- 800 * input$scale
-        width <- 400 * length(DB$active@datasets) * input$scale
-        wait(session, paste("Plotting result with FDR",
-          input$fdr.cut, "and scale to", input$scale))
-        try({
-          png(outfile, res=120, width=width, height=height)
-          heatmap.sig.genes(isolate(DE$result), meta.method=isolate(input$meta.method),
-                            fdr.cut=isolate(input$fdr.cut), color="GR")
-          dev.off()
-        }, session)
-        done(session)
-        list(src=outfile, contentType='image/png', alt="heatmap",
-             width=width, height=height)
-      }, deleteFile=TRUE)
-    }
+  observeEvent(input$plot, {
+    outfile <- tempfile(fileext='.png')
+    height <- 800 * input$scale
+    width <- 400 * length(DB$active@datasets) * input$scale
+    wait(session, paste("Plotting result with scale:", input$scale))
+    try({
+      png(outfile, res=120, width=width, height=height)
+      heatmap.sig.genes(isolate(DE$result), meta.method=isolate(input$meta.method),
+                        fdr.cut=isolate(input$fdr.cut), color="GR")
+      dev.off()
+    }, session)
+    output$heatmap <- renderImage(
+      list(src=outfile, contentType='image/png', alt="heatmap",
+           width=width, height=height)
+    , deleteFile=TRUE)
+    done(session)
   })
 
   ##########################
@@ -288,13 +285,10 @@ meta_de_server <- function(input, output, session) {
     DE$summary
   }))
 
-  output$heatmap.info <- renderText({
-    count <- sum(DE$summary$FDR <= input$fdr.cut)
-    if (!is.null(DE$result)) {
-      tail <- input$tail
-      if (length(tail) == 0) tail <- "abs"
-      paste(isolate(input$meta.method), "with", tail, "alternative hypothesis,",
-            count, "significant genes left after cut off.")
+  output$geneLeft <- renderText({
+    if (!is.null(DE$summary)) {
+      count <- sum(DE$summary$FDR <= input$fdr.cut)
+      paste(count, "genes left after cut off")
     }
   })
 
@@ -307,6 +301,21 @@ meta_de_server <- function(input, output, session) {
   output$covariate.opt <- renderUI({
     clinical.options <- names(DB$active@clinicals[[1]])
     selectInput(ns("covariate"), "Covariate:", c(None="None", clinical.options))
+  })
+
+  output$plot.opt <- renderUI({
+    if (!is.null(DE$result)) {
+      tagList(
+        fluidRow(
+          column(3, numericInput(ns("fdr.cut"), "FDR Cutoff", value=1e-9)),
+          column(3, textOutput(ns("geneLeft"), container=div)),
+          column(3, sliderInput(ns("scale"), "Image Size", value=1, min=0.5, max=4)),
+          column(3, actionButton(ns("plot"), "Plot DE Genes Heatmap",
+                      icon=icon("paint-brush"), class="btn-success btn-run lower-btn"))
+        ),
+        imageOutput(ns('heatmap'), height="100%")
+      )
+    }
   })
 
 }
