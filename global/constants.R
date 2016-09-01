@@ -187,3 +187,8 @@ QVALUE.permutation <- "permutation"
 QVALUE.all <- c(QVALUE.estimate, QVALUE.permutation)
 names(QVALUE.all) <- c("Estimate", "Permutation")
 
+KAPPA.METHOD.i <- "MAPE_I"
+KAPPA.METHOD.g <- "MAPE_G"
+KAPPA.METHOD.p <- "MAPE_P"
+KAPPA.METHOD.all <- c(KAPPA.METHOD.i, KAPPA.METHOD.g, KAPPA.METHOD.p)
+names(KAPPA.METHOD.all) <- c("MAPE I", "MAPE G", "MAPE P")

@@ -6,7 +6,7 @@ meta_path_ui <- function(id, label = "meta path") {
         uiOutput(ns('srcSelect')),
         uiOutput(ns('resp.opt')),
         selectizeInput(ns('pathway'), "Pathway Dayabases:", GENESET.all, multiple=T,
-                       selected=c(GENESET.BioCarta, GENESET.GOBP, 
+                       selected=c(GENESET.BioCarta, GENESET.GOBP, GENESET.GOCC,
                                GENESET.GOMF, GENESET.KEGG, GENESET.Reactome)),
         tags$hr(),
         bsCollapse(id="meta_de-advanced",
@@ -23,18 +23,26 @@ meta_path_ui <- function(id, label = "meta path") {
             ), style="info"
           )
         ),
-        actionButton(ns('run'), 'Run', icon=icon("rocket"), class="btn-success btn-run")
+        actionButton(ns('run'), 'Step 1: Run Pathway Analysis', 
+		     icon=icon("rocket"), class="btn-success btn-run"),
+        tags$hr(),
+        bsCollapsePanel("Step 2: Pathway Clustering Diagnotics",
+          uiOutput(ns('heatmap.opt')), style="primary"
+        ),
+        tags$hr(),
+        bsCollapsePanel("Step 3: Clustering",
+	  uiOutput(ns('clustering.opt')), style="primary"
+        )
       ),
       mainPanel(
-	uiOutput(ns('heatmap.opt')),
+        h3("Analysis Summary"),
+        DT::dataTableOutput(ns("summary")),
         tags$div(class="DocumentList",
           tags$ul(class="list-inline",
             tags$li(class="DocumentItem", imageOutput(ns('consensus'), height="100%")),
             tags$li(class="DocumentItem", imageOutput(ns('delta'), height="100%"))
           )
-        ),
-        h3("Analysis Summary"),
-        DT::dataTableOutput(ns("summary"))
+        )
       )
     )
   )

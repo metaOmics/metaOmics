@@ -60,12 +60,28 @@ meta_path_server <- function(input, output, session) {
     opt
   }
 
+  getKappaOption <- function(input) {
+    opt <- list()
+    result <- MAPE$result
+    opt$q_cutoff <- input$q_cutoff
+    opt$summary <- result$summary
+    opt$software <- result$method
+    opt$pathway <- result$pathway
+    opt$max_k <- 20
+    opt$output_dir <- DB$working
+    if (MAPE$result$method == MAPE.MAPE) {
+      opt$method <- input$kappa.method
+    }
+
+    opt
+  }
+
   ##########################
   # Reactive Values        #
   ##########################
   DB <- reactiveValues(active=DB.load.active(db), working=NULL)
   DE <- reactiveValues(result=NULL)
-  MAPE <- reactiveValues(result=NULL)
+  MAPE <- reactiveValues(result=NULL, diagnostics=NULL)
 
   ##########################
   # Validation             #
@@ -86,6 +102,7 @@ meta_path_server <- function(input, output, session) {
       DE$result <- readRDS(file.path)
       sendInfoMessage(session, MSG.detect.de.result)
     }, error=function(error){
+      DE$result <- NULL
       sendInfoMessage(session, MSG.no.de.result)
     })
   })
@@ -102,13 +119,9 @@ meta_path_server <- function(input, output, session) {
   })
 
   observeEvent(input$plot, {
-
-    result <- MAPE$result
-    q_cutoff <- input$q_cutoff
     wait(session, "Plotting consensus CDF and Delta area")
     tryCatch({
-      MAPE.kappa_result = MAPE.Kappa(summary=result$summary, software=result$method,
-	pathway=result$pathway, max_k=20, q_cutoff=q_cutoff, output_dir=DB$working)
+      MAPE$diagnostics <- do.call(MAPE.Kappa, getKappaOption(input))
     }, error=function(error){
       if(error$message == "Number of clusters 'k' must be in {1,2, .., n-1}; hence n >= 2")
         sendErrorMessage(session, MSG.too.few.pathway)
@@ -208,21 +221,38 @@ meta_path_server <- function(input, output, session) {
   }))
 
   output$heatmap.opt <- renderUI({
-    if (!is.null(MAPE$result))
-      fluidRow(
-        column(4, numericInput(ns("q_cutoff"), "FDR cut off", 0.1)),
-        column(4, textOutput(ns("pathwayLeft"), container=div)),
-        column(4, actionButton(ns('plot'), 'Plot (consensus CDF / Delta area)', 
+    if (!is.null(MAPE$result)) {
+      tagList(
+        if (MAPE$result$method == MAPE.MAPE) {
+          selectInput(ns("kappa.method"), "Select Cutoff Method", KAPPA.METHOD.all)
+	} else {""},
+        numericInput(ns("q_cutoff"), "FDR cut off value", 0.1),
+        textOutput(ns("pathwayLeft"), container=div),
+        actionButton(ns('plot'), 'Pathway Clustering Diagnotics', 
                     icon=icon("paint-brush"), class="btn-success btn-run lower-btn")
-        )
       )
+    } else {
+      h4("You need to run step 1 first")
+    }
+  })
+
+  output$clustering.opt <- renderUI({
+    if (!is.null(MAPE$diagnostics)) {
+      tagList(
+        numericInput(ns("q_cutoff"), "Number Of Clusters", 6, min=2),
+        actionButton(ns('cluster'), 'Get Clustering Result', 
+                    icon=icon("paint-brush"), class="btn-success btn-run lower-btn")
+      )
+    } else {
+      h4("You need to run step 2 first")
+    }
   })
   
   output$pathwayLeft <- renderText({
     if (!is.null(MAPE$result)) {
       left <- 0
       if (MAPE$result$method == MAPE.MAPE) {
-        left <- sum(MAPE$result$summary["MAPE_I"] <= input$q_cutoff)
+        left <- sum(MAPE$result$summary[input$kappa.method] <= input$q_cutoff)
       } else {
         left <- sum(MAPE$result$summary["q_value_meta"] <= input$q_cutoff)
       }
