@@ -1,6 +1,6 @@
 meta_ktsp_ui <- function(id, label = "meta KTSP") {
     ns <- NS(id)
-    tabPanel("MetaKTSP", value=id,
+    tabPanel("Meta KTSP", value=id,
              sidebarLayout(
                  sidebarPanel(
                      h4("Summary Table"),

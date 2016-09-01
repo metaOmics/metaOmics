@@ -121,6 +121,6 @@ setting_server <- function(input, output, session) {
   check.pkg(TOOLSET.path, 'Meta PATH',
 	    cran.dep=c("gplots", "ggplot2", "shape"),
 	    bioconductor.dep=c("Biobase", "GSEABase", "genefilter", "impute", "ConsensusClusterPlus", "irr", "cluster", "AnnotationDbi", "Rgraphviz"))
-  check.pkg(TOOLSET.pca, 'Meta PCA', cran.dep=c("impute","PMA"))
+  check.pkg(TOOLSET.pca, 'meta PCA', cran.dep=c("PMA"),bioconductor.dep=c("impute"))
   check.pkg(TOOLSET.ktsp, 'Meta KTSP', cran.dep=c("doMC"))
 }

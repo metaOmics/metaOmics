@@ -12,12 +12,8 @@ shinyServer(function(input, output, session) {
     callModule(meta_clust_server, "meta_clust")
   if (TOOLSET.path %in% installed)
     callModule(meta_path_server, "meta_path")
-  if (TOOLSET.pca %in% installed){
+  if (TOOLSET.pca %in% installed)
       callModule(meta_pca_server, "meta_pca")
-      print("pca")
-  }
-  if (TOOLSET.ktsp %in% installed){
-      callModule(meta_ktsp_server, "meta_ktsp")
-      print("metaktsp")
-  }
+#  if (TOOLSET.ktsp %in% installed)
+#      callModule(meta_ktsp_server, "meta_ktsp")
 })
