@@ -68,7 +68,9 @@ meta_path_server <- function(input, output, session) {
     opt$software <- result$method
     opt$pathway <- result$pathway
     opt$max_k <- 20
-    opt$output_dir <- DB$working
+    dir.path <- paste(DB$working, "clustering diagnostics", sep="/")
+    if (!file.exists(dir.path)) dir.create(dir.path)
+    opt$output_dir <- dir.path
     if (MAPE$result$method == MAPE.MAPE) {
       opt$method <- input$kappa.method
     }
@@ -111,9 +113,12 @@ meta_path_server <- function(input, output, session) {
     try({
       wait(session, "performing Meta Path Analysis")
       MAPE$result <- do.call(MAPE2.0, getOption(input))
-      file.path <- paste(DB$working, "result.rds", sep="/")
-      saveRDS(MAPE$result, file=file.path)
-      sendSuccessMessage(session, paste("result raw data written to", file.path))
+      dir.path <- paste(DB$working, "analysis summary", sep="/")
+      if (!file.exists(dir.path)) dir.create(dir.path)
+      saveRDS(MAPE$result, file=paste(dir.path, "result.rds", sep="/"))
+      write.csv(MAPE$result$summary, file=paste(dir.path, "summary.csv", sep="/"))
+      sendSuccessMessage(session,
+        paste("result raw data / summary csv file  written to", dir.path))
       done(session)
     }, session)
   })
@@ -130,12 +135,12 @@ meta_path_server <- function(input, output, session) {
     })
 
     output$consensus <- renderImage({
-      img.src <- paste(DB$working, "consensus021.png", sep="/")
+      img.src <- paste(DB$working, "clustering diagnostics", "consensus021.png", sep="/")
       list(src=img.src, contentType='image/png', alt="consensus plot")
     })
 
     output$delta <- renderImage({
-      img.src <- paste(DB$working, "consensus022.png", sep="/")
+      img.src <- paste(DB$working, "clustering diagnostics", "consensus022.png", sep="/")
       list(src=img.src, contentType='image/png', alt="delta area plot")
     })
     done(session)
@@ -155,6 +160,7 @@ meta_path_server <- function(input, output, session) {
                     method=diagnostics$method,
                     software=result$method,
                     output_dir=DB$working)
+    sendSuccessMessages(sessions, paste("Clustering result saved to:", DB$working))
     done(session)
   })
 
