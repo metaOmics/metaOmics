@@ -141,6 +141,23 @@ meta_path_server <- function(input, output, session) {
     done(session)
   })
 
+  observeEvent(input$cluster, {
+    result <- MAPE$result
+    diagnostics <- MAPE$diagnostics
+    wait(session, "Clustering, the result will be output in working directory")
+    MAPE.Clustering(summary=result$summary,
+                    Num_Clusters=input$Num_Clusters,
+                    Num_of_gene_lists=result$Num_of_gene_lists,
+                    genelist=genelist,
+                    kappa.result=diagnostics$kappa,
+                    pathway=result$pathway,
+                    enrichment=result$enrichment,
+                    method=diagnostics$method,
+                    software=result$method,
+                    output_dir=DB$working)
+    done(session)
+  })
+
   ##########################
   # Render output/UI       #
   ##########################
@@ -228,7 +245,7 @@ meta_path_server <- function(input, output, session) {
 	} else {""},
         numericInput(ns("q_cutoff"), "FDR cut off value", 0.1),
         textOutput(ns("pathwayLeft"), container=div),
-        actionButton(ns('plot'), 'Pathway Clustering Diagnotics', 
+        actionButton(ns('plot'), 'Pathway Clustering Diagnostics', 
                     icon=icon("paint-brush"), class="btn-success btn-run lower-btn")
       )
     } else {
@@ -239,7 +256,7 @@ meta_path_server <- function(input, output, session) {
   output$clustering.opt <- renderUI({
     if (!is.null(MAPE$diagnostics)) {
       tagList(
-        numericInput(ns("q_cutoff"), "Number Of Clusters", 6, min=2),
+        numericInput(ns("Num_Clusters"), "Number Of Clusters", 6, min=2),
         actionButton(ns('cluster'), 'Get Clustering Result', 
                     icon=icon("paint-brush"), class="btn-success btn-run lower-btn")
       )
