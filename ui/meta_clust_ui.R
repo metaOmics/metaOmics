@@ -8,7 +8,13 @@ meta_clust_ui <- function(id, label = "meta sparse K means") {
                      tableOutput(ns("summaryTable")),
                      tags$hr(),
                      bsCollapse(id = "collapseExample", open = c("About","Run Meta Sparse K-Means"), multiple=TRUE,
-                                bsCollapsePanel("About", "This is a panel with just text: Add text here ",  style = "primary"),
+                                bsCollapsePanel("About", "This metaClust panel serves as an UI for MetaSparseKmeans.
+Starting with multiple studies, we could run MetaSparseKmeans with pre-specified number of clusters (K) and gene selection tuning parameter (Wbounds).
+If you are not sure about what are good K and Wbounds, please try Tune K and Tune Wbounds panel.
+Details are in ",
+                                                a(strong("Tutorials"),     href="https://github.com/metaOmic/tutorial/
+blob/master/metaOmics_turtorial.pdf",target="_blank"),
+                                                style = "primary"),
                                 bsCollapsePanel("Tune K (optional)",
                                                 "This panel is for tuning number of clusters K",
                                                 tags$hr(),
@@ -18,7 +24,8 @@ meta_clust_ui <- function(id, label = "meta sparse K means") {
                                                 br(),
 
                                                 selectizeInput(ns("studyforK"), label = "Select studies to be tuned", choices = NULL,multiple=TRUE),
-                                                actionButton(ns("tuneK"), "Tune K",icon = icon("refresh", lib = "font-awesome")),                           
+                                                actionButton(ns("tuneK"), "Tune K",icon = icon("refresh", lib = "font-awesome")),
+                                                helpIcon("tune_k_help",HELP.tune.k),
                                                 style = "primary"),
                                 bsCollapsePanel("Tune Wbounds (optional)",
                                                 "This panel is for tuning Wbounds",
@@ -27,12 +34,14 @@ meta_clust_ui <- function(id, label = "meta sparse K means") {
                                                 numericInput(ns("BforW"), "Iterations:", value=2),
                                                 
                                                 fluidRow(
-                                                    column(4,numericInput(ns("minforW"),"Minimum of wbounds:", value=2)),
+                                                    column(3,numericInput(ns("minforW"),"Minimum of wbounds:", value=2)),
                                                     column(4,numericInput(ns("maxforW"),"Maximum of wbounds:", value=16)),
-                                                    column(4,numericInput(ns("stepforW"),"Step of wbounds:", value=2))
+                                                    column(4,numericInput(ns("stepforW"),"Step of wbounds:", value=2)),
+                                                    helpIcon("step_w_help",HELP.step.w)
                                                 ),
 
-                                                actionButton(ns("tuneW"), "Tune wbounds",icon = icon("refresh", lib = "font-awesome")), 
+                                                actionButton(ns("tuneW"), "Tune wbounds",icon = icon("refresh", lib = "font-awesome")),
+                                                helpIcon("tune_w_help",HELP.tune.w),
                                                 style="primary"),
 
                                 bsCollapsePanel("Run Meta Sparse K-Means",
@@ -42,10 +51,20 @@ meta_clust_ui <- function(id, label = "meta sparse K means") {
                                                              value = 5),            
                                                 numericInput(ns("wBounds"), "Wbounds:",
                                                              value = 10),
+                                                fluidRow(
+                                                    column(10,
                                                 selectInput(ns("methods"), label = "Methods for meta sparse K means",
                                                             choices = list("Exhaustive" = "exhaustive", "Linear" = "linear", "MCMC" = "MCMC"),
-                                                            selected = "exhaustive"),
-                                                checkboxInput(ns("sizeAdj"),"Adjust sample size",FALSE),
+                                                            selected = "exhaustive")
+                                                           ),
+                                                    column(1,helpIcon("metaClust_methods_help",HELP.meta.clust.methods))
+                                                ),
+
+                                                fluidRow(
+                                                    column(5,checkboxInput(ns("sizeAdj"),"Adjust sample size",FALSE)),
+                                                    column(1,helpIcon("metaClust_sizeAdj_help",HELP.meta.clust.sizeAdj))
+                                                ),
+                                              
                                                 br(),
                                                 actionButton(ns("clustGo"), "Run meta sparse K means",icon = icon("rocket", lib = "font-awesome")),
                                                 style="primary")
