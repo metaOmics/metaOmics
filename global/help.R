@@ -27,3 +27,12 @@ HELP.merge <- "Merging selected dataset will keep only those features (gene symb
 HELP.delete <- "After you delete these datasets, they will not be recoverable"
 
 HELP.working.dir <- "During the computation, some output files or images are automatically saved to this directory."
+
+HELP.step.w <- "The step of searching for wbounds. Recommended to be at least 2 to speed up the process."
+
+HELP.tune.k <- "Tune for number of clusters(k). User can choose an optimal k fromthe gap statistics"
+HELP.tune.w <- "Wbounds controls the number of features selected by metaClust. This function search for an optimal wbounds, user may choose based on gap statistics."
+
+HELP.meta.clust.methods <- "Exhaustive as default. Linear performs smart search and is faster while less accurate. MCMC is more time consuming."
+
+HELP.meta.clust.sizeAdj <- "When TRUE, adjust for sample size effect"
