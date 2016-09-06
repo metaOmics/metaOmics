@@ -1,6 +1,10 @@
 # metaOmics
 A graphical user interface to facilitate the application of meta analysis on -Omics study
 
+## Requirement
+* R >= 3.3.1
+* Shiny >= 0.13.2
+
 ## How to start the app
 First, clone the project
 ```
