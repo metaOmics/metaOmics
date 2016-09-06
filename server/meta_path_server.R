@@ -98,7 +98,8 @@ meta_path_server <- function(input, output, session) {
   ##########################
   observeEvent(input$tabChange, {
     DB$active <- DB.load.active(db)
-    DB$working <- paste(DB.load.working.dir(db), "Meta PATH", sep="/")
+    DB$working <- paste(DB.load.working.dir(db), "Meta Path", sep="/")
+    if (!file.exists(DB$working)) dir.create(DB$working)
     tryCatch({
       file.path <- paste(DB.load.working.dir(db), "Meta DE", "result.rds", sep="/")
       DE$result <- readRDS(file.path)
@@ -160,7 +161,7 @@ meta_path_server <- function(input, output, session) {
                     method=diagnostics$method,
                     software=result$method,
                     output_dir=DB$working)
-    sendSuccessMessages(sessions, paste("Clustering result saved to:", DB$working))
+    sendSuccessMessage(session, paste("Clustering result saved to:", DB$working))
     done(session)
   })
 
