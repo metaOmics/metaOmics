@@ -6,6 +6,7 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(shiny)
+library(shinyBS)
 source("global/help.R")
 source("global/helpers.R")
 ```

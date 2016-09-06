@@ -21,8 +21,10 @@ navbar:
           icon: fa-linux
           href: module.Rmd
     - text: "Database"
+      icon: fa-database
       href: databases.Rmd 
     - text: "Git"
+      icon: fa-github
       href: git.Rmd 
 output:
   html_document:
