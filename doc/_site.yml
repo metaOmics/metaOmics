@@ -17,6 +17,9 @@ navbar:
         - text: "Exception Handling"
           icon: fa-exclamation-circle
           href: exceptionHelper.Rmd
+        - text: "Create New Module"
+          icon: fa-linux
+          href: module.Rmd
     - text: "Database"
       href: databases.Rmd 
     - text: "Git"
