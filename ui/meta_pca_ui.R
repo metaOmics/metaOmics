@@ -3,44 +3,40 @@ meta_pca_ui <- function(id, label = "meta PCA") {
     tabPanel("MetaPCA", value=id,
              sidebarLayout(
                  sidebarPanel(
-                 
-                     h4("Parameters for MetaPCA"),
-                     br(),
+                     h4("Summary Table"),
+                     tags$hr(),
+                     tableOutput(ns("summaryTable")),
+                     tags$hr(),
                      selectInput(ns("methods"), label = "Methods for MetaPCA",
-                                 choices = list("Fisher" = "Fisher", "SSC" = "SSC", "SV" = "SV"),
-                                 selected = "Fisher"),
+                                 choices = list("SSC" = "SSC", "SV" = "SV"),
+                                 selected = "SSC"),
                      br(),
 
-                     sliderInput(ns("dim"), "Dimension of meta-eigenvector matrix:",
-                                 min = 0, max = 30, value = 2, step = 1),
+                     numericInput(ns("dim"), "Dimension of meta-eigenvector matrix:", value = 2),
                      br(),
 
-                     
-#                     selectInput(ns("dimAuto"), label = "Whether dimension is determined by variance quantile",
-#                                 choices = list("True" ="TRUE", "False"="FALSE"),
-                                        #                                 selected = "TRUE"),
-                     checkboxInput(ns("dimAuto"),"Dimension determined by variance quantile"),
+                     checkboxInput(ns("dimAuto"),"Dimension determined by variance quantile",value = TRUE),
 
-                     checkboxInput(ns("sparse"),"Sparseness encouraged"),
+                     checkboxInput(ns("sparse"),"Sparsity encouraged"),
                      
-#                     selectInput(ns("sparse"), label = "Whether sparseness is encouraged",
-#                                 choices = list("True" ="TRUE", "False"="FALSE"),
-#                                 selected = "TRUE"),
                      conditionalPanel(
                          condition="document.getElementById('meta_pca-sparse').checked == true ",
-                         sliderInput(ns("lambda"), "Tuning parameter for sparsity:",
-                                     min = 0, max = 20, value = 6, step = 1)
+                         numericInput(ns("lambda"), "Tuning parameter for sparsity:", value = 6),
+                         actionButton(ns("tuneGo"), "Search for optimal tuning parameter", icon=icon("line-chart"),class="btn-danger")
                      ),
 
                      tags$hr(),
                      
-                     actionButton(ns("pcaGo"), "Run meta PCA",icon = icon("play", lib = "glyphicon"))
+                     actionButton(ns("pcaGo"), "Run meta PCA",icon = icon("rocket"),class="btn-success btn-run")
                  ),
                  mainPanel(
                      h4("Meta PCA plots"),
                      tags$hr(),
-                     uiOutput(ns("plots"))
-                     )
+                     uiOutput(ns("plots")),
+                     h4("Tune sparsity parameter diagnostic plot"),
+                     tags$hr(),
+                     plotOutput(ns("tuningPlot"))
                  )
+             )
              )
 }

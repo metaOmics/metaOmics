@@ -1,15 +1,15 @@
 meta_pca_server <- function(input, output,session) {
     library(metaPCA)
+    library(doMC)
     study <- DB.load.active(db)
     DB <- reactiveValues(acitve=NULL,transpose=NULL)
-
-
 
     validate <- function(){
         study <- DB.load.active(db)
         if(is.null(study)) stop(MSG.no.active)
         if(DB.load.working.dir(db)=="") stop(MSG.no.working.dir)    
     }
+    optimalLambda <- 6
     
     observeEvent(input$tabChange, {
         try({
@@ -21,42 +21,106 @@ meta_pca_server <- function(input, output,session) {
         dir.create(paste(DB.load.working.dir(db),"metaPCA",sep="/"))
     })
 
+    output$summaryTable <- renderTable({
+        if(!is.null(DB$active)){
+            table <- matrix(NA, length(DB$active@datasets), 2 )
+            colnames(table) <- c("#Genes","#Samples")
+            rownames(table) <- names(DB$transpose)
+            for (i in 1:length(DB$transpose)){
+                table[i,2] <- dim(DB$transpose[[i]])[2]
+                table[i,1] <- dim(DB$transpose[[i]])[1]   
+            }
+            return(table)
+        }
+    })
 
-    observeEvent(input$pcaGo, {
+    observeEvent(input$tuneGo, {
         
-        wait(session, "Running Meta PCA. Go get a coffee.")
+        wait(session, "Searching the optimal tuning parameter based on the proportion of increased explained variance. This may take a while...")
         try({
             validate()
-            if (is.null(input$lambda))
-                res6 <- meta.pca(DList=DB$transpose, method=input$methods, Meta.Dim=input$dim, is.auto.Dim = input$dimAuto, #as.logical
-                                 is.sparse=linput$sparse)
-            else
-                res6 <- meta.pca(DList=DB$transpose, method=input$methods, Meta.Dim=input$dim, is.auto.Dim = input$dimAuto,
-                                 is.sparse=linput$sparse, Lambda=input$lambda)
+            sequence = seq(1,10,1)
+            var.tmp <-foreach(i= sequence,.combine=rbind) %do% {
+                res6 <- meta.pca(DList=DB$transpose, method=input$methods,
+                                 Meta.Dim=input$dim, is.auto.Dim = input$dimAuto,
+                                 is.sparse=TRUE, Lambda=i)
+                
+                non.zero <- sum(res6$v != 0)
+                c(sum(foreach(ii = 1: length(res6$coord),.combine=c) %do% {
+                    sum(diag(var(res6$coord[[ii]])))
+                }), non.zero)
+            }
+            num.nonzero <- var.tmp[,2]
+            var.tmp <- var.tmp[,1]
+                                        # plot(var.tmp ~ num.nonzero, type='o',ylab="Explained Variance",xlab="The number of non-penalized features",cex.lab=2,lwd=2,cex.axis=1.5)
+            scree <-foreach(i= 1:10,.combine=c) %do% {
+                (var.tmp[i+1] - var.tmp[i]) / var.tmp[i+1]
+            }
+            png(paste(DB.load.working.dir(db),"/metaPCA/metaPCA_tuning_lambda.png",sep=""))  
+            par(mfrow=c(1,1), mar=c(5, 5, 2, 4))
+            plot(na.omit(scree) ~ num.nonzero[1:length(na.omit(scree))], type='o',ylab="Proportion of Increased Explained Variance",xlab="The number of non-penalized features",cex.lab=2,lwd=2,cex.axis=1.5)
+            abline(h=0.1,col='red',lwd=2)
+            dev.off()
+
+            output$tuningPlot <- renderPlot({
+                plot(na.omit(scree) ~ num.nonzero[1:length(na.omit(scree))], type='o',ylab="Proportion of Increased Explained Variance",xlab="The number of non-penalized features",cex.lab=2,lwd=2,cex.axis=1.5)
+                abline(h=0.1,col='red',lwd=2)            
+            })
+            optimalLambda <-  sequence[sum(scree> 0.1, na.rm=TRUE)]
+
+            updateNumericInput(session, "lambda", value=optimalLambda)
             
+            sendSuccessMessage(session, paste("Sparsity parameter tuned and updated. Recommended lambda is ", optimalLambda,sep=""))
+        },session)
+        done(session)
+    })            
+
+    
+    observeEvent(input$pcaGo, {        
+        wait(session, "Running Meta PCA.")
+        try({
+            validate()
+            if (input$sparse==FALSE){
+                res6 <- meta.pca(DList=DB$transpose, method=input$methods,
+                                 Meta.Dim=input$dim, is.auto.Dim = input$dimAuto,
+                                 is.sparse=input$sparse)
+            } else {
+                res6 <- meta.pca(DList=DB$transpose, method=input$methods,
+                                 Meta.Dim=input$dim, is.auto.Dim = input$dimAuto,
+                                 is.sparse=input$sparse, Lambda=input$lambda)
+            }
             coord <- res6$coord
 
-            png(paste(input$outDir,'/metaPCA_results.png',sep=""))
+            if( (input$dimAuto==TRUE)&(input$sparse==FALSE))
+                png(paste(DB.load.working.dir(db),"/metaPCA/metaPCA_results_dim",input$dim,input$methods,"_autoDim",".png",sep=""))
+            if( (input$dimAuto==FALSE)&(input$sparse==FALSE))
+                png(paste(DB.load.working.dir(db),"/metaPCA/metaPCA_results_dim",input$dim,input$methods,".png",sep=""))
+            if( (input$dimAuto==FALSE)&(input$sparse==TRUE))
+                png(paste(DB.load.working.dir(db),"/metaPCA/metaPCA_results_dim",input$dim,input$methods,"_sparse","_lambda",input$lambda,".png",sep=""))
+            if( (input$dimAuto==TRUE)&(input$sparse==TRUE))
+                png(paste(DB.load.working.dir(db),"/metaPCA/metaPCA_results_dim",input$dim,input$methods,"autoDim_sparse","_lambda",input$lambda,".png",sep=""))
+            
             par(mfrow=c(2,2))
             for(i in 1:length(coord)){
                 acoord <- coord[[i]]
+                labels <- DB$active@clinicals[[1]]
                 alabel <- as.factor(label[[i]])
+                print(alabel)
                 plot(acoord[,1], acoord[,2], type="n", xlab="", ylab="", xaxt="n", yaxt="n"
                     ,ylim=c(min(acoord[,2])-1.5, max(acoord[,2])+1.5)
                     ,xlim=c(min(acoord[,1])-1, max(acoord[,1])+1),main=names(Leukemia)[i])
                 points(acoord[,1], acoord[,2], col=as.numeric(alabel), cex=1)
                 legend('topright',legend=levels(alabel),col=unique(as.numeric(alabel)),pch=1)
-                
             }
             dev.off()
+            sendSuccessMessage(session, "Meta PCA complete.")
         },session)
         done(session)
-        sendSuccessMessage(session, "Meta PCA complete.")
-            
+
+        
         wait(session,"Visualizing results.")
         try({
             validate()
-  
             output$plots <- renderUI({
                 plot_output_list <- lapply(1:length(coord), function(i) {
                     plotname <- paste("meta_pca-plot", i, sep="")
@@ -88,10 +152,9 @@ meta_pca_server <- function(input, output,session) {
                 })
             }
             
-            done(session)
-            
             sendSuccessMessage(session, "Visualization complete.")
         },session)
+        done(session)    
     })            
 
 }
