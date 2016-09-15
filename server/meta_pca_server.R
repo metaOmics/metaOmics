@@ -17,6 +17,9 @@ meta_pca_server <- function(input, output,session) {
             study <- DB.load.active(db)
             DB$active <- DB.load.active(db)
             DB$transpose <- lapply(DB$active@datasets,function(x) t(scale(t(x))))
+ #           print(colnames(DB$transpose[[1]]))
+ #           print(DB$active@clinicals)
+ #           print(names(DB$transpose))
         }, session)
         dir.create(paste(DB.load.working.dir(db),"metaPCA",sep="/"))
     })
@@ -75,7 +78,6 @@ meta_pca_server <- function(input, output,session) {
         done(session)
     })            
 
-    
     observeEvent(input$pcaGo, {        
         wait(session, "Running Meta PCA.")
         try({
@@ -103,7 +105,7 @@ meta_pca_server <- function(input, output,session) {
             par(mfrow=c(2,2))
             for(i in 1:length(coord)){
                 acoord <- coord[[i]]
-                labels <- DB$active@clinicals[[1]]
+                label <- DB$active@clinicals
                 alabel <- as.factor(label[[i]])
                 print(alabel)
                 plot(acoord[,1], acoord[,2], type="n", xlab="", ylab="", xaxt="n", yaxt="n"
