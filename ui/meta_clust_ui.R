@@ -4,7 +4,7 @@ meta_clust_ui <- function(id, label = "meta sparse K means") {
              sidebarLayout(
                  sidebarPanel(
                      h4("Summary Table"),
-                     tags$hr(),
+                     br(),br(),
                      tableOutput(ns("summaryTable")),
                      tags$hr(),
                      bsCollapse(id = "collapseExample", open = c("About","Run Meta Sparse K-Means"), multiple=TRUE,

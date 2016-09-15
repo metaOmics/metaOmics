@@ -4,9 +4,9 @@ meta_ktsp_ui <- function(id, label = "meta KTSP") {
              sidebarLayout(
                  sidebarPanel(
                      h4("Summary Table"),
-                     tags$hr(),
+                     br(),br(),
                      tableOutput(ns("summaryTable")),
-
+                     tags$hr(),
                      selectInput(ns("methods"), label = "Methods for Meta KTSP",
                                  choices = list("Mean score" = "Mean score", "Fisher" = "Fisher", "Stouffer" = "Stouffer"),
                                  selected = "Mean score"),
@@ -19,8 +19,9 @@ meta_ktsp_ui <- function(id, label = "meta KTSP") {
                      actionButton(ns("ktspGo"),"Run meta KTSP", icon= icon("rocket"),class="btn-success btn-run")
                  ),
                  mainPanel(
-                     h4("Meta KTSP output"),
-                     tags$hr()
+                     h4("Differently labeled samples"),
+                     tags$hr(),
+                     tableOutput(ns("diffTable"))
                  )
              )
              )

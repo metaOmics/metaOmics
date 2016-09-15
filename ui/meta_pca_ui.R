@@ -4,7 +4,7 @@ meta_pca_ui <- function(id, label = "meta PCA") {
              sidebarLayout(
                  sidebarPanel(
                      h4("Summary Table"),
-                     tags$hr(),
+                     br(),br(),
                      tableOutput(ns("summaryTable")),
                      tags$hr(),
                      selectInput(ns("methods"), label = "Methods for MetaPCA",

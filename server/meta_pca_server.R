@@ -18,7 +18,7 @@ meta_pca_server <- function(input, output,session) {
             DB$active <- DB.load.active(db)
             DB$transpose <- lapply(DB$active@datasets,function(x) t(scale(t(x))))
  #           print(colnames(DB$transpose[[1]]))
- #           print(DB$active@clinicals)
+ #           print(levels(as.factor(DB$active@clinicals[[1]])))
  #           print(names(DB$transpose))
         }, session)
         dir.create(paste(DB.load.working.dir(db),"metaPCA",sep="/"))
