@@ -6,6 +6,16 @@ tryCatch({
   GLOBAL.network <<- F
 })
 
+# Try again with http if https fail
+if (GLOBAL.network == F) {
+  tryCatch({
+    source("http://bioconductor.org/biocLite.R")
+    GLOBAL.network <<- T
+  }, error=function(error){
+    GLOBAL.network <<- F
+  })
+}
+
 if(GLOBAL.network) {
   installed <- installed.packages()[,"Package"]
   for (package in c("utils", "DMwR", "devtools", "DT", "shinyBS")) {

@@ -60,12 +60,30 @@ meta_path_server <- function(input, output, session) {
     opt
   }
 
+  getKappaOption <- function(input) {
+    opt <- list()
+    result <- MAPE$result
+    opt$q_cutoff <- input$q_cutoff
+    opt$summary <- result$summary
+    opt$software <- result$method
+    opt$pathway <- result$pathway
+    opt$max_k <- 20
+    dir.path <- paste(DB$working, "clustering diagnostics", sep="/")
+    if (!file.exists(dir.path)) dir.create(dir.path)
+    opt$output_dir <- dir.path
+    if (MAPE$result$method == MAPE.MAPE) {
+      opt$method <- input$kappa.method
+    }
+
+    opt
+  }
+
   ##########################
   # Reactive Values        #
   ##########################
   DB <- reactiveValues(active=DB.load.active(db), working=NULL)
   DE <- reactiveValues(result=NULL)
-  MAPE <- reactiveValues(result=NULL)
+  MAPE <- reactiveValues(result=NULL, diagnostics=NULL)
 
   ##########################
   # Validation             #
@@ -80,12 +98,14 @@ meta_path_server <- function(input, output, session) {
   ##########################
   observeEvent(input$tabChange, {
     DB$active <- DB.load.active(db)
-    DB$working <- paste(DB.load.working.dir(db), "Meta PATH", sep="/")
+    DB$working <- paste(DB.load.working.dir(db), "Meta Path", sep="/")
+    if (!file.exists(DB$working)) dir.create(DB$working)
     tryCatch({
       file.path <- paste(DB.load.working.dir(db), "Meta DE", "result.rds", sep="/")
       DE$result <- readRDS(file.path)
       sendInfoMessage(session, MSG.detect.de.result)
     }, error=function(error){
+      DE$result <- NULL
       sendInfoMessage(session, MSG.no.de.result)
     })
   })
@@ -94,21 +114,20 @@ meta_path_server <- function(input, output, session) {
     try({
       wait(session, "performing Meta Path Analysis")
       MAPE$result <- do.call(MAPE2.0, getOption(input))
-      file.path <- paste(DB$working, "result.rds", sep="/")
-      saveRDS(MAPE$result, file=file.path)
-      sendSuccessMessage(session, paste("result raw data written to", file.path))
+      dir.path <- paste(DB$working, "analysis summary", sep="/")
+      if (!file.exists(dir.path)) dir.create(dir.path)
+      saveRDS(MAPE$result, file=paste(dir.path, "result.rds", sep="/"))
+      write.csv(MAPE$result$summary, file=paste(dir.path, "summary.csv", sep="/"))
+      sendSuccessMessage(session,
+        paste("result raw data / summary csv file  written to", dir.path))
       done(session)
     }, session)
   })
 
   observeEvent(input$plot, {
-
-    result <- MAPE$result
-    q_cutoff <- input$q_cutoff
     wait(session, "Plotting consensus CDF and Delta area")
     tryCatch({
-      MAPE.kappa_result = MAPE.Kappa(summary=result$summary, software=result$method,
-	pathway=result$pathway, max_k=20, q_cutoff=q_cutoff, output_dir=DB$working)
+      MAPE$diagnostics <- do.call(MAPE.Kappa, getKappaOption(input))
     }, error=function(error){
       if(error$message == "Number of clusters 'k' must be in {1,2, .., n-1}; hence n >= 2")
         sendErrorMessage(session, MSG.too.few.pathway)
@@ -117,14 +136,32 @@ meta_path_server <- function(input, output, session) {
     })
 
     output$consensus <- renderImage({
-      img.src <- paste(DB$working, "consensus021.png", sep="/")
+      img.src <- paste(DB$working, "clustering diagnostics", "consensus021.png", sep="/")
       list(src=img.src, contentType='image/png', alt="consensus plot")
     })
 
     output$delta <- renderImage({
-      img.src <- paste(DB$working, "consensus022.png", sep="/")
+      img.src <- paste(DB$working, "clustering diagnostics", "consensus022.png", sep="/")
       list(src=img.src, contentType='image/png', alt="delta area plot")
     })
+    done(session)
+  })
+
+  observeEvent(input$cluster, {
+    result <- MAPE$result
+    diagnostics <- MAPE$diagnostics
+    wait(session, "Clustering, the result will be output in working directory")
+    MAPE.Clustering(summary=result$summary,
+                    Num_Clusters=input$Num_Clusters,
+                    Num_of_gene_lists=result$Num_of_gene_lists,
+                    genelist=genelist,
+                    kappa.result=diagnostics$kappa,
+                    pathway=result$pathway,
+                    enrichment=result$enrichment,
+                    method=diagnostics$method,
+                    software=result$method,
+                    output_dir=DB$working)
+    sendSuccessMessage(session, paste("Clustering result saved to:", DB$working))
     done(session)
   })
 
@@ -208,21 +245,38 @@ meta_path_server <- function(input, output, session) {
   }))
 
   output$heatmap.opt <- renderUI({
-    if (!is.null(MAPE$result))
-      fluidRow(
-        column(4, numericInput(ns("q_cutoff"), "FDR cut off", 0.1)),
-        column(4, textOutput(ns("pathwayLeft"), container=div)),
-        column(4, actionButton(ns('plot'), 'Plot (consensus CDF / Delta area)', 
+    if (!is.null(MAPE$result)) {
+      tagList(
+        if (MAPE$result$method == MAPE.MAPE) {
+          selectInput(ns("kappa.method"), "Select Cutoff Method", KAPPA.METHOD.all)
+	} else {""},
+        numericInput(ns("q_cutoff"), "FDR cut off value", 0.1),
+        textOutput(ns("pathwayLeft"), container=div),
+        actionButton(ns('plot'), 'Pathway Clustering Diagnostics', 
                     icon=icon("paint-brush"), class="btn-success btn-run lower-btn")
-        )
       )
+    } else {
+      h4("You need to run step 1 first")
+    }
+  })
+
+  output$clustering.opt <- renderUI({
+    if (!is.null(MAPE$diagnostics)) {
+      tagList(
+        numericInput(ns("Num_Clusters"), "Number Of Clusters", 6, min=2),
+        actionButton(ns('cluster'), 'Get Clustering Result', 
+                    icon=icon("paint-brush"), class="btn-success btn-run lower-btn")
+      )
+    } else {
+      h4("You need to run step 2 first")
+    }
   })
   
   output$pathwayLeft <- renderText({
     if (!is.null(MAPE$result)) {
       left <- 0
       if (MAPE$result$method == MAPE.MAPE) {
-        left <- sum(MAPE$result$summary["MAPE_I"] <= input$q_cutoff)
+        left <- sum(MAPE$result$summary[input$kappa.method] <= input$q_cutoff)
       } else {
         left <- sum(MAPE$result$summary["q_value_meta"] <= input$q_cutoff)
       }
