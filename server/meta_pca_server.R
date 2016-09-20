@@ -106,7 +106,7 @@ meta_pca_server <- function(input, output,session) {
             for(i in 1:length(coord)){
                 acoord <- coord[[i]]
                 label <- DB$active@clinicals
-                alabel <- as.factor(label[[i]])
+                alabel <- as.factor(unlist(label[[i]]))
                 print(alabel)
                 plot(acoord[,1], acoord[,2], type="n", xlab="", ylab="", xaxt="n", yaxt="n"
                     ,ylim=c(min(acoord[,2])-1.5, max(acoord[,2])+1.5)
@@ -144,7 +144,7 @@ meta_pca_server <- function(input, output,session) {
                     
                     output[[plotname]] <- renderPlot({
                         acoord <- coord[[my_i]]
-                        alabel <- as.factor(label[[my_i]])
+                        alabel <- as.factor(unlist(label[[my_i]]))
                         plot(acoord[,1], acoord[,2], type="n", xlab="", ylab="", xaxt="n", yaxt="n"
                             ,ylim=c(min(acoord[,2])-1.5, max(acoord[,2])+1.5)
                             ,xlim=c(min(acoord[,1])-1, max(acoord[,1])+1),main=names(DB$transpose)[my_i])

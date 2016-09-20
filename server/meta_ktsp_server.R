@@ -21,7 +21,7 @@ meta_ktsp_server <- function(input, output,session) {
             DB$active <- DB.load.active(db)
             DB$transpose <- lapply(DB$active@datasets,t)
             labels <- DB$active@clinicals
-            labelLevels <- levels(as.factor( DB$active@clinicals[[1]] ))
+            labelLevels <- levels(as.factor( unlist(DB$active@clinicals[[1]]) ))
             updateSelectizeInput(session, "twoLabels", label="Please select only two labels to cluster", choices = labelLevels, server = TRUE)
         }, session)
         
