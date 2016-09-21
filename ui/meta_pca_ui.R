@@ -21,6 +21,12 @@ meta_pca_ui <- function(id, label = "meta PCA") {
                      
                      conditionalPanel(
                          condition="document.getElementById('meta_pca-sparse').checked == true ",
+                         fluidRow(
+                             column(3,numericInput(ns("min"),"Minimum of lambda:", value=1)),
+                             column(4,numericInput(ns("max"),"Maximum of lambda:", value=10)),
+                             column(4,numericInput(ns("step"),"Step of lambda:", value=1)),
+                             helpIcon("step_pcaLambda_help",HELP.step.pcaLambda)
+                         ),
                          numericInput(ns("lambda"), "Tuning parameter for sparsity:", value = 6),
                          actionButton(ns("tuneGo"), "Search for optimal tuning parameter", icon=icon("line-chart"),class="btn-danger")
                      ),

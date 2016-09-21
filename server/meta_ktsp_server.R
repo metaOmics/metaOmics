@@ -57,9 +57,9 @@ meta_ktsp_server <- function(input, output,session) {
             selectedIdx <- list()
             DList <- list()
             for(i in 1:length(DB$active@datasets)){
-                selectedIdx[[i]] <- which(labels[[i]] %in% input$twoLabels)
+                selectedIdx[[i]] <- which(unlist(labels[[i]]) %in% input$twoLabels)
                 DList[[i]] <- DB$active@datasets[[i]][,selectedIdx[[i]]]
-                colnames(DList[[i]]) <- labels[[i]][selectedIdx[[i]]]
+                colnames(DList[[i]]) <- unlist(labels[[i]])[selectedIdx[[i]]]
                 colnames(DList[[i]])[colnames(DList[[i]]) == input$twoLabels[[1]]] <- "0"
                 colnames(DList[[i]])[colnames(DList[[i]]) == input$twoLabels[[2]]] <- "1" 
             }

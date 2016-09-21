@@ -42,7 +42,7 @@ meta_pca_server <- function(input, output,session) {
         wait(session, "Searching the optimal tuning parameter based on the proportion of increased explained variance. This may take a while...")
         try({
             validate()
-            sequence = seq(1,10,1)
+            sequence = seq(input$min,input$max,input$step)
             var.tmp <-foreach(i= sequence,.combine=rbind) %do% {
                 res6 <- meta.pca(DList=DB$transpose, method=input$methods,
                                  Meta.Dim=input$dim, is.auto.Dim = input$dimAuto,
@@ -56,7 +56,7 @@ meta_pca_server <- function(input, output,session) {
             num.nonzero <- var.tmp[,2]
             var.tmp <- var.tmp[,1]
                                         # plot(var.tmp ~ num.nonzero, type='o',ylab="Explained Variance",xlab="The number of non-penalized features",cex.lab=2,lwd=2,cex.axis=1.5)
-            scree <-foreach(i= 1:10,.combine=c) %do% {
+            scree <-foreach(i= sequence,.combine=c) %do% {
                 (var.tmp[i+1] - var.tmp[i]) / var.tmp[i+1]
             }
             png(paste(DB.load.working.dir(db),"/metaPCA/metaPCA_tuning_lambda.png",sep=""))  
@@ -91,6 +91,7 @@ meta_pca_server <- function(input, output,session) {
                                  Meta.Dim=input$dim, is.auto.Dim = input$dimAuto,
                                  is.sparse=input$sparse, Lambda=input$lambda)
             }
+            print(res6)
             coord <- res6$coord
 
             if( (input$dimAuto==TRUE)&(input$sparse==FALSE))
