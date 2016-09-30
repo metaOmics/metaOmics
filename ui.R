@@ -13,6 +13,8 @@ if (TOOLSET.clust %in% enabled)
   toolsets <- c(toolsets, list(meta_clust_ui("meta_clust")))
 if (TOOLSET.path %in% enabled)
   toolsets <- c(toolsets, list(meta_path_ui("meta_path")))
+if (TOOLSET.dcn %in% enabled)
+  toolsets <- c(toolsets, list(meta_dcn_ui("meta_dcn")))
 
 if (length(toolsets) > 1) {
   toolsets <- do.call(navbarMenu, toolsets)

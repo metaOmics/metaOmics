@@ -5,7 +5,8 @@ TOOLSET.clust <- "MetaSparseKmeans"
 TOOLSET.path  <- "MetaPath"
 TOOLSET.pca   <- "MetaPCA"
 TOOLSET.ktsp  <- "MetaKTSP"
-TOOLSET.all <- c(TOOLSET.de, TOOLSET.clust, TOOLSET.path, TOOLSET.pca, TOOLSET.ktsp) 
+TOOLSET.dcn  <- "MetaDCN"
+TOOLSET.all <- c(TOOLSET.de, TOOLSET.clust, TOOLSET.path, TOOLSET.pca, TOOLSET.ktsp, TOOLSET.dcn) 
 
 select.noDefault <- list(
   placeholder = 'Choose from below',
