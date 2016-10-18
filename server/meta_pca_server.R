@@ -127,12 +127,21 @@ meta_pca_server <- function(input, output,session) {
             output$plots <- renderUI({
                 plot_output_list <- lapply(1:length(coord), function(i) {
                     plotname <- paste("meta_pca-plot", i, sep="")
-                    plotOutput(plotname, height = 280, width = 350)
+                    #plotOutput(plotname, height = 280, width = 350)
+                    
+                     tags$li(class="DocumentItem",
+                            plotOutput(plotname, height = 480, width = 450)
+                    )
                 })
                 
                                         # Convert the list to a tagList - this is necessary for the list of items
                                         # to display properly.
-                do.call(tagList, plot_output_list)
+                #do.call(tagList, plot_output_list)
+                tags$div(class="DocumentList",
+                         tags$ul(class="list-inline",
+                                 plot_output_list
+                         )
+                )
             })
             
             for (i in 1:length(coord)) {
