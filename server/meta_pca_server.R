@@ -91,9 +91,9 @@ meta_pca_server <- function(input, output,session) {
                                  Meta.Dim=input$dim, is.auto.Dim = input$dimAuto,
                                  is.sparse=input$sparse, Lambda=input$lambda)
             }
-            print(res6)
-            coord <- res6$coord
 
+            coord <- res6$coord
+            
             if( (input$dimAuto==TRUE)&(input$sparse==FALSE))
                 png(paste(DB.load.working.dir(db),"/metaPCA/metaPCA_results_dim",input$dim,input$methods,"_autoDim",".png",sep=""))
             if( (input$dimAuto==FALSE)&(input$sparse==FALSE))
@@ -104,14 +104,14 @@ meta_pca_server <- function(input, output,session) {
                 png(paste(DB.load.working.dir(db),"/metaPCA/metaPCA_results_dim",input$dim,input$methods,"autoDim_sparse","_lambda",input$lambda,".png",sep=""))
             
             par(mfrow=c(2,2))
+            label <- DB$active@clinicals
             for(i in 1:length(coord)){
                 acoord <- coord[[i]]
-                label <- DB$active@clinicals
                 alabel <- as.factor(unlist(label[[i]]))
-                print(alabel)
+                #print(alabel)
                 plot(acoord[,1], acoord[,2], type="n", xlab="", ylab="", xaxt="n", yaxt="n"
                     ,ylim=c(min(acoord[,2])-1.5, max(acoord[,2])+1.5)
-                    ,xlim=c(min(acoord[,1])-1, max(acoord[,1])+1),main=names(Leukemia)[i])
+                    ,xlim=c(min(acoord[,1])-1, max(acoord[,1])+1),main=names(DB$transpose)[i])
                 points(acoord[,1], acoord[,2], col=as.numeric(alabel), cex=1)
                 legend('topright',legend=levels(alabel),col=unique(as.numeric(alabel)),pch=1)
             }
