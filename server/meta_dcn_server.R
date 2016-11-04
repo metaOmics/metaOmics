@@ -227,8 +227,9 @@ meta_dcn_server <- function(input, output, session){
       img.src2 <- paste(DB.load.working.dir(db), 
         "Meta DCN/Basic_modules_figures_weight_", MetaDCNRes$w1, 
         "/Basic_module_component_",
-        MetaDCNRes$ModuleInCase[as.numeric(input$HModule), "Component.Number"],
-        "_repeat_", MetaDCNRes$ModuleInCase[as.numeric(input$HModule), 
+        MetaDCNRes$ModuleInControl[as.numeric(input$LModule), 
+        "Component.Number"],
+        "_repeat_", MetaDCNRes$ModuleInControl[as.numeric(input$LModule), 
               "Repeat.Index"], "_weight_", MetaDCNRes$w1, 
               "_backward.png", sep="")
       list(src=img.src2, contentType='image/png', alt="module")
@@ -237,8 +238,9 @@ meta_dcn_server <- function(input, output, session){
       paste("File name:", DB.load.working.dir(db), 
         "Meta DCN/Basic_modules_figures_weight_", MetaDCNRes$w1, 
         "/Basic_module_component_",
-        MetaDCNRes$ModuleInCase[as.numeric(input$HModule), "Component.Number"],
-        "_repeat_", MetaDCNRes$ModuleInCase[as.numeric(input$HModule), 
+        MetaDCNRes$ModuleInControl[as.numeric(input$LModule), 
+        "Component.Number"],
+        "_repeat_", MetaDCNRes$ModuleInControl[as.numeric(input$LModule), 
               "Repeat.Index"], "_weight_", MetaDCNRes$w1, 
               "_backward.png", sep="")
       })  
