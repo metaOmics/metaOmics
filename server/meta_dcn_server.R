@@ -67,6 +67,8 @@ meta_dcn_server <- function(input, output, session){
   observeEvent(input$GeneNet, {
     wait(session, "Generate network, may take a while")
     try({
+      print(getOption1(input)$labels[1:20])
+
       dir.path <- paste(DB.load.working.dir(db), "Meta DCN", sep="")
       if (!file.exists(dir.path)) dir.create(dir.path)
       res <- do.call(GeneNet, getOption1(input))
@@ -251,14 +253,16 @@ meta_dcn_server <- function(input, output, session){
   ##########################
   output$caseName = renderUI({
       selectInput(ns('caseName'), 'Case Name', 
-        unique(DB$active@clinicals[[1]][,1]),
-       selected=unique(DB$active@clinicals[[1]][,1])[1])
+        as.character(unique(DB$active@clinicals[[1]][,1])),
+       selected=as.character(unique(DB$active@clinicals[[1]][,1])[1]))
   })
+
   output$controlName = renderUI({
       selectInput(ns('controlName'), 'Control Name', 
-        unique(DB$active@clinicals[[1]][,1]), 
-        selected=unique(DB$active@clinicals[[1]][,1])[2])
+        as.character(unique(DB$active@clinicals[[1]][,1])), 
+        selected=as.character(unique(DB$active@clinicals[[1]][,1])[2]))
   })
+
   output$CPUNumbersButton = renderUI({
       selectInput(ns('CPUNumbers'), 'Number of CPUs', 
         seq(1,input$permutationTimes), 
