@@ -27,15 +27,15 @@ meta_dcn_server <- function(input, output, session){
 
   getOption2 <- function(input, GeneNetRes) {
    opt <- list(GeneNetRes, MCSteps=500, jaccardCutoff=0.8, 
-         repeatTimes=4, outputFigure=TRUE, silent=FALSE)
+         repeatTimes=3, outputFigure=TRUE, silent=FALSE)
    opt$MCSteps <- input$MCSteps
    opt$jaccardCutoff <- input$jaccardCutoff
    opt$repeatTimes <- input$repeatTimes
    return(opt)
   }
 
-  getOption3 <- function(input, GeneNetRes) {
-   opt <- list(GeneNetRes, FDRCutoff=0.3, w1=NULL, silent=FALSE)
+  getOption3 <- function(input, GeneNetRes, SearchBMRes) {
+   opt <- list(GeneNetRes, SearchBMRes, FDRCutoff=0.3, w1=NULL, silent=FALSE)
    opt$FDRCutoff <- input$FDRCutoff
    return(opt)
   }
@@ -46,6 +46,7 @@ meta_dcn_server <- function(input, output, session){
   ##########################
   DB <- reactiveValues(active=DB.load.active(db))
   GeneNetRes <- reactiveValues()
+  SearchBMRes <- reactiveValues()
   MetaDCNRes <- reactiveValues()
 
   ##########################
@@ -67,7 +68,6 @@ meta_dcn_server <- function(input, output, session){
   observeEvent(input$GeneNet, {
     wait(session, "Generate network, may take a while")
     try({
-      print(getOption1(input)$labels[1:20])
 
       dir.path <- paste(DB.load.working.dir(db), "Meta DCN", sep="")
       if (!file.exists(dir.path)) dir.create(dir.path)
@@ -84,18 +84,19 @@ meta_dcn_server <- function(input, output, session){
       # print High module
       output$repeatTimes <- renderUI({
         numericInput(ns("repeatTimes"), "Number to repeat:",
-          value=4)
+          value=3)
         })
       output$MCSteps <- renderUI({
         numericInput(ns("MCSteps"), "MC steps:",
           value=500)
         })
       output$jaccardCutoff <- renderUI({
-        numericInput(ns("jaccardCutoff"), "jaccardCutoff",
+        numericInput(ns("jaccardCutoff"), "Jaccard Cutoff",
           value=0.8)
         })
       output$SearchBM <- renderUI({
-        actionButton(ns('SearchBM'), 'Search for basic modules', icon=icon("rocket"), class="btn-success btn-run")
+        actionButton(ns('SearchBM'), 'Search for basic modules', 
+          icon=icon("rocket"), class="btn-success btn-run")
         })
 
     }, session)
@@ -107,19 +108,50 @@ meta_dcn_server <- function(input, output, session){
     try({
       dir.path <- paste(DB.load.working.dir(db), "Meta DCN", sep="")
       if (!file.exists(dir.path)) dir.create(dir.path)
-      do.call(SearchBM, getOption2(input, GeneNetRes))
+      res2 <- do.call(SearchBM, getOption2(input, GeneNetRes))
+      SearchBMRes$w1 <- res2$w1
+      SearchBMRes$BMInCase <- res2$BMInCase
+      SearchBMRes$BMInControl <- res2$BMInControl
+
       sendSuccessMessage(session, paste("Basic modules files written to", 
         dir.path))
       
-      # print High module
+      # print BMInCase
+      if(nrow(SearchBMRes$BMInCase) > 0){
+        output$BMInCaseHeader <- renderText({
+          "Basic modules higher correlated in case: "
+        })
+        output$BMInCaseTable <- DT::renderDataTable(DT::datatable({
+          SearchBMRes$BMInCase
+          }))
+      }else{
+        output$BMInCaseHeader <- renderText({
+          "No basic modules higher correlated in case"
+        })
+      }
+      
+     # print BMInControl
+      if(nrow(SearchBMRes$BMInControl) > 0){
+        output$BMInControlHeader <- renderText({
+          "Basic modules higher correlated in control: "
+        })
+        output$BMInControlTable <- DT::renderDataTable(DT::datatable({
+          SearchBMRes$BMInControl
+          }))
+      }else{
+        output$BMInControlHeader <- renderText({
+        "No basic modules higher correlated in control"
+        })
+      }
+
+      # select FDR
       output$FDRCutoff <- renderUI({
         sliderInput(ns("FDRCutoff"), label="FDR Cutoff", value=0.3, min=0, max=1)
         })
 
       output$MetaDCN <- renderUI({
-        actionButton(ns('MetaDCN'), 'Assemble supermdules', icon=icon("rocket"), class="btn-success btn-run")
+        actionButton(ns('MetaDCN'), 'Assemble supermodules', icon=icon("rocket"), class="btn-success btn-run")
         })
-
     }, session)
     done(session)
   })
@@ -130,60 +162,50 @@ meta_dcn_server <- function(input, output, session){
       dir.path <- paste(DB.load.working.dir(db), "Meta DCN", sep="")
       if (!file.exists(dir.path)) dir.create(dir.path)
 
-      res2 <- do.call(MetaDCN, getOption3(input, GeneNetRes))
-      MetaDCNRes$w1 <- res2$w1
-      MetaDCNRes$ModuleInCase <- res2$ModuleInCase
-      MetaDCNRes$ModuleInControl <- res2$ModuleInControl
-      MetaDCNRes$supermodule <- res2$supermodule
+      res3 <- do.call(MetaDCN, getOption3(input, GeneNetRes, SearchBMRes))
+      FDRCutoff <- getOption3(input, GeneNetRes, SearchBMRes)$FDRCutoff
+      MetaDCNRes$w1 <- res3$w1
+      MetaDCNRes$supermodule <- res3$supermodule
+      MetaDCNRes$BMInCaseSig <- res3$BMInCaseSig
+      MetaDCNRes$BMInControlSig <- res3$BMInControlSig
+
       sendSuccessMessage(session, paste("MetaDCN files written to", dir.path))
       
       # print High module
-      output$HModuleHeader <- renderText({
-        "Basic modules higher correlated in case"
-        })
-      if(nrow(MetaDCNRes$ModuleInCase) > 0){
-        output$HModuleText <- renderText({
-          paste(nrow(MetaDCNRes$ModuleInCase),
+      if(nrow(MetaDCNRes$BMInCaseSig) > 0){
+        output$BMInCaseText <- renderText({
+          paste(nrow(MetaDCNRes$BMInCaseSig),
             " modules higher correlated in case under FDR ", 
-            getOption3(input, GeneNetRes)$FDRCutoff, 
+            FDRCutoff, 
             ", select modules to plot:", sep="")
           })
-        output$HModuleSelect <- renderUI({
+        output$BMInCaseSelect <- renderUI({
             selectInput(ns('HModule'), '', 
-              seq(1,nrow(MetaDCNRes$ModuleInCase)))
+              seq(1,nrow(MetaDCNRes$BMInCaseSig)))
           })
-        output$HModuleTable <- DT::renderDataTable(DT::datatable({
-          res2$ModuleInCase
-          }))
       }else{
-        output$HModuleText <- renderText({
+        output$BMInCaseText <- renderText({
         paste("No modules higher correlated in case under FDR ", 
-          getOption3(input, GeneNetRes)$FDRCutoff, sep="")
+          FDRCutoff, sep="")
         })
       }
       
       # Print low module
-      output$LModuleHeader <- renderText({
-        "Basic modules higher correlated in control"
-        })
-      if(nrow(MetaDCNRes$ModuleInControl) > 0){
-        output$LModuleText <- renderText({
-          paste(nrow(MetaDCNRes$ModuleInControl), 
+      if(nrow(MetaDCNRes$BMInControlSig) > 0){
+        output$BMInControlText <- renderText({
+          paste(nrow(MetaDCNRes$BMInControlSig), 
             " modules higher correlated in control under FDR ", 
-            getOption3(input, GeneNetRes)$FDRCutoff, 
+            FDRCutoff, 
             ", select modules to plot:", sep="")
         })
-        output$LModuleSelect <- renderUI({
+        output$BMInControlSelect <- renderUI({
             selectInput(ns('LModule'), '', 
-              seq(1,nrow(MetaDCNRes$ModuleInControl)))
+              seq(1,nrow(MetaDCNRes$BMInControlSig)))
           })
-        output$LModuleTable <- DT::renderDataTable(DT::datatable({
-          MetaDCNRes$ModuleInControl
-          }))
       }else{
-        output$LModuleText <- renderText({
+        output$BMInControlText <- renderText({
           paste("No modules higher correlated in control under FDR ", 
-            getOption3(input, GeneNetRes)$FDRCutoff, sep="")
+            FDRCutoff, sep="")
         })
       }
 
@@ -191,10 +213,8 @@ meta_dcn_server <- function(input, output, session){
       output$supermoduleHeader <- renderText({
         "MetaDCN pathway-guided supermodules"
         })
-      output$supermodule <- DT::renderDataTable(DT::datatable({res2$supermodule
+      output$supermodule <- DT::renderDataTable(DT::datatable({MetaDCNRes$supermodule
       }))
-
-
     }, session)
     done(session)
   })
@@ -206,8 +226,8 @@ meta_dcn_server <- function(input, output, session){
       img.src <- paste(DB.load.working.dir(db), 
         "Meta DCN/Basic_modules_figures_weight_", MetaDCNRes$w1, 
         "/Basic_module_component_", 
-        MetaDCNRes$ModuleInCase[as.numeric(input$HModule), "Component.Number"],
-        "_repeat_", MetaDCNRes$ModuleInCase[as.numeric(input$HModule), 
+        MetaDCNRes$BMInCaseSig[as.numeric(input$HModule), "Component.Number"],
+        "_repeat_", MetaDCNRes$BMInCaseSig[as.numeric(input$HModule), 
               "Repeat.Index"], "_weight_", MetaDCNRes$w1, 
               "_forward.png", sep="")
       list(src=img.src, contentType='image/png', alt="module")
@@ -216,8 +236,8 @@ meta_dcn_server <- function(input, output, session){
       paste("File name:", DB.load.working.dir(db), 
         "Meta DCN/Basic_modules_figures_weight_", MetaDCNRes$w1, 
         "/Basic_module_component_",
-        MetaDCNRes$ModuleInCase[as.numeric(input$HModule), "Component.Number"],
-        "_repeat_", MetaDCNRes$ModuleInCase[as.numeric(input$HModule), 
+        MetaDCNRes$BMInCaseSig[as.numeric(input$HModule), "Component.Number"],
+        "_repeat_", MetaDCNRes$BMInCaseSig[as.numeric(input$HModule), 
               "Repeat.Index"], "_weight_", MetaDCNRes$w1, 
               "_forward.png", sep="")
       })  
@@ -229,9 +249,9 @@ meta_dcn_server <- function(input, output, session){
       img.src2 <- paste(DB.load.working.dir(db), 
         "Meta DCN/Basic_modules_figures_weight_", MetaDCNRes$w1, 
         "/Basic_module_component_",
-        MetaDCNRes$ModuleInControl[as.numeric(input$LModule), 
+        MetaDCNRes$BMInControlSig[as.numeric(input$LModule), 
         "Component.Number"],
-        "_repeat_", MetaDCNRes$ModuleInControl[as.numeric(input$LModule), 
+        "_repeat_", MetaDCNRes$BMInControlSig[as.numeric(input$LModule), 
               "Repeat.Index"], "_weight_", MetaDCNRes$w1, 
               "_backward.png", sep="")
       list(src=img.src2, contentType='image/png', alt="module")
@@ -240,9 +260,9 @@ meta_dcn_server <- function(input, output, session){
       paste("File name:", DB.load.working.dir(db), 
         "Meta DCN/Basic_modules_figures_weight_", MetaDCNRes$w1, 
         "/Basic_module_component_",
-        MetaDCNRes$ModuleInControl[as.numeric(input$LModule), 
+        MetaDCNRes$BMInControlSig[as.numeric(input$LModule), 
         "Component.Number"],
-        "_repeat_", MetaDCNRes$ModuleInControl[as.numeric(input$LModule), 
+        "_repeat_", MetaDCNRes$BMInControlSig[as.numeric(input$LModule), 
               "Repeat.Index"], "_weight_", MetaDCNRes$w1, 
               "_backward.png", sep="")
       })  

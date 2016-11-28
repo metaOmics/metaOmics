@@ -6,8 +6,8 @@ meta_dcn_ui <- function(id, label = "meta DCN") {
         uiOutput(ns('caseName')),
         uiOutput(ns('controlName')),
         numericInput(ns("permutationTimes"), "Number of Permutations:", 
-          value=3),
-        uiOutput(ns("CPUNumbersButton")),
+          value=4),
+        #uiOutput(ns("CPUNumbersButton")),
         sliderInput(ns("edgeCutoff"), label="Edge Cutoff", value=0.1, 
           min=0, max=1),
         tags$hr(),
@@ -20,22 +20,22 @@ meta_dcn_ui <- function(id, label = "meta DCN") {
         uiOutput(ns('MetaDCN'))
         ),
       mainPanel(
-        h3(textOutput(ns("HModuleHeader"))),
+        h3(textOutput(ns("BMInCaseHeader"))),
         br(),
-        DT::dataTableOutput(ns("HModuleTable")),
+        DT::dataTableOutput(ns("BMInCaseTable")),
         fluidRow( 
-          column(8, br(),h4(textOutput(ns("HModuleText")))),
-          column(2, uiOutput(ns("HModuleSelect")))
+          column(8, br(),h4(textOutput(ns("BMInCaseText")))),
+          column(2, uiOutput(ns("BMInCaseSelect")))
           ),
         imageOutput(ns("HMImage"), height = 500),
         textOutput(ns("src")),
         tags$hr(),
-        h3(textOutput(ns("LModuleHeader"))),
+        h3(textOutput(ns("BMInControlHeader"))),
         br(),
-        DT::dataTableOutput(ns("LModuleTable")),
+        DT::dataTableOutput(ns("BMInControlTable")),
         fluidRow(
-          column(8, br(),h4(textOutput(ns("LModuleText")))),
-          column(2, uiOutput(ns("LModuleSelect")))
+          column(8, br(),h4(textOutput(ns("BMInControlText")))),
+          column(2, uiOutput(ns("BMInControlSelect")))
           ),
         imageOutput(ns("LMImage"), height = 500),
         textOutput(ns("src2")),
