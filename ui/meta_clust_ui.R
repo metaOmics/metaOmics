@@ -4,7 +4,7 @@ meta_clust_ui <- function(id, label = "meta sparse K means") {
              sidebarLayout(
                  sidebarPanel(
                      h4("Summary Table"),
-                     tags$hr(),
+                     br(),br(),
                      tableOutput(ns("summaryTable")),
                      tags$hr(),
                      bsCollapse(id = "collapseExample", open = c("About","Run Meta Sparse K-Means"), multiple=TRUE,
@@ -40,7 +40,7 @@ blob/master/metaOmics_turtorial.pdf",target="_blank"),
                                                     helpIcon("step_w_help",HELP.step.w)
                                                 ),
 
-                                                actionButton(ns("tuneW"), "Tune wbounds",icon = icon("refresh", lib = "font-awesome")),
+                                                actionButton(ns("tuneW"), "Tune wbounds",icon = icon("refresh",lib="font-awesome")),
                                                 helpIcon("tune_w_help",HELP.tune.w),
                                                 style="primary"),
 
@@ -66,7 +66,7 @@ blob/master/metaOmics_turtorial.pdf",target="_blank"),
                                                 ),
                                               
                                                 br(),
-                                                actionButton(ns("clustGo"), "Run meta sparse K means",icon = icon("rocket", lib = "font-awesome")),
+                                                actionButton(ns("clustGo"), "Run meta sparse K means",icon = icon("rocket"),class="btn-success btn-runA"),
                                                 style="primary")
                                 )
 
