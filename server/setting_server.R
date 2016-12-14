@@ -123,4 +123,7 @@ setting_server <- function(input, output, session) {
 	    bioconductor.dep=c("Biobase", "GSEABase", "genefilter", "impute", "ConsensusClusterPlus", "irr", "cluster", "AnnotationDbi", "Rgraphviz"))
   check.pkg(TOOLSET.pca, 'meta PCA', cran.dep=c("PMA"),bioconductor.dep=c("impute"))
   check.pkg(TOOLSET.ktsp, 'Meta KTSP', cran.dep=c("doMC"))
+  check.pkg(TOOLSET.dcn, 'Meta DCN', cran.dep=c("igraph", "snow", "snowfall"), 
+    bioconductor.dep=c("genefilter"))
+
 }
