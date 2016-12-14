@@ -16,7 +16,7 @@ setting_ui <- function(id, label = "global settings") {
           tags$tr(tags$td("Meta DE"), tags$td(uiOutput(ns("opt.MetaDE")))),
           tags$tr(tags$td("Meta Clust"), tags$td(uiOutput(ns("opt.MetaSparseKmeans")))),
           tags$tr(tags$td("Meta Path"), tags$td(uiOutput(ns("opt.MetaPath")))),
-          tags$tr(tags$td("Meta PCA"), tags$td(uiOutput(ns("opt.MetaPCA")))),
+          tags$tr(tags$td("Meta PCA"), tags$td(uiOutput(ns("opt.metaPCA")))),
           tags$tr(tags$td("Meta KTSP"), tags$td(uiOutput(ns("opt.MetaKTSP")))),
           tags$tr(tags$td("Meta DCN"), tags$td(uiOutput(ns("opt.MetaDCN"))))
         )
