@@ -1,40 +1,95 @@
 meta_path_server <- function(input, output, session) {
+
+  library(MetaDE)	
   library(MetaPath)
   data(pathways)
 
   ns <- NS("meta_path")
 
   getOption <- function(input) {
-    opt <- list()
-    if (is.null(DE$result) || (length(input$useDE) > 0 && input$useDE == F)) {
+    study <- DB$active
+    n <- length(study@datasets)
+    opt <- list(ind.method=rep(IND.limma, n), covariate=NULL, rth.value=NULL, select.group=NULL , ref.level=NULL)
+     
       opt$arraydata <- DB$active@datasets
       opt$clinical.data <- DB$active@clinicals
-      opt$resp.type <- input$resp.type
-      opt$label <- input$label
-      if (input$resp.type == RESP.survival) {
-        opt$censoring <- input$censoring
+      opt$data.type <- DB$active@dtype
+
+    if (length(input$method) > 0) {
+      method <- input$method
+      opt$method  <- input$method
+      if (input$method == MAPE.MAPE) {
+	      opt$stat <- input$stat
+	    if (input$stat == MAPE.STAT.rth) {
+	      opt$rth.value <- input$rth.value
+	    }
       }
     } else {
-      opt$meta.p <- DE$result$meta.analysis$pval
-      opt$ind.p <- DE$result$ind.p
-      opt$MetaDE <- T
+          opt$method <- MAPE.CPI    	
+    }      
+
+      opt$ind.method <- unlist(lapply(1:n, function(index) {
+        tag.id <- paste("ind", index, sep="")
+        if (length(input[[tag.id]]) == 0)
+          IND.limma
+        else
+          input[[tag.id]]
+      }))
+            
+    if (length(input$covariate) == 0 || input$covariate == "None") {
+    } else {
+      opt$covariate <- input$covariate
     }
+    
+    if (length(input$tail) > 0) {
+      opt$tail <- input$tail
+    }
+
+    resp <- input$resp.type
+    clinical.options <- names(DB$active@clinicals[[1]])
+    labels <- DB$active@clinicals[[1]][,clinical.options[1]]
+    labels <- levels(as.factor(labels))
+
+    opt$resp.type <- resp
+    if (resp == RESP.two.class) {
+      if (length(input$label.col) > 0) {
+        opt$label <- input$label.col
+        opt$select.group <- c(input$control.label, input$expr.label)
+        opt$ref.level <- input$control.label
+      } else {
+        opt$label <- clinical.options[1]
+        opt$select.group <- c(labels[1], labels[2])
+        opt$ref.level <- labels[1]
+      }
+    } else if (resp == RESP.multi.class) {
+      if (length(input$label.col) > 0) {
+        opt$label <- input$label.col
+        opt$select.group <- input$multi.class.col
+        opt$ref.level <- input$control.label
+      } else {
+        opt$label <- clinical.options[1]
+        opt$select.group <- labels
+        opt$ref.level <- labels[1]
+      }
+    } else if (resp == RESP.continuous) {
+      if (length(input$label.col) > 0) {
+        opt$label <- input$conti.col
+      } else {
+        opt$label <- clinical.options[1]
+      }
+    } else if (resp == RESP.survival) {
+      if (length(input$time.col) > 0 && length(input$indicator.col)) {
+        opt$label <- c(input$time.col, input$indicator.col)
+      } else {
+        opt$label <- c(clinical.options[1], clinical.options[2])
+      }
+    }
+
     opt$pathway <- c()
     for (pathway in input$pathway) {
       opt$pathway <- c(opt$pathway, get(pathway))
     }
     opt$enrichment  <- input$enrichment
-
-    if (length(input$method) > 0) {
-      opt$method      <- input$method
-      if (input$method == MAPE.MAPE) {
-	opt$stat <- input$stat
-	if (input$stat == MAPE.STAT.rth)
-	  opt$rth.value <- input$rth.value
-      }
-    } else if (length(input$useDE) == 0 || input$useDE == F) {
-      opt$method <- MAPE.CPI
-    }
 
     if (input$enrichment == ENRICHMENT.KS) {
       opt$permute  <- input$permute
@@ -48,7 +103,7 @@ meta_path_server <- function(input, output, session) {
       opt$nperm <- input$nperm
       opt$qvalue.cal <- input$qvalue.cal
     }
-
+    
     opt$size.min <- input$size.min
     opt$size.max <- input$size.max
     tmp <- opt
@@ -96,23 +151,15 @@ meta_path_server <- function(input, output, session) {
   ##########################
   # Observers              #
   ##########################
+
   observeEvent(input$tabChange, {
     DB$active <- DB.load.active(db)
-    DB$working <- paste(DB.load.working.dir(db), "Meta Path", sep="/")
-    if (!file.exists(DB$working)) dir.create(DB$working)
-    tryCatch({
-      file.path <- paste(DB.load.working.dir(db), "Meta DE", "result.rds", sep="/")
-      DE$result <- readRDS(file.path)
-      sendInfoMessage(session, MSG.detect.de.result)
-    }, error=function(error){
-      DE$result <- NULL
-      sendInfoMessage(session, MSG.no.de.result)
-    })
+    DB$working <- paste(DB.load.working.dir(db), "Meta PATH", sep="/")
   })
 
   observeEvent(input$run, {
+    wait(session, "performing Meta Path Analysis")
     try({
-      wait(session, "performing Meta Path Analysis")
       MAPE$result <- do.call(MAPE2.0, getOption(input))
       dir.path <- paste(DB$working, "analysis summary", sep="/")
       if (!file.exists(dir.path)) dir.create(dir.path)
@@ -162,49 +209,85 @@ meta_path_server <- function(input, output, session) {
                     software=result$method,
                     output_dir=DB$working)
     sendSuccessMessage(session, paste("Clustering result saved to:", DB$working))
+
+    img.src <- paste(DB$working, paste("Clustering_files",input$Num_Clusters,"clusters",sep="_"), "Heatmap_clusters_all.png", sep="/")
+    print(img.src)
+    output$heatmap <- renderImage(              
+     list(src=img.src, contentType='image/png', alt="heatmap of clusters")
+     )           
     done(session)
   })
+  
+  
 
   ##########################
   # Render output/UI       #
   ##########################
-  output$srcSelect <- renderUI({
-    if (!is.null(DE$result)) {
-      radioButtons(ns("useDE"), 'Use Meta DE Result:', inline=T,
-        c(Yes=T, No=F), T
-      )
-    }
-  })
-
-  output$resp.opt <- renderUI({
-    if(is.null(DE$result) || (length(input$useDE) > 0 && input$useDE == F)) {
-      tagList(
-        selectizeInput(ns('resp.type'), "Response Type:", RESP.all),
-        uiOutput(ns("resp.type.option"))
-      )
-    }
-  })
-
+  
   output$resp.type.option <- renderUI({
-    if(length(input$resp.type) > 0) {
+    try({
+      validate()
       resp <- input$resp.type
       clinical.options <- names(DB$active@clinicals[[1]])
-      if (resp == RESP.two.class || resp == RESP.multi.class
-          || resp == RESP.continuous) {
-        selectInput(ns("label"), "Label Attribute:", clinical.options)
+      if (resp == RESP.two.class || resp == RESP.multi.class) {
+        tagList(
+          selectInput(ns("label.col"), "Label Attribute:", clinical.options),
+          uiOutput(ns("class.option"))
+        )
+      } else if (resp == RESP.continuous) {
+        selectInput(ns("conti.col"), "Label Attribute:", clinical.options)
       } else if (resp == RESP.survival) {
         tagList(
-          selectInput(ns("label"), "Time Attribute:", clinical.options),
-          selectInput(ns("censoring"), "Indicator Attribute:", clinical.options)
+          selectInput(ns("time.col"), "Time Attribute:", clinical.options),
+          selectInput(ns("indicator.col"), "Indicator Attribute:", clinical.options)
         )
       }
+    }, session)
+  })
+
+
+  output$class.option <- renderUI({
+    try({
+      validate()
+      labels <- DB$active@clinicals[[1]][,input$label.col]
+      labels <- levels(as.factor(labels))
+      if (input$resp.type == RESP.two.class) {
+        tagList(
+          selectInput(ns("control.label"), "Control Label:", labels, selected=labels[1]),
+          selectInput(ns("expr.label"), "Experimental Label:", labels, selected=labels[2])
+        )
+      } else if (input$resp.type == RESP.multi.class) {
+        tagList(
+          selectizeInput(ns("group.label"), "Group Labels:", labels, 
+                         multiple=T, options = select.noDefault),
+          selectInput(ns("control.label"), "Control Label:", labels)
+        )
+      }
+    }, session)
+  })  
+
+
+  output$ind.method.opt <- renderUI({
+    study <- DB$active
+    if (!is.null(study)) {
+      study.names <- names(study@datasets)
+        bsCollapsePanel("Setting Individual Study Method",
+          lapply(seq_along(study.names), function(index) {
+            tag.id <- ns(paste("ind", index, sep=""))
+            selectizeInput(tag.id, study.names[index], IND.all)
+          }), style="primary"
+        )
     }
   })
 
+  output$covariate.opt <- renderUI({
+    clinical.options <- names(DB$active@clinicals[[1]])
+    selectInput(ns("covariate"), "Covariate:", c(None="None", clinical.options))
+  })
+
+
   output$method.opt <- renderUI({
-    if (length(input$useDE) == 0 || input$useDE == F) {
       selectizeInput(ns('method'), "Software:", MAPE.all)
-    }
   })
 
   output$mape.opt <- renderUI({
@@ -230,13 +313,18 @@ meta_path_server <- function(input, output, session) {
 
   output$permute.opt <- renderUI({
     if (length(input$permute) > 0 && input$permute == T && 
-        input$enrichment == ENRICHMENT.KS) {
+        input$enrichment == ENRICHMENT.KS) { 	
       tagList(
-        selectizeInput(ns('permutation'), "Permutation Method", PERMUTE.all),
+#        selectizeInput(ns('permutation'), "Permutation Method", PERMUTE.all),
+        textOutput(ns("warn"), container=div),
         numericInput(ns("nperm"), "Number of Permutation", 500),
         selectizeInput(ns('qvalue.cal'), "q-value Calculation Method", QVALUE.all)
       )
     }
+  })
+
+  output$warn <- renderText({
+      paste0("Warning: permutation will be slow \n")
   })
 
   output$summary <- DT::renderDataTable(DT::datatable({

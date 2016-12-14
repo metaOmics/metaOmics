@@ -18,4 +18,7 @@ shinyServer(function(input, output, session) {
       callModule(meta_ktsp_server, "meta_ktsp")
   if (TOOLSET.dcn %in% installed)
     callModule(meta_dcn_server, "meta_dcn")
+  if (TOOLSET.qc %in% installed) ##
+    callModule(meta_qc_server, "meta_qc") ##
+
 })

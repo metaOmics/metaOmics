@@ -3,9 +3,19 @@ meta_path_ui <- function(id, label = "meta path") {
   tabPanel("Meta Path", value=id,
     sidebarLayout(
       sidebarPanel(
-        uiOutput(ns('srcSelect')),
-        uiOutput(ns('resp.opt')),
-        selectizeInput(ns('pathway'), "Pathway Dayabases:", GENESET.all, multiple=T,
+        bsCollapsePanel("Response Type", 
+          selectizeInput(ns("resp.type"), "", as.list(RESP.all)),
+          uiOutput(ns("resp.type.option")), style="primary"
+        ),
+        uiOutput(ns("ind.method.opt")),
+          bsCollapsePanel("Advanced",
+            tagList(
+              uiOutput(ns("covariate.opt")),
+              selectizeInput(ns("tail"), "Alternative Hypothesis", TAIL.all)
+            ), style="info"
+          ),        
+	tags$hr(),                             
+        selectizeInput(ns('pathway'), "Pathway Databases:", GENESET.all, multiple=T,
                        selected=c(GENESET.BioCarta, GENESET.GOBP, GENESET.GOCC,
                                GENESET.GOMF, GENESET.KEGG, GENESET.Reactome)),
         tags$hr(),
@@ -26,7 +36,7 @@ meta_path_ui <- function(id, label = "meta path") {
         actionButton(ns('run'), 'Step 1: Run Pathway Analysis', 
 		     icon=icon("rocket"), class="btn-success btn-run"),
         tags$hr(),
-        bsCollapsePanel("Step 2: Pathway Clustering Diagnotics",
+        bsCollapsePanel("Step 2: Pathway Clustering Diagnostics",
           uiOutput(ns('heatmap.opt')), style="primary"
         ),
         tags$hr(),
@@ -39,10 +49,12 @@ meta_path_ui <- function(id, label = "meta path") {
         DT::dataTableOutput(ns("summary")),
         tags$div(class="DocumentList",
           tags$ul(class="list-inline",
-            tags$li(class="DocumentItem", imageOutput(ns('consensus'), height="100%")),
-            tags$li(class="DocumentItem", imageOutput(ns('delta'), height="100%"))
+            tags$li(class="DocumentItem", imageOutput(ns('consensus'), height="50%")),
+            tags$li(class="DocumentItem", imageOutput(ns('delta'), height="50%"))
           )
-        )
+        ),
+        tags$hr(),
+        imageOutput(ns('heatmap'), height="50%") 
       )
     )
   )

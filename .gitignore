@@ -82,3 +82,6 @@ vignettes/*.pdf
 
 # doc
 doc/_site
+
+# mac .DS_Store
+.DS_Store

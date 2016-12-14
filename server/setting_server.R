@@ -112,6 +112,11 @@ setting_server <- function(input, output, session) {
     )
   })
 
+  check.pkg(TOOLSET.qc, 'Meta QC', 
+    cran.dep=c("survival", "combinat"),
+    bioconductor.dep=c("multtest","survival")
+  )
+
   check.pkg(TOOLSET.de, 'Meta DE', 
     cran.dep=c("survival", "combinat"),
     bioconductor.dep=c("limma", "cluster", "samr", "edgeR", "DESeq2", "impute", "Biobase")

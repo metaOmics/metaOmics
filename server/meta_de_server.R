@@ -1,5 +1,6 @@
 meta_de_server <- function(input, output, session) {
   library(MetaDE)
+  data(pathways) ###
 
   ns <- NS("meta_de")
 
@@ -8,6 +9,20 @@ meta_de_server <- function(input, output, session) {
     study <- DB$active
     n <- length(study@datasets)
     opt <- list(ind.method=rep(IND.limma, n), covariate=NULL, rth=NULL, select.group=NULL , ref.level=NULL, REM.type=NULL)
+
+    opt$size.min <- input$size.min 
+    opt$size.max <- input$size.max 
+
+    opt$pathway <- c() 
+    for (pathway in input$pathway) {
+      opt$pathway <- c(opt$pathway, get(pathway))
+    }
+    opt$enrichment  <- input$enrichment
+
+    if (input$enrichment == ENRICHMENT.fisher) {
+      opt$DEgene.number <- input$DEgene.number
+      opt$p.cut <- input$p.cut 
+    }
 
     opt$data <- study@datasets
     opt$clin.data <- study@clinicals
@@ -165,7 +180,32 @@ meta_de_server <- function(input, output, session) {
     , deleteFile=TRUE)
     done(session)
   })
-
+  
+  observeEvent(input$runpath, {	
+    wait(session, "running pathway analysis, should be soon")
+    try({
+      if(is.null(DE$result)) stop("You need to run DE analysis first")
+      meta.p  <- DE$result$meta.analysis$pval
+      pathway <- getOption(input)$pathway
+      enrichment <- getOption(input)$enrichment
+      p.cut <- getOption(input)$p.cut      
+      DEgene.number <- getOption(input)$DEgene.number
+      size.min <- getOption(input)$size.min       
+      size.max <- getOption(input)$size.max
+      DE$pathresult <- PathAnalysis(meta.p=meta.p,pathway=pathway,
+                              enrichment=enrichment,p.cut=p.cut,
+                              DEgene.number=DEgene.number,
+                              size.min=size.min, size.max=size.max)           
+      dir.path <- paste(DB.load.working.dir(db), "Meta DE", sep="/")
+      if (!file.exists(dir.path)) dir.create(dir.path)
+      file.path <- paste(dir.path, "pathway.summary.csv", sep="/")
+      write.csv(DE$pathresult, file=file.path)
+      sendSuccessMessage(session, paste("pathway summary file written to", file.path))
+    }, session)
+    done(session)
+  })    
+###  
+  
   ##########################
   # Render output/UI       #
   ##########################
@@ -317,5 +357,35 @@ meta_de_server <- function(input, output, session) {
       )
     }
   })
+
+  output$enrichment.opt <- renderUI({
+     if (input$enrichment == ENRICHMENT.fisher) {
+          tagList(
+           numericInput(ns("p.cut"), "p-value cutoff", NULL),
+           textOutput(ns("geneLeft.path"), container=div),
+           numericInput(ns("DEgene.number"), "number of DE genes", NULL)
+          )
+    }
+  })
+  
+  output$geneLeft.path <- renderText({
+    if (!is.null(DE$summary)) {
+      count <- sum(DE$summary$pval <= input$p.cut)
+      paste(count, "genes are selected for pathway analysis \n")
+    }
+  })
+  
+
+  output$downloadPathwayCsv <- downloadHandler(
+    filename=function(){"pathway.result.csv"},
+    content=function(file) {
+      write.csv(DE$pathresult, file=file)
+    }
+  )
+
+  output$pathresult <- DT::renderDataTable(DT::datatable({
+    DE$pathresult
+  }))
+
 
 }

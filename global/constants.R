@@ -6,7 +6,8 @@ TOOLSET.path  <- "MetaPath"
 TOOLSET.pca   <- "metaPCA"
 TOOLSET.ktsp  <- "MetaKTSP"
 TOOLSET.dcn  <- "MetaDCN"
-TOOLSET.all <- c(TOOLSET.de, TOOLSET.clust, TOOLSET.path, TOOLSET.pca, TOOLSET.ktsp, TOOLSET.dcn) 
+TOOLSET.qc    <- "MetaQC" ##
+TOOLSET.all <- c(TOOLSET.de, TOOLSET.clust, TOOLSET.path, TOOLSET.pca, TOOLSET.ktsp, TOOLSET.dcn, TOOLSET.qc) ##
 
 select.noDefault <- list(
   placeholder = 'Choose from below',

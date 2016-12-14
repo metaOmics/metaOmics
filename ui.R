@@ -19,6 +19,8 @@ if (TOOLSET.ktsp %in% enabled)
     toolsets <- c(toolsets, list(meta_ktsp_ui("meta_ktsp")))
 if (TOOLSET.dcn %in% enabled)
   toolsets <- c(toolsets, list(meta_dcn_ui("meta_dcn")))
+if (TOOLSET.qc %in% enabled) ##
+  toolsets <- c(toolsets, list(meta_qc_ui("meta_qc"))) ##
 
 if (length(toolsets) > 1) {
   toolsets <- do.call(navbarMenu, toolsets)
