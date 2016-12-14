@@ -6,10 +6,23 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(shiny)
+library(shinyBS)
+library(preproc)
+source("global/constants.R")
+source("global/messages.R")
+source("global/help.R")
+source("global/database.R")
 source("global/helpers.R")
 ```
 
-## Try(code, session)
+<script>
+loading = document.createElement('div')
+loading.innerHTML = '<div id="loading"><div id="loadingcontent"><p id="loadingspinner">loading......</p></div></div>'
+header = document.getElementById("header")
+header.insertBefore(loading, header.childNodes[0])
+</script>
+
+## Try(code, session) 
 If you enclose a block of code in `Try` block, the warning messages 
 and error messages will be output to browser as notifications.
 

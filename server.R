@@ -12,6 +12,8 @@ shinyServer(function(input, output, session) {
     callModule(meta_clust_server, "meta_clust")
   if (TOOLSET.path %in% installed)
     callModule(meta_path_server, "meta_path")
+  if (TOOLSET.qc %in% installed) ##
+    callModule(meta_qc_server, "meta_qc") ##
 
   # callModule(meta_pca_server,"meta_pca")
 })
