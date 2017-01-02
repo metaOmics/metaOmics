@@ -5,10 +5,10 @@ meta_qc_ui <- function(id, label = "Meta QC") {
     sidebarLayout(
       sidebarPanel(
 #       uiOutput(ns("srcSelect")),
-       radioButtons(ns("useExample"), 'Use Example Dataset:', inline=T,c(Yes=T, No=F), T),
+#       radioButtons(ns("useExample"), 'Use Example Dataset:', inline=T,c(Yes=T, No=F), T),
          bsCollapsePanel("Options",
-          radioButtons(ns("overlap.gene"), 'Take only overlapped genes: ', inline=T, c(Yes=T, No=F), T),
-            radioButtons(ns("filter.gene"), 'Perform gene filtering: ', inline=T, c(Yes=T, No=F), F),                     
+          #radioButtons(ns("overlap.gene"), 'Take only overlapped genes: ', inline=T, c(Yes=T, No=F), T),
+            radioButtons(ns("filter.gene"), 'Perform gene filtering: ', inline=T, c(Yes=T, No=F), T),                     
                bsCollapsePanel(
                   tagList(
                     uiOutput(ns("filter.mean")),
@@ -25,7 +25,7 @@ meta_qc_ui <- function(id, label = "Meta QC") {
         tags$hr(),                                       
           bsCollapsePanel("Advanced Options",
                 tagList(
-                     radioButtons(ns("filter.pathway"), 'Perform pathway filtering: ', inline=T, c(Yes=T, No=F), T),
+                     #radioButtons(ns("filter.pathway"), 'Perform pathway filtering: ', inline=T, c(Yes=T, No=F), T),
                      uiOutput(ns("min")),
                      uiOutput(ns("max")),
                      numericInput(ns("permutation"),"Number of permutations", value=100)

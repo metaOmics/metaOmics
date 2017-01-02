@@ -5,16 +5,16 @@ meta_qc_server <- function(input, output,session) {
    getOption <- function(input) {
 
     data(pathway) ## c2.all
-    data(prostate) 
+    #data(prostate8) 
           
      opt <- list() 
       
-    if(length(input$useExample)>0 && input$useExample == T) {     	
-     	 study <- prostate
-         n <- length(study$datasets)
-       opt$DList <- study$datasets
-       opt$colLabel <- study$clinicals
-     } else {
+#    if(length(input$useExample)>0 && input$useExample == T) {     	
+#     	 study <- prostate8
+#         n <- length(study$data)
+#       opt$DList <- study$data
+#       opt$colLabel <- study$dataLabel
+#     } else {
      	 study <- DB$active
          n <- length(study@datasets)
          opt$DList <- study@datasets
@@ -26,10 +26,10 @@ meta_qc_server <- function(input, output,session) {
         }
 
         opt$colLabel <- colLabel
-     }
+#     }
     
      opt$GList <- pathway[[1]]   
-     opt$overlapGenes <- input$overlap.gene
+     #opt$overlapGenes <- input$overlap.gene
      opt$filterGenes <- input$filter.gene
      opt$cutRatioByMean <- input$filter.mean.gene
      opt$cutRatioByVar <- input$filter.var.gene
@@ -37,7 +37,7 @@ meta_qc_server <- function(input, output,session) {
      opt$pvalAdjustGene <- input$adjust.pvalue.gene
      opt$pvalCutPath <- input$pvalue.cut.pathway
      opt$pvalAdjustPath <- input$adjust.pvalue.pathway   
-     opt$filterPathway <- input$filter.pathway
+     #opt$filterPathway <- input$filter.pathway
      opt$minNumGenes <- input$size.min
      opt$maxNumGenes <- input$size.max
      opt$B <- input$permutation
@@ -74,7 +74,7 @@ meta_qc_server <- function(input, output,session) {
 #    print(length(opt$DList))
 #    print(length(opt$colLabel))
 #    print(length(opt$GList))
-     print(opt$pvalAdjustGene)
+#    print(opt$pvalAdjustGene)
 
    try({
       QC$result <- suppressWarnings(do.call(MetaQC, getOption(input)))
@@ -85,21 +85,22 @@ meta_qc_server <- function(input, output,session) {
       saveRDS(QC$result, file=file.path)
       sendSuccessMessage(session, paste("result.rds written to", file.path))
       summary <- cbind(QC$result$scoreTable,QC$result$SMR)
+      colnames(summary)[ncol(summary)] <- "SMR"
       file.path <- paste(dir.path, "summaryTable.csv", sep="/")
       write.csv(summary, file=file.path)
       #write.csv(QC$result$SMR, file=paste(dir.path, "SMR.csv", sep="/"))
       sendSuccessMessage(session, paste("summary written to", file.path), unique=T)      
       
-      outfile <- "biplot.png" 
-      png(outfile)
-        getPlot(QC$result$scoreTable)
+      biplot.path <- paste(dir.path, "biplot.png", sep="/")
+      png(biplot.path)
+         plotMetaQC(QC$result$scoreTable)
       dev.off()
       
       sendSuccessMessage(session, paste("PCA biplot saved to", dir.path))
 
      output$biplot <- renderImage(      
-          list(src=outfile, contentType='image/png', alt="biplot"), 
-            deleteFile=TRUE
+          list(src=biplot.path, contentType='image/png', alt="biplot"), 
+            deleteFile=FALSE
         )
       
       done(session) 
@@ -114,6 +115,7 @@ meta_qc_server <- function(input, output,session) {
 #  },session)
 
 })
+
   output$summary <- DT::renderDataTable(DT::datatable({
     table <- QC$result$scoreTable
     SMR <- QC$result$SMR
@@ -123,13 +125,13 @@ meta_qc_server <- function(input, output,session) {
 
   output$filter.mean <- renderUI({
     if (input$filter.gene == T) {
-      numericInput(ns("filter.mean.gene"), "cut lowest (xx*100)th percentile by mean", value=0.27)
+      numericInput(ns("filter.mean.gene"), "cut lowest (xx*100)th percentile by mean", value=0.3)
     }
   })
 
   output$filter.var <- renderUI({
     if (input$filter.gene == T) {
-      numericInput(ns("filter.var.gene"), "cut lowest (xx*100)th percentile by variance", value=0.27)
+      numericInput(ns("filter.var.gene"), "cut lowest (xx*100)th percentile by variance", value=0.3)
     }
   })
 
@@ -142,15 +144,15 @@ meta_qc_server <- function(input, output,session) {
   )
 
   output$min <- renderUI({
-    if (input$filter.pathway == T) {
+    #if (input$filter.pathway == T) {
       numericInput(ns("size.min"), "pathway min gene size", 5)
-    }
+    #}
   })
 
   output$max <- renderUI({
-    if (input$filter.pathway == T) {
+    #if (input$filter.pathway == T) {
       numericInput(ns("size.max"), "pathway max gene size", 200)
-    }
+    #}
   })  
    	        
 #  output$srcSelect <- renderUI({
