@@ -8,7 +8,7 @@ meta_qc_ui <- function(id, label = "Meta QC") {
 #       radioButtons(ns("useExample"), 'Use Example Dataset:', inline=T,c(Yes=T, No=F), T),
          bsCollapsePanel("Options",
           #radioButtons(ns("overlap.gene"), 'Take only overlapped genes: ', inline=T, c(Yes=T, No=F), T),
-            radioButtons(ns("filter.gene"), 'Perform gene filtering: ', inline=T, c(Yes=T, No=F), T),                     
+            radioButtons(ns("filter.gene"), 'Perform gene filtering: ', inline=T, c(Yes=T, No=F), F),                     
                bsCollapsePanel(
                   tagList(
                     uiOutput(ns("filter.mean")),

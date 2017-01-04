@@ -11,20 +11,20 @@ for (toolset in TOOLSET.all) {
 }
 
 toolsets <- c("Toolsets")
+if (TOOLSET.qc %in% enabled) ##
+  toolsets <- c(toolsets, list(meta_qc_ui("meta_qc"))) ##
 if (TOOLSET.de %in% enabled)
   toolsets <- c(toolsets, list(meta_de_ui("meta_de")))
 if (TOOLSET.clust %in% enabled)
-  toolsets <- c(toolsets, list(meta_clust_ui("meta_clust")))
-if (TOOLSET.path %in% enabled && TOOLSET.de %in% enabled)
     toolsets <- c(toolsets, list(meta_path_ui("meta_path")))
 if (TOOLSET.pca %in% enabled)
     toolsets <- c(toolsets, list(meta_pca_ui("meta_pca")))
 if (TOOLSET.ktsp %in% enabled)
-    toolsets <- c(toolsets, list(meta_ktsp_ui("meta_ktsp")))
+  toolsets <- c(toolsets, list(meta_clust_ui("meta_clust")))
 if (TOOLSET.dcn %in% enabled)
   toolsets <- c(toolsets, list(meta_dcn_ui("meta_dcn")))
-if (TOOLSET.qc %in% enabled) ##
-  toolsets <- c(toolsets, list(meta_qc_ui("meta_qc"))) ##
+if (TOOLSET.path %in% enabled && TOOLSET.de %in% enabled)
+    toolsets <- c(toolsets, list(meta_ktsp_ui("meta_ktsp")))
 
 if (length(toolsets) > 1) {
   toolsets <- do.call(navbarMenu, toolsets)
