@@ -11,10 +11,14 @@ First, clone the project
 git clone https://github.com/metaOmic/metaOmics
 ```
 
-* in R (suppose the application diretory is metaOmics)
+* in R (suppose the application directory is metaOmics)
 ```R
 install.packages('shiny')
 shiny::runApp('metaOmics', port=9987, launch.browser=T)
+```
+## Where to find the tutorial 
+```
+https://github.com/metaOmic/tutorial/blob/master/metaOmics_turtorial.pdf
 ```
 
 ## How to start the documentation
