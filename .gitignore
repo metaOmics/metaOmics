@@ -74,7 +74,8 @@ vignettes/*.pdf
 
 # App database
 /data
-!/data/example/*
+!/data/example/prostate
+!/data/example/leukemia
 .Database
 
 # Temporari files
