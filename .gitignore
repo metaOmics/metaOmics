@@ -74,7 +74,7 @@ vignettes/*.pdf
 
 # App database
 /data
-!/data/example
+!/data/example/*
 .Database
 
 # Temporari files

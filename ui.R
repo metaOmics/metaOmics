@@ -1,4 +1,8 @@
 installed <- installed.packages()[,"Package"]
+
+if (TOOLSET.de %in% installed ==F && TOOLSET.path %in% installed)
+installed <- installed[-grep(TOOLSET.path,installed,fixed=T)]
+
 enabled <- c()
 for (toolset in TOOLSET.all) {
   if (toolset %in% installed) {
@@ -11,7 +15,7 @@ if (TOOLSET.de %in% enabled)
   toolsets <- c(toolsets, list(meta_de_ui("meta_de")))
 if (TOOLSET.clust %in% enabled)
   toolsets <- c(toolsets, list(meta_clust_ui("meta_clust")))
-if (TOOLSET.path %in% enabled)
+if (TOOLSET.path %in% enabled && TOOLSET.de %in% enabled)
     toolsets <- c(toolsets, list(meta_path_ui("meta_path")))
 if (TOOLSET.pca %in% enabled)
     toolsets <- c(toolsets, list(meta_pca_ui("meta_pca")))

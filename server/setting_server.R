@@ -9,6 +9,10 @@ setting_server <- function(input, output, session) {
     output.id <- paste("opt", pkg, sep=".")
     log.id <- paste("log", pkg, sep=".")
     output[[output.id]] <- renderUI({
+    	
+       if (TOOLSET.de %in% PACKAGES$installed ==F && TOOLSET.path %in% PACKAGES$installed)
+      PACKAGES$installed <- PACKAGES$installed[-grep(TOOLSET.path,PACKAGES$installed,fixed=T)]
+	
       PACKAGES$installed
       if (supported) {
         if (installed(pkg)) {
@@ -42,9 +46,13 @@ setting_server <- function(input, output, session) {
           }
         }
         sendInfoMessage(session,paste("installing", pkg, "from Github"))
-        devtools::install_github(paste("metaOmic", pkg, sep="/"))
+        devtools::install_github(paste("metaOmic", pkg, sep="/"),force=T)
         
         PACKAGES$installed <- installed.packages()[,"Package"]
+        
+         if (TOOLSET.de %in% PACKAGES$installed ==F && TOOLSET.path %in% PACKAGES$installed)
+        PACKAGES$installed <- PACKAGES$installed[-grep(TOOLSET.path,PACKAGES$installed,fixed=T)]
+        
         sendSuccessMessage(session, paste(pkg, "installed"))
         sendSuccessMessage(session, MSG.installed, unique=T)
       }, session)
