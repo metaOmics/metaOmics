@@ -24,7 +24,7 @@ preproc_ui <- function(id, label= "preprocessing data") {
                   c(None='', 'Double Quote'='"', 'Single Quote'="'"), '"'
                 ),
                 radioButtons(ns("log"), 'Log tranforming data', inline=T,
-                  c('Yes'=T, 'No'=F),  F 
+                  c('Yes'=T, 'No'=F), F 
                 ),
                 tags$hr()
               ),
