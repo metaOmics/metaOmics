@@ -73,9 +73,7 @@ vignettes/*.pdf
 *.knit.md
 
 # App database
-/data
-!/data/example/prostate
-!/data/example/leukemia
+/data/studies
 .Database
 
 # Temporari files
