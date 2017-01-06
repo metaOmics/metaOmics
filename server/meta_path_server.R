@@ -154,15 +154,16 @@ meta_path_server <- function(input, output, session) {
 
   observeEvent(input$tabChange, {
     DB$active <- DB.load.active(db)
-    DB$working <- paste(DB.load.working.dir(db), "Meta PATH", sep="/")
+    dir.path <- paste(DB.load.working.dir(db), "Meta PATH", sep="")
+    if (!file.exists(dir.path)) dir.create(dir.path)
+    DB$working <- dir.path
   })
 
   observeEvent(input$run, {
     wait(session, "performing Meta Path Analysis")
     try({
       MAPE$result <- do.call(MAPE2.0, getOption(input))
-      dir.path <- paste(DB$working, "analysis summary", sep="/")
-      if (!file.exists(dir.path)) dir.create(dir.path)
+      dir.path <- DB$working
       saveRDS(MAPE$result, file=paste(dir.path, "result.rds", sep="/"))
       write.csv(MAPE$result$summary, file=paste(dir.path, "summary.csv", sep="/"))
       sendSuccessMessage(session,
@@ -181,7 +182,7 @@ meta_path_server <- function(input, output, session) {
       else
         sendErrorMessage(session, error$message)
     })
-
+    
     output$consensus <- renderImage({
       img.src <- paste(DB$working, "clustering diagnostics", "consensus021.png", sep="/")
       list(src=img.src, contentType='image/png', alt="consensus plot")
@@ -201,7 +202,7 @@ meta_path_server <- function(input, output, session) {
     MAPE.Clustering(summary=result$summary,
                     Num_Clusters=input$Num_Clusters,
                     Num_of_gene_lists=result$Num_of_gene_lists,
-                    genelist=genelist,
+                    genelist=result$genelist,
                     kappa.result=diagnostics$kappa,
                     pathway=result$pathway,
                     enrichment=result$enrichment,
@@ -351,7 +352,7 @@ meta_path_server <- function(input, output, session) {
   output$clustering.opt <- renderUI({
     if (!is.null(MAPE$diagnostics)) {
       tagList(
-        numericInput(ns("Num_Clusters"), "Number Of Clusters", 6, min=2),
+        numericInput(ns("Num_Clusters"), "Number Of Clusters", 5, min=2),
         actionButton(ns('cluster'), 'Get Clustering Result', 
                     icon=icon("paint-brush"), class="btn-success btn-run lower-btn")
       )
