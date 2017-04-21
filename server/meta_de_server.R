@@ -42,6 +42,14 @@ meta_de_server <- function(input, output, session) {
       else
         opt$REM.type <- input$REM.type
     }
+    
+    opt$paired <- unlist(lapply(1:n, function(index) {
+      tag.id <- paste("paired", index, sep="")
+      if (length(input[[tag.id]]) == 0)
+        F
+      else
+        input[[tag.id]] == T
+    }))
 
     if (input$meta.type == META.TYPE.p) {
       opt$ind.method <- unlist(lapply(1:n, function(index) {
@@ -51,15 +59,7 @@ meta_de_server <- function(input, output, session) {
         else
           input[[tag.id]]
       }))
-    } else if (input$meta.type == META.TYPE.effect) {
-      opt$paired <- unlist(lapply(1:n, function(index) {
-        tag.id <- paste("paired", index, sep="")
-        if (length(input[[tag.id]]) == 0)
-          F
-        else
-          input[[tag.id]] == T
-      }))
-    }
+    } 
 
     resp <- input$resp.type
     clinical.options <- names(DB$active@clinicals[[1]])
@@ -254,21 +254,28 @@ meta_de_server <- function(input, output, session) {
     study <- DB$active
     if (!is.null(study)) {
       study.names <- names(study@datasets)
-      if (input$meta.type == META.TYPE.p) {
-        bsCollapsePanel("Setting Individual Study Method",
+       if (input$meta.type == META.TYPE.p) {
+         bsCollapse(bsCollapsePanel("Setting Individual Study Method",
           lapply(seq_along(study.names), function(index) {
             tag.id <- ns(paste("ind", index, sep=""))
             selectizeInput(tag.id, study.names[index], IND.all)
-          }), style="primary"
-        )
-      } else if (input$meta.type == META.TYPE.effect) {
+          })
+        ),
+          bsCollapsePanel("Setting Individual Study Paired Option",
+                        lapply(seq_along(study.names), function(index) {
+                          tag.id <- ns(paste("paired", index, sep=""))
+                          radioButtons(tag.id, paste(study.names[index], "paired?"),
+                                       c(Yes=T, No=F), F, inline=T)
+                        })
+        ))
+      } else {
         bsCollapsePanel("Setting Individual Study Paired Option",
-          lapply(seq_along(study.names), function(index) {
-            tag.id <- ns(paste("paired", index, sep=""))
-            radioButtons(tag.id, paste(study.names[index], "paired?"),
-                         c(Yes=T, No=F), F, inline=T)
-          }), style="primary"
-        )
+                        lapply(seq_along(study.names), function(index) {
+                          tag.id <- ns(paste("paired", index, sep=""))
+                          radioButtons(tag.id, paste(study.names[index], "paired?"),
+                                       c(Yes=T, No=F), F, inline=T)
+                        })
+        )        
       }
     }
   })

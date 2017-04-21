@@ -7,7 +7,9 @@ meta_path_ui <- function(id, label = "meta path") {
           selectizeInput(ns("resp.type"), "", as.list(RESP.all)),
           uiOutput(ns("resp.type.option")), style="primary"
         ),
-        uiOutput(ns("ind.method.opt")),
+        bsCollapsePanel("Individual Study Option",
+                        uiOutput(ns("ind.method.opt")),style="primary"
+        ),
           bsCollapsePanel("Advanced",
             tagList(
               uiOutput(ns("covariate.opt")),

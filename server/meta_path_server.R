@@ -35,6 +35,14 @@ meta_path_server <- function(input, output, session) {
         else
           input[[tag.id]]
       }))
+      
+      opt$paired <- unlist(lapply(1:n, function(index) {
+        tag.id <- paste("paired", index, sep="")
+        if (length(input[[tag.id]]) == 0)
+          F
+        else
+          input[[tag.id]] == T
+      }))
             
     if (length(input$covariate) == 0 || input$covariate == "None") {
     } else {
@@ -272,12 +280,19 @@ meta_path_server <- function(input, output, session) {
     study <- DB$active
     if (!is.null(study)) {
       study.names <- names(study@datasets)
-        bsCollapsePanel("Setting Individual Study Method",
-          lapply(seq_along(study.names), function(index) {
-            tag.id <- ns(paste("ind", index, sep=""))
-            selectizeInput(tag.id, study.names[index], IND.all)
-          }), style="primary"
-        )
+      bsCollapse(bsCollapsePanel("Setting Individual Study Method",
+                                 lapply(seq_along(study.names), function(index) {
+                                   tag.id <- ns(paste("ind", index, sep=""))
+                                   selectizeInput(tag.id, study.names[index], IND.all)
+                                 })
+      ),
+      bsCollapsePanel("Setting Individual Study Paired Option",
+                      lapply(seq_along(study.names), function(index) {
+                        tag.id <- ns(paste("paired", index, sep=""))
+                        radioButtons(tag.id, paste(study.names[index], "paired?"),
+                                     c(Yes=T, No=F), F, inline=T)
+                      })
+      ))
     }
   })
 

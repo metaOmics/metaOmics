@@ -9,7 +9,9 @@ meta_de_ui <- function(id, label = "meta DE") {
           selectizeInput(ns("resp.type"), "", as.list(RESP.all)),
           uiOutput(ns("resp.type.option")), style="primary"
         ),
-        uiOutput(ns("ind.method.opt")),
+        bsCollapsePanel("Individual Study Option",
+          uiOutput(ns("ind.method.opt")),style="primary"
+        ),
 	tags$hr(),
         bsCollapse(id="meta_de-advanced",
           bsCollapsePanel("Advanced Options",
@@ -28,7 +30,7 @@ meta_de_ui <- function(id, label = "meta DE") {
         actionButton(ns('run'), 'Run', icon=icon("rocket"), class="btn-success btn-run") , 
 
         tags$hr(),                                       
-        selectizeInput(ns('pathway'), "Pathway Dayabases:", GENESET.all, multiple=T,
+        selectizeInput(ns('pathway'), "Pathway Databases:", GENESET.all, multiple=T,
                        selected=c(GENESET.BioCarta, GENESET.GOBP, GENESET.GOCC,
                                GENESET.GOMF, GENESET.KEGG, GENESET.Reactome)),
         tags$hr(),                               
