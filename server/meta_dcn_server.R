@@ -6,7 +6,7 @@ meta_dcn_server <- function(input, output, session){
 
   getOption1 <- function(input) {
    study <- DB$active
-   dir.path <- paste(DB.load.working.dir(db), "Meta DCN", sep="")
+   dir.path <- paste(DB.load.working.dir(db), "MetaNetwork", sep="")
    n <- length(study@datasets)
    opt <- list(data=NULL, labels=NULL, caseName=NULL, controlName=NULL,
     meanFilter=0, SDFilter=0, edgeCutoff=NULL, permutationTimes=NULL,
@@ -63,13 +63,14 @@ meta_dcn_server <- function(input, output, session){
   observeEvent(input$tabChange, {
     DB$active <- DB.load.active(db)
     DB$working.dir <- DB.load.working.dir(db)
+    DB$transpose <- lapply(DB$active@datasets,t)    
   })
 
   observeEvent(input$GeneNet, {
     wait(session, "Generate network, may take a while")
     try({
 
-      dir.path <- paste(DB.load.working.dir(db), "Meta DCN", sep="")
+      dir.path <- paste(DB.load.working.dir(db), "MetaNetwork", sep="")
       if (!file.exists(dir.path)) dir.create(dir.path)
       res <- do.call(GeneNet, getOption1(input))
       GeneNetRes$caseName <- res$caseName
@@ -106,7 +107,7 @@ meta_dcn_server <- function(input, output, session){
   observeEvent(input$SearchBM, {
     wait(session, "Search for basic modules, may take a while")
     try({
-      dir.path <- paste(DB.load.working.dir(db), "Meta DCN", sep="")
+      dir.path <- paste(DB.load.working.dir(db), "MetaNetwork", sep="")
       if (!file.exists(dir.path)) dir.create(dir.path)
       res2 <- do.call(SearchBM, getOption2(input, GeneNetRes))
       SearchBMRes$w1 <- res2$w1
@@ -159,7 +160,7 @@ meta_dcn_server <- function(input, output, session){
   observeEvent(input$MetaDCN, {
     wait(session, "running MetaDCN, may take a while")
     try({
-      dir.path <- paste(DB.load.working.dir(db), "Meta DCN", sep="")
+      dir.path <- paste(DB.load.working.dir(db), "MetaNetwork", sep="")
       if (!file.exists(dir.path)) dir.create(dir.path)
 
       res3 <- do.call(MetaDCN, getOption3(input, GeneNetRes, SearchBMRes))
@@ -224,7 +225,7 @@ meta_dcn_server <- function(input, output, session){
   observeEvent(input$HModule, {
     output$HMImage <- renderImage({
       img.src <- paste(DB.load.working.dir(db), 
-        "Meta DCN/Basic_modules_figures_weight_", MetaDCNRes$w1, 
+        "MetaNetwork/Basic_modules_figures_weight_", MetaDCNRes$w1, 
         "/Basic_module_component_", 
         MetaDCNRes$BMInCaseSig[as.numeric(input$HModule), "Component.Number"],
         "_repeat_", MetaDCNRes$BMInCaseSig[as.numeric(input$HModule), 
@@ -234,7 +235,7 @@ meta_dcn_server <- function(input, output, session){
     }, deleteFile = FALSE)
     output$src <- renderText({
       paste("File name:", DB.load.working.dir(db), 
-        "Meta DCN/Basic_modules_figures_weight_", MetaDCNRes$w1, 
+        "MetaNetwork/Basic_modules_figures_weight_", MetaDCNRes$w1, 
         "/Basic_module_component_",
         MetaDCNRes$BMInCaseSig[as.numeric(input$HModule), "Component.Number"],
         "_repeat_", MetaDCNRes$BMInCaseSig[as.numeric(input$HModule), 
@@ -247,7 +248,7 @@ meta_dcn_server <- function(input, output, session){
   observeEvent(input$LModule, {
     output$LMImage <- renderImage({
       img.src2 <- paste(DB.load.working.dir(db), 
-        "Meta DCN/Basic_modules_figures_weight_", MetaDCNRes$w1, 
+        "MetaNetwork/Basic_modules_figures_weight_", MetaDCNRes$w1, 
         "/Basic_module_component_",
         MetaDCNRes$BMInControlSig[as.numeric(input$LModule), 
         "Component.Number"],
@@ -258,7 +259,7 @@ meta_dcn_server <- function(input, output, session){
     }, deleteFile = FALSE)
     output$src2 <- renderText({
       paste("File name:", DB.load.working.dir(db), 
-        "Meta DCN/Basic_modules_figures_weight_", MetaDCNRes$w1, 
+        "MetaNetwork/Basic_modules_figures_weight_", MetaDCNRes$w1, 
         "/Basic_module_component_",
         MetaDCNRes$BMInControlSig[as.numeric(input$LModule), 
         "Component.Number"],
@@ -271,6 +272,20 @@ meta_dcn_server <- function(input, output, session){
   ##########################
   # Render output/UI       #
   ##########################
+
+  output$summaryTable <- renderTable({
+        if(!is.null(DB$active)){
+            table <- matrix(NA, length(DB$active@datasets), 2 )
+            colnames(table) <- c("#Genes","#Samples")
+            rownames(table) <- names(DB$transpose)
+            for (i in 1:length(DB$transpose)){
+                table[i,2] <- dim(DB$transpose[[i]])[1]
+                table[i,1] <- dim(DB$transpose[[i]])[2]
+            }
+            return(table)
+        }
+    })
+  
   output$caseName = renderUI({
       selectInput(ns('caseName'), 'Case Name', 
         as.character(unique(DB$active@clinicals[[1]][,1])),

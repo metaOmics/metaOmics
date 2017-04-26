@@ -1,13 +1,19 @@
-meta_ktsp_ui <- function(id, label = "meta KTSP") {
+meta_ktsp_ui <- function(id, label = "MetaPredict") {
     ns <- NS(id)
-    tabPanel("Meta KTSP", value=id,
+    tabPanel("MetaPredict", value=id,
              sidebarLayout(
                  sidebarPanel(
                      h4("Summary Table"),
                      br(),br(),
                      tableOutput(ns("summaryTable")),
                      tags$hr(),
-                     selectInput(ns("methods"), label = "Methods for Meta KTSP",
+                    bsCollapsePanel("About", "This MetaPredict panel serves as an UI for MetaPredict package.
+  The MetaPredict is a  meta-analysis version of the TSP algorithm that combines multiple transcriptomic studies to build a prediction model and shows improved prediction accuracy as compared to single study analysis.",
+                   a(strong("Tutorials"), href="https://github.com/metaOmic/tutorial/
+blob/master/metaOmics_turtorial.pdf",target="_blank"),
+                               style = "primary"),
+                    tags$hr(),                           
+                     selectInput(ns("methods"), label = "Methods for MetaPredict",
                                  choices = list("Mean score" = "Mean score", "Fisher" = "Fisher", "Stouffer" = "Stouffer"),
                                  selected = "Mean score"),
                      br(),

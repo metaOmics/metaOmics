@@ -162,9 +162,10 @@ meta_path_server <- function(input, output, session) {
 
   observeEvent(input$tabChange, {
     DB$active <- DB.load.active(db)
-    dir.path <- paste(DB.load.working.dir(db), "Meta PATH", sep="")
+    dir.path <- paste(DB.load.working.dir(db), "MetaPath", sep="")
     if (!file.exists(dir.path)) dir.create(dir.path)
     DB$working <- dir.path
+    DB$transpose <- lapply(DB$active@datasets,t)
   })
 
   observeEvent(input$run, {
@@ -232,6 +233,19 @@ meta_path_server <- function(input, output, session) {
   ##########################
   # Render output/UI       #
   ##########################
+  
+  output$summaryTable <- renderTable({
+        if(!is.null(DB$active)){
+            table <- matrix(NA, length(DB$active@datasets), 2 )
+            colnames(table) <- c("#Genes","#Samples")
+            rownames(table) <- names(DB$transpose)
+            for (i in 1:length(DB$transpose)){
+                table[i,2] <- dim(DB$transpose[[i]])[1]
+                table[i,1] <- dim(DB$transpose[[i]])[2]
+            }
+            return(table)
+        }
+    })  
   
   output$resp.type.option <- renderUI({
     try({
