@@ -21,7 +21,7 @@ meta_pca_server <- function(input, output,session) {
  #           print(levels(as.factor(DB$active@clinicals[[1]])))
  #           print(names(DB$transpose))
         }, session)
-        dir.create(paste(DB.load.working.dir(db),"metaPCA",sep="/"))
+        dir.create(paste(DB.load.working.dir(db),"MetaPCA",sep="/"))
     })
 
     output$summaryTable <- renderTable({

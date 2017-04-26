@@ -140,8 +140,9 @@ meta_de_server <- function(input, output, session) {
   observeEvent(input$tabChange, {
     DB$active <- DB.load.active(db)
     DB$working.dir <- DB.load.working.dir(db)
+    DB$transpose <- lapply(DB$active@datasets,t)
   })
-
+  
   observeEvent(input$run, {
     wait(session, "running meta DE, should be soon")
     try({
@@ -151,7 +152,7 @@ meta_de_server <- function(input, output, session) {
         DE$result <- do.call(MetaDE, getOption(input))
       }
       DE$summary <- summary.meta(DE$result, input$meta.method)
-      dir.path <- paste(DB.load.working.dir(db), "Meta DE", sep="/")
+      dir.path <- paste(DB.load.working.dir(db), "MetaDE", sep="/")
       if (!file.exists(dir.path)) dir.create(dir.path)
       file.path <- paste(dir.path, "summary.csv", sep="/")
       write.csv(DE$summary, file=file.path)
@@ -209,6 +210,20 @@ meta_de_server <- function(input, output, session) {
   ##########################
   # Render output/UI       #
   ##########################
+          
+  output$summaryTable <- renderTable({
+        if(!is.null(DB$active)){
+            table <- matrix(NA, length(DB$active@datasets), 2 )
+            colnames(table) <- c("#Genes","#Samples")
+            rownames(table) <- names(DB$transpose)
+            for (i in 1:length(DB$transpose)){
+                table[i,2] <- dim(DB$transpose[[i]])[1]
+                table[i,1] <- dim(DB$transpose[[i]])[2]
+            }
+            return(table)
+        }
+    })
+  
   output$meta.type.opt <- renderUI({
     meta.type <- input$meta.type
     if (meta.type == META.TYPE.p) {
@@ -393,6 +408,5 @@ meta_de_server <- function(input, output, session) {
   output$pathresult <- DT::renderDataTable(DT::datatable({
     DE$pathresult
   }))
-
-
+  
 }

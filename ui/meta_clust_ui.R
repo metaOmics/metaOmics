@@ -1,4 +1,4 @@
-meta_clust_ui <- function(id, label = "meta sparse K means") {
+meta_clust_ui <- function(id, label = "MetaClust") {
     ns <- NS(id)
     tabPanel("MetaClust", value=id,
              sidebarLayout(

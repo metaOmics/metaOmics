@@ -65,16 +65,13 @@ meta_qc_server <- function(input, output,session) {
   observeEvent(input$tabChange, {
      DB$active <- DB.load.active(db)
      DB$working <- paste(DB.load.working.dir(db), "MetaQC/", sep="")
+     DB$transpose <- lapply(DB$active@datasets,t)
   })
 
 
   observeEvent(input$run, {
     wait(session, "Running MetaQC analysis, might take a few minutes")
     opt <- getOption(input)
-#    print(length(opt$DList))
-#    print(length(opt$colLabel))
-#    print(length(opt$GList))
-#    print(opt$pvalAdjustGene)
 
    try({
       QC$result <- suppressWarnings(do.call(MetaQC, getOption(input)))
@@ -115,6 +112,23 @@ meta_qc_server <- function(input, output,session) {
 #  },session)
 
 })
+
+  ##########################
+  # Render output/UI       #
+  ##########################
+
+  output$summaryTable <- renderTable({
+        if(!is.null(DB$active)){
+            table <- matrix(NA, length(DB$active@datasets), 2 )
+            colnames(table) <- c("#Genes","#Samples")
+            rownames(table) <- names(DB$transpose)
+            for (i in 1:length(DB$transpose)){
+                table[i,2] <- dim(DB$transpose[[i]])[1]
+                table[i,1] <- dim(DB$transpose[[i]])[2]
+            }
+            return(table)
+        }
+    })
 
   output$summary <- DT::renderDataTable(DT::datatable({
     table <- QC$result$scoreTable

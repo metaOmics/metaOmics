@@ -1,4 +1,4 @@
-meta_pca_ui <- function(id, label = "meta PCA") {
+meta_pca_ui <- function(id, label = "MetaPCA") {
     ns <- NS(id)
     tabPanel("MetaPCA", value=id,
              sidebarLayout(
@@ -6,7 +6,13 @@ meta_pca_ui <- function(id, label = "meta PCA") {
                      h4("Summary Table"),
                      br(),br(),
                      tableOutput(ns("summaryTable")),
-                     tags$hr(),
+                     tags$hr(),                     
+                     bsCollapsePanel("About", "This MetaPCA panel serves as an UI for MetaPCA package.
+ MetaPCA aims to combine multiple omics datasets of identical or similar biological hypothesis and perform simultaneous dimensional reduction in all studies. The results show improved accuracy, robustness and better interpretation among all studies.",
+                   a(strong("Tutorials"), href="https://github.com/metaOmic/tutorial/
+blob/master/metaOmics_turtorial.pdf",target="_blank"),
+                               style = "primary"),
+                     tags$hr(),                        
                      selectInput(ns("methods"), label = "Methods for MetaPCA",
                                  choices = list("SSC" = "SSC", "SV" = "SV"),
                                  selected = "SSC"),

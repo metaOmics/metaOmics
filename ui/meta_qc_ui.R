@@ -1,11 +1,21 @@
-meta_qc_ui <- function(id, label = "Meta QC") {
+meta_qc_ui <- function(id, label = "MetaQC") {
     ns <- NS(id)
 
-  tabPanel("Meta QC", value=id,
+  tabPanel("MetaQC", value=id,
     sidebarLayout(
       sidebarPanel(
 #       uiOutput(ns("srcSelect")),
 #       radioButtons(ns("useExample"), 'Use Example Dataset:', inline=T,c(Yes=T, No=F), T),
+          h4("Summary Table"),
+          br(),br(),
+          tableOutput(ns("summaryTable")),
+          tags$hr(),
+          bsCollapsePanel("About", "This MetaQC panel serves as an UI for MetaQC package.
+ MetaQC package provides an objective and quantitative tool to help determine the inclusion/exclusion of studies for meta-analysis. More specifically, MetaQC provides users with six quantitative quality control (QC) measures: including IQC, EQC, AQCg, CQCg, AQCp and CQCp.  In addition, visualization plots and summarization tables are generated using principal component analysis (PCA) biplots and standardized mean ranks (SMR) to assist in visualization and decision.",
+                   a(strong("Tutorials"), href="https://github.com/metaOmic/tutorial/
+blob/master/metaOmics_turtorial.pdf",target="_blank"),
+                               style = "primary"),
+         tags$hr(),                
          bsCollapsePanel("Options",
           #radioButtons(ns("overlap.gene"), 'Take only overlapped genes: ', inline=T, c(Yes=T, No=F), T),
             radioButtons(ns("filter.gene"), 'Perform gene filtering: ', inline=T, c(Yes=T, No=F), F),                     

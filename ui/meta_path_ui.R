@@ -1,8 +1,20 @@
-meta_path_ui <- function(id, label = "meta path") {
+meta_path_ui <- function(id, label = "MetaPath") {
   ns <- NS(id)
-  tabPanel("Meta Path", value=id,
+  tabPanel("MetaPath", value=id,
     sidebarLayout(
       sidebarPanel(
+                   h4("Summary Table"),
+                   br(),br(),
+                   tableOutput(ns("summaryTable")),
+                   tags$hr(),
+                   bsCollapsePanel("About", "This MetaPath panel serves as an UI for MetaPath package. When there are multiple studies available on a related hypothesis, meta-analysis methods are necessary for joint pathway analysis. Two major approaches have been included in the MetaPath package to serve for this purpose: Comparative Pathway Integrator (CPI, default) and Meta-Analysis for Pathway Enrichment (MAPE).  Pathway
+clustering with statistically valid text mining is included in the package to
+reduce pathway redundancy to condense knowledge and increase interpretability
+of clustering results.",
+                                                a(strong("Tutorials"),     href="https://github.com/metaOmic/tutorial/
+blob/master/metaOmics_turtorial.pdf",target="_blank"),
+                                                style = "primary"),      
+                    tags$hr(),     
         bsCollapsePanel("Response Type", 
           selectizeInput(ns("resp.type"), "", as.list(RESP.all)),
           uiOutput(ns("resp.type.option")), style="primary"

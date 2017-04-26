@@ -37,7 +37,7 @@ meta_ktsp_server <- function(input, output,session) {
         }, session)
 
         
-        dir.create(paste(DB.load.working.dir(db),"metaKTSP",sep="/"))
+        dir.create(paste(DB.load.working.dir(db),"MetaPredict",sep="/"))
 
     })
 
@@ -68,7 +68,7 @@ meta_ktsp_server <- function(input, output,session) {
       })
 
     observeEvent(input$ktspTrain, {
-        wait(session, "Training meta KTSP model. This may take a while")
+        wait(session, "Training MetaPredict model. This may take a while")
         try({
             validate()
 
@@ -138,12 +138,12 @@ meta_ktsp_server <- function(input, output,session) {
             })
             trainedFlag<-1
             
-            sendSuccessMessage(session, paste("Meta KTSP model trained. Recommended K updated to be", K, sep=""))
+            sendSuccessMessage(session, paste("MetaPredict model trained. Recommended K updated to be", K, sep=""))
 
 
                 observeEvent(input$ktspTest, {
         registerDoMC(cores=input$core)
-        wait(session, "Running meta KTSP prediction")
+        wait(session, "Running MetaPredict prediction")
         try({
             validate()
             
@@ -192,7 +192,7 @@ meta_ktsp_server <- function(input, output,session) {
 
             finalResult <- cbind(sampleNameBind,labelBind, pred.rule$mul.rule)
             colnames(finalResult) <- c("ID","Original Label","Predicted Label")
-            write.csv(finalResult, paste(DB.load.working.dir(db), "/metaKTSP/Class_label_method_", input$methods, "_labels_",input$twoLabels[1],"_",input$twoLabels[2],".csv",sep="" ),quote=F,row.names=FALSE)
+            write.csv(finalResult, paste(DB.load.working.dir(db), "/MetaPredict/Class_label_method_", input$methods, "_labels_",input$twoLabels[1],"_",input$twoLabels[2],".csv",sep="" ),quote=F,row.names=FALSE)
 
             if(labelEmpty[testIdx]==1){
                 output$confusionTitle <- renderText({""})
