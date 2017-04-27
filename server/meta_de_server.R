@@ -151,7 +151,7 @@ meta_de_server <- function(input, output, session) {
       } else {
         DE$result <- do.call(MetaDE, getOption(input))
       }
-      DE$summary <- summary.meta(DE$result, input$meta.method)
+      DE$summary <- summary.meta(DE$result, input$meta.method, input$resp.type)
       dir.path <- paste(DB.load.working.dir(db), "MetaDE", sep="/")
       if (!file.exists(dir.path)) dir.create(dir.path)
       file.path <- paste(dir.path, "summary.csv", sep="/")
@@ -336,8 +336,7 @@ meta_de_server <- function(input, output, session) {
       } else if (input$resp.type == RESP.multi.class) {
         tagList(
           selectizeInput(ns("group.label"), "Group Labels:", labels, 
-                         multiple=T, options = select.noDefault),
-          selectInput(ns("control.label"), "Control Label:", labels)
+                         multiple=T, options = select.noDefault)
         )
       }
     }, session)
