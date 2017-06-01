@@ -106,11 +106,11 @@ meta_de_server <- function(input, output, session) {
       opt$covariate <- input$covariate
     }
 
-    if (length(input$parametric) > 0)
+    #if (length(input$parametric) > 0)
       opt$parametric <- (input$parametric == T)
-    if (length(input$tail) > 0)
+    #if (length(input$tail) > 0)
       opt$tail <- input$tail
-    if (length(input$nperm) == 0)
+    #if (length(input$nperm) == 0)
       opt$nperm <- input$nperm
 
     tmp <- opt
