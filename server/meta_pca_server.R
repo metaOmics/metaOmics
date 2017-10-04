@@ -159,7 +159,7 @@ meta_pca_server <- function(input, output,session) {
                             ,ylim=c(min(acoord[,2])-1.5, max(acoord[,2])+1.5)
                             ,xlim=c(min(acoord[,1])-1, max(acoord[,1])+1),main=names(DB$transpose)[my_i])
                         points(acoord[,1], acoord[,2], col=as.numeric(alabel), cex=1)
-                        legend('topright',legend=levels(alabel),col=unique(as.numeric(alabel)),pch=1)
+                        legend('topright',legend=levels(alabel),col=unique(sort(as.numeric(alabel))),pch=1)
                     })
                 })
             }

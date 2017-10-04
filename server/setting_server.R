@@ -129,14 +129,13 @@ setting_server <- function(input, output, session) {
     cran.dep=c("survival", "combinat"),
     bioconductor.dep=c("limma", "cluster", "samr", "edgeR", "DESeq2", "impute", "Biobase")
   )
-
-  check.pkg(TOOLSET.clust, 'MetaClust', cran.dep=c("cluster"))
   check.pkg(TOOLSET.path, 'MetaPath',
 	    cran.dep=c("gplots", "ggplot2", "shape"),
 	    bioconductor.dep=c("Biobase", "GSEABase", "genefilter", "impute", "ConsensusClusterPlus", "irr", "cluster", "AnnotationDbi", "Rgraphviz"))
-  check.pkg(TOOLSET.pca, 'MetaPCA', cran.dep=c("PMA"),bioconductor.dep=c("impute"))
-  check.pkg(TOOLSET.ktsp, 'MetaPredict', cran.dep=c("doMC"))
   check.pkg(TOOLSET.dcn, 'MetaNetwork', cran.dep=c("igraph", "snow", "snowfall"), 
     bioconductor.dep=c("genefilter"))
+  check.pkg(TOOLSET.ktsp, 'MetaPredict', cran.dep=c("doMC"))    
+  check.pkg(TOOLSET.clust, 'MetaClust', cran.dep=c("cluster"))
+  check.pkg(TOOLSET.pca, 'MetaPCA', cran.dep=c("PMA"),bioconductor.dep=c("impute"))
 
 }

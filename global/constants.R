@@ -1,13 +1,13 @@
 DB.dir <- "data"
 
+TOOLSET.qc    <- "MetaQC" 
 TOOLSET.de    <- "MetaDE"
-TOOLSET.clust <- "MetaSparseKmeans"
 TOOLSET.path  <- "MetaPath"
-TOOLSET.pca   <- "metaPCA"
-TOOLSET.ktsp  <- "MetaKTSP"
 TOOLSET.dcn  <- "MetaDCN"
-TOOLSET.qc    <- "MetaQC" ##
-TOOLSET.all <- c(TOOLSET.de, TOOLSET.clust, TOOLSET.path, TOOLSET.pca, TOOLSET.ktsp, TOOLSET.dcn, TOOLSET.qc) ##
+TOOLSET.ktsp  <- "MetaKTSP"
+TOOLSET.clust <- "MetaSparseKmeans"
+TOOLSET.pca   <- "metaPCA"
+TOOLSET.all <- c(TOOLSET.qc, TOOLSET.de,  TOOLSET.path, TOOLSET.dcn,  TOOLSET.ktsp, TOOLSET.clust, TOOLSET.pca ) 
 
 select.noDefault <- list(
   placeholder = 'Choose from below',
@@ -74,6 +74,9 @@ IND.edgeR     <- "edgeR"
 IND.DESeq2    <- "DESeq2"
 IND.pearsonr  <- "pearsonr"
 IND.spearmanr <- "spearmanr"
+IND.continuous <- "continuous"
+IND.discrete <- "discrete"
+IND.type <- c(IND.continuous,IND.discrete)
 IND.all <- c(IND.limma, IND.sam, IND.limmaVoom, IND.edgeR, IND.DESeq2, IND.pearsonr, IND.spearmanr)
 names(IND.all) <- c("LIMMA (Linear Model for Microarrray data)", "SAM (Significance Analysis of Microarrays)", "voom method in limma", "edgeR", "DESeq2", "pearson correlation", "spearman correlation")
 

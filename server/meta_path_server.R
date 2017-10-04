@@ -43,6 +43,21 @@ meta_path_server <- function(input, output, session) {
         else
           input[[tag.id]] == T
       }))
+      
+      if(input[["mixed"]]==T){
+       print(MSG.mixed.type.MetaDE)
+       opt$mixed <- input[["mixed"]]      
+       opt$mix.type <- unlist(lapply(1:n, function(index) {
+        tag.id <- paste("type", index, sep="")
+        if (length(input[[tag.id]]) == 0)
+          IND.continuous
+        else
+          input[[tag.id]]
+       }))     	
+      } else{
+        opt$mixed <- F
+        opt$mix.type <- rep(opt$data.type,n)   
+      } 	
             
     if (length(input$covariate) == 0 || input$covariate == "None") {
     } else {
@@ -294,7 +309,14 @@ meta_path_server <- function(input, output, session) {
     study <- DB$active
     if (!is.null(study)) {
       study.names <- names(study@datasets)
-      bsCollapse(bsCollapsePanel("Setting Individual Study Method",
+      bsCollapse(
+        bsCollapsePanel("Setting Individual Data Type",
+          lapply(seq_along(study.names), function(index) {
+            tag.id <- ns(paste("type", index, sep=""))
+            selectizeInput(tag.id, study.names[index], IND.type)
+          })
+        ),
+        bsCollapsePanel("Setting Individual Study Method",
                                  lapply(seq_along(study.names), function(index) {
                                    tag.id <- ns(paste("ind", index, sep=""))
                                    selectizeInput(tag.id, study.names[index], IND.all)

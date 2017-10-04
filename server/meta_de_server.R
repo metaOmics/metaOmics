@@ -8,7 +8,8 @@ meta_de_server <- function(input, output, session) {
 
     study <- DB$active
     n <- length(study@datasets)
-    opt <- list(ind.method=rep(IND.limma, n), covariate=NULL, rth=NULL, select.group=NULL , ref.level=NULL, REM.type=NULL)
+    opt <- list(ind.method=rep(IND.limma, n), data.type=rep(IND.continuous,n),
+    covariate=NULL, rth=NULL, select.group=NULL , ref.level=NULL, REM.type=NULL)
 
     opt$size.min <- input$size.min 
     opt$size.max <- input$size.max 
@@ -59,8 +60,24 @@ meta_de_server <- function(input, output, session) {
         else
           input[[tag.id]]
       }))
+        
     } 
-
+        
+    if(input[["mixed"]]==T){
+    	  print(MSG.mixed.type.MetaDE)    	
+      opt$mixed <- input[["mixed"]]      
+      opt$mix.type <- unlist(lapply(1:n, function(index) {
+        tag.id <- paste("type", index, sep="")
+        if (length(input[[tag.id]]) == 0)
+          IND.continuous
+        else
+          input[[tag.id]]
+      }))     	
+    } else{
+        opt$mixed <- F
+        opt$mix.type <- rep(opt$data.type,n)   
+    } 	
+    
     resp <- input$resp.type
     clinical.options <- names(DB$active@clinicals[[1]])
     labels <- DB$active@clinicals[[1]][,clinical.options[1]]
@@ -141,8 +158,10 @@ meta_de_server <- function(input, output, session) {
     DB$active <- DB.load.active(db)
     DB$working.dir <- DB.load.working.dir(db)
     DB$transpose <- lapply(DB$active@datasets,t)
+    #print(DB$active@dtype)
+    #print(head(DB$active@datasets[[1]]))
   })
-  
+    
   observeEvent(input$run, {
     wait(session, "running meta DE, should be soon")
     try({
@@ -192,12 +211,12 @@ meta_de_server <- function(input, output, session) {
       p.cut <- getOption(input)$p.cut      
       DEgene.number <- getOption(input)$DEgene.number
       size.min <- getOption(input)$size.min       
-      size.max <- getOption(input)$size.max
+      size.max <- getOption(input)$size.max     
       DE$pathresult <- PathAnalysis(meta.p=meta.p,pathway=pathway,
                               enrichment=enrichment,p.cut=p.cut,
                               DEgene.number=DEgene.number,
                               size.min=size.min, size.max=size.max)           
-      dir.path <- paste(DB.load.working.dir(db), "Meta DE", sep="/")
+      dir.path <- paste(DB.load.working.dir(db), "MetaDE", sep="/")
       if (!file.exists(dir.path)) dir.create(dir.path)
       file.path <- paste(dir.path, "pathway.summary.csv", sep="/")
       write.csv(DE$pathresult, file=file.path)
@@ -270,7 +289,14 @@ meta_de_server <- function(input, output, session) {
     if (!is.null(study)) {
       study.names <- names(study@datasets)
        if (input$meta.type == META.TYPE.p) {
-         bsCollapse(bsCollapsePanel("Setting Individual Study Method",
+         bsCollapse(
+          bsCollapsePanel("Setting Individual Data Type",
+           lapply(seq_along(study.names), function(index) {
+            tag.id <- ns(paste("type", index, sep=""))
+            selectizeInput(tag.id, study.names[index], IND.type)
+          })
+        ),
+         bsCollapsePanel("Setting Individual Study Method",
           lapply(seq_along(study.names), function(index) {
             tag.id <- ns(paste("ind", index, sep=""))
             selectizeInput(tag.id, study.names[index], IND.all)

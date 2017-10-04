@@ -15,6 +15,7 @@ blob/master/metaOmics_turtorial.pdf",target="_blank"),
          tags$hr(),      
         selectizeInput(ns("meta.type"), "Meta Method Type", as.list(META.TYPE.all)),
         uiOutput(ns("meta.type.opt")),
+        radioButtons(ns("mixed"),"mixed data types?",c(No=F,Yes=T), F, inline=T),
         bsCollapsePanel("Response Type",
           selectizeInput(ns("resp.type"), "", as.list(RESP.all)),
           uiOutput(ns("resp.type.option")), style="primary"

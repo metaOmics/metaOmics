@@ -20,9 +20,10 @@ saved_data_server <- function(input, output, session) {
     } else if (all(is.discrete(types))){
       if (is.na(input$threshold))
         stop(MSG.merge.nothreshold)
-    } else {
-      stop(MSG.merge.mixedtype)
-    }
+    } 
+    #else {
+    #  stop(MSG.merge.mixedtype)
+    #}
 
     if(is.null(input$studyName) || input$studyName == "")
       stop(MSG.merge.noname)
@@ -92,8 +93,16 @@ saved_data_server <- function(input, output, session) {
           mergeButton
         )
       } else {
-        tags$span(MSG.merge.mixedtype)
-      }
+        tagList(
+          numericInput(ns("mean"), "mean:", value = 0.3, step= 0.1),
+          numericInput(ns("var"), "variance:", min = 0, value = 0.3, step= 0.1),
+          numericInput(ns("threshold"), "threshold", 1, min=0),
+          mergeButton
+        )
+      } 
+      #else {
+      #  tags$span(MSG.merge.mixedtype)
+      #}
     }
   })
 

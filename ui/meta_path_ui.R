@@ -14,7 +14,8 @@ of clustering results.",
                                                 a(strong("Tutorials"),     href="https://github.com/metaOmic/tutorial/
 blob/master/metaOmics_turtorial.pdf",target="_blank"),
                                                 style = "primary"),      
-                    tags$hr(),     
+                    tags$hr(),
+          radioButtons(ns("mixed"),"mixed data types?",c(No=F,Yes=T), F, inline=T),       
         bsCollapsePanel("Response Type", 
           selectizeInput(ns("resp.type"), "", as.list(RESP.all)),
           uiOutput(ns("resp.type.option")), style="primary"
