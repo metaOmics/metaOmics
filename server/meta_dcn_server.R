@@ -28,9 +28,16 @@ meta_dcn_server <- function(input, output, session){
   getOption2 <- function(input, GeneNetRes) {
    opt <- list(GeneNetRes, MCSteps=500, jaccardCutoff=0.8, 
          repeatTimes=3, outputFigure=TRUE, silent=FALSE)
+
+   if(length(input$MCSteps) >0)     
    opt$MCSteps <- input$MCSteps
+   
+   if(length(input$jaccardCutoff) >0)     
    opt$jaccardCutoff <- input$jaccardCutoff
+   
+   if(length(input$repeatTimes) >0)     
    opt$repeatTimes <- input$repeatTimes
+   
    return(opt)
   }
 

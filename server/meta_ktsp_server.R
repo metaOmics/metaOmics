@@ -75,9 +75,9 @@ meta_ktsp_server <- function(input, output,session) {
             if(length(input$twoLabels)!=2){
                 stop("Two and only two labels should be selected for clustering")
             }
-            if(length(input$testStudy)!=1){
-                stop("One and only one testing study should be selected at a time.")
-            }
+            #if(length(input$testStudy)!=1){
+            #    stop("One and only one testing study should be selected at a time.")
+            #}
             DB$active <- DB.load.active(db)
             DB$transpose <- lapply(DB$active@datasets,t)
             labels <- DB$active@clinicals
@@ -153,10 +153,12 @@ meta_ktsp_server <- function(input, output,session) {
             if(length(input$twoLabels)!=2){
                 stop("Two and only two labels should be selected for clustering")
             }
+            #if(length(input$testStudy)!=1){
+            #    stop("One and only one testing study should be selected at a time.")
+            #}            
             if(length(input$testStudy)!=1){
-                stop("One and only one testing study should be selected at a time.")
-            }
-            
+                stop("One and only one testing study should be selected for prediction.")
+            }            
             sampleNameBind <- colnames(DB$active@datasets[[testIdx]])[selectedIdx[[testIdx]]]
             labelBind <- colnames(DList[[testIdx]])
 

@@ -64,7 +64,6 @@ meta_de_server <- function(input, output, session) {
     } 
         
     if(input[["mixed"]]==T){
-    	  print(MSG.mixed.type.MetaDE)    	
       opt$mixed <- input[["mixed"]]      
       opt$mix.type <- unlist(lapply(1:n, function(index) {
         tag.id <- paste("type", index, sep="")
@@ -148,7 +147,7 @@ meta_de_server <- function(input, output, session) {
   ##########################
   validate <- function() {
     if(length(DB$active) == 0 )
-      warning(MSG.no.active)
+      warning(MSG.no.active)   	      
   }
 
   ##########################
@@ -260,12 +259,18 @@ meta_de_server <- function(input, output, session) {
     }
   })
 
+#  output$meta.p.opt <- renderUI({
+#    if(input$meta.type == META.TYPE.p && length(input$advanced.method) > 0) {
+#      if (input$advanced.method)
+#        selectizeInput(ns("meta.method"), "Meta Method", as.list(META.p.all))
+#      else
+#        selectizeInput(ns("meta.method"), "Meta Method", as.list(META.p.core))
+#    }
+#  })
+
   output$meta.p.opt <- renderUI({
-    if(input$meta.type == META.TYPE.p && length(input$advanced.method) > 0) {
-      if (input$advanced.method)
+    if(input$meta.type == META.TYPE.p) {
         selectizeInput(ns("meta.method"), "Meta Method", as.list(META.p.all))
-      else
-        selectizeInput(ns("meta.method"), "Meta Method", as.list(META.p.core))
     }
   })
 
@@ -433,5 +438,5 @@ meta_de_server <- function(input, output, session) {
   output$pathresult <- DT::renderDataTable(DT::datatable({
     DE$pathresult
   }))
-  
+    
 }

@@ -12,18 +12,18 @@ meta_pca_ui <- function(id, label = "MetaPCA") {
                    a(strong("Tutorials"), href="https://github.com/metaOmic/tutorial/
 blob/master/metaOmics_turtorial.pdf",target="_blank"),
                                style = "primary"),
-                     tags$hr(),                        
-                     selectInput(ns("methods"), label = "Methods for MetaPCA",
+                     tags$hr(),  
+                     bsCollapsePanel("Advanced Options",
+                       tagList(
+                            selectInput(ns("methods"), label = "Methods for MetaPCA",
                                  choices = list("SSC" = "SSC", "SV" = "SV"),
                                  selected = "SSC"),
-                     br(),
-
-                     numericInput(ns("dim"), "Dimension of meta-eigenvector matrix:", value = 2),
-                     br(),
-
+                            numericInput(ns("dim"), "Dimension of meta-eigenvector matrix:", value = 2)
+            ), style="info"
+          ),                                                                        
                      checkboxInput(ns("dimAuto"),"Dimension determined by variance quantile",value = TRUE),
 
-                     checkboxInput(ns("sparse"),"Sparsity encouraged"),
+                     checkboxInput(ns("sparse"),"Enforce Sparsity"),
                      
                      conditionalPanel(
                          condition="document.getElementById('meta_pca-sparse').checked == true ",
@@ -33,8 +33,10 @@ blob/master/metaOmics_turtorial.pdf",target="_blank"),
                              column(4,numericInput(ns("step"),"Step of lambda:", value=1)),
                              helpIcon("step_pcaLambda_help",HELP.step.pcaLambda)
                          ),
-                         numericInput(ns("lambda"), "Tuning parameter for sparsity:", value = 6),
-                         actionButton(ns("tuneGo"), "Search for optimal tuning parameter", icon=icon("line-chart"),class="btn-danger")
+                          actionButton(ns("tuneGo"), "Search for optimal tuning parameter", icon=icon("line-chart"),class="btn-danger"),
+                         br(),
+                         tags$hr(),
+                         numericInput(ns("lambda"), "Tuning parameter for sparsity:", value = 6)
                      ),
 
                      tags$hr(),

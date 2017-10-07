@@ -12,13 +12,16 @@ meta_ktsp_ui <- function(id, label = "MetaPredict") {
                    a(strong("Tutorials"), href="https://github.com/metaOmic/tutorial/
 blob/master/metaOmics_turtorial.pdf",target="_blank"),
                                style = "primary"),
-                    tags$hr(),                           
+                    tags$hr(),
+                     bsCollapsePanel("Advanced Options",
+                       tagList(
                      selectInput(ns("methods"), label = "Methods for MetaPredict",
-                                 choices = list("Mean score" = "Mean score", "Fisher" = "Fisher", "Stouffer" = "Stouffer"),
-                                 selected = "Mean score"),
+                                 choices = list("Mean score" = "Mean score", "Fisher" = "Fisher", "Stouffer" = "Stouffer"),selected = "Mean score"),
                      br(),
-                     fluidRow(column(8, numericInput(ns("kMax"), "Max number of top scoring pairs (K)", value=9))),
-                     fluidRow(column(8,numericInput(ns("core"), "Number of cores for parallel computing", value=2))),
+                     fluidRow(column(8, numericInput(ns("kMax"), "Max number of top scoring pairs (K)", value=29))),
+                     fluidRow(column(8,numericInput(ns("core"), "Number of cores for parallel computing", value=1)))
+            ), style="info"
+          ),                                  
                      selectizeInput(ns("twoLabels"), label = "Please select TWO labels to train", choices = NULL,multiple=TRUE),
                      br(),
                      selectizeInput(ns("trainStudy"), label = "Please select studies for training", choices = NULL,multiple=TRUE),
@@ -27,7 +30,7 @@ blob/master/metaOmics_turtorial.pdf",target="_blank"),
                      tags$hr(),
                      actionButton(ns("ktspTrain"),"Train model", icon= icon("rocket"),class="btn-success btn-run"),
                      tags$hr(),
-                     fluidRow(column(6, numericInput(ns("K"),"Number of top scoring pairs (K)",value=9))),
+                     fluidRow(column(6, numericInput(ns("K"),"Number of top scoring pairs (K)",value=29))),
                      actionButton(ns("ktspTest"),"Predict", icon= icon("rocket"),class="btn-success btn-run")
                  ),
                  mainPanel(

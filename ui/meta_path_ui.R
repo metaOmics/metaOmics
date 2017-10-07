@@ -23,19 +23,19 @@ blob/master/metaOmics_turtorial.pdf",target="_blank"),
         bsCollapsePanel("Individual Study Option",
                         uiOutput(ns("ind.method.opt")),style="primary"
         ),
-          bsCollapsePanel("Advanced",
+          bsCollapsePanel("Advanced Options",
             tagList(
               uiOutput(ns("covariate.opt")),
               selectizeInput(ns("tail"), "Alternative Hypothesis", TAIL.all)
             ), style="info"
           ),        
-	tags$hr(),                             
+	tags$hr(),
         selectizeInput(ns('pathway'), "Pathway Databases:", GENESET.all, multiple=T,
                        selected=c(GENESET.BioCarta, GENESET.GOBP, GENESET.GOCC,
                                GENESET.GOMF, GENESET.KEGG, GENESET.Reactome)),
         tags$hr(),
         bsCollapse(id="meta_de-advanced",
-          bsCollapsePanel("Advanced Options",
+          bsCollapsePanel("Options",
           tagList(
             uiOutput(ns('method.opt')),
             uiOutput(ns("mape.opt")),

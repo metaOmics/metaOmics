@@ -49,16 +49,16 @@ names(META.all) <- c(
   "minP with one sided correction",
   "Fisher",
   "Fisher with one sided correction",
-  "AW Fisher",
-  "roP",
-  "roP with one sided correction",
+  "AW Fisher*",
+  "rOP*",
+  "rOP with one sided correction",
   "Stouffer",
   "Stouffer one sided correction",
   "Sum of Rank",
   "Product of Rank",
   "minMCC (Multi-class Correlation)",
   "FEM (Fixed Effect Model)",
-  "REM (Random Effect Model)",
+  "REM (Random Effect Model)*",
   "Rank Product"
 )
 
@@ -166,8 +166,8 @@ names(GENESET.all) <- c(
 
 MAPE.CPI <- "CPI"
 MAPE.MAPE <- "MAPE"
-MAPE.all <- c(MAPE.CPI, MAPE.MAPE)
-names(MAPE.all) <- c("CPI (Comparative Pathway Integrator)", "MAPE (Meta Analysis Pathway Enrichment)")
+MAPE.all <- c(MAPE.MAPE, MAPE.CPI)
+names(MAPE.all) <- c("MAPE (Meta Analysis Pathway Enrichment)", "CPI (Comparative Pathway Integrator)")
 
 ENRICHMENT.KS <- "KS"
 ENRICHMENT.fisher <- "Fisher's exact"

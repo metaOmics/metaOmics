@@ -16,15 +16,25 @@ blob/master/metaOmics_turtorial.pdf",target="_blank"),
         uiOutput(ns('caseName')),
         uiOutput(ns('controlName')),
         numericInput(ns("permutationTimes"), "Number of Permutations:", 
-          value=4),
+          value=20),
         #uiOutput(ns("CPUNumbersButton")),
         sliderInput(ns("edgeCutoff"), label="Edge Cutoff", value=0.1, 
           min=0, max=1),
         tags$hr(),
         actionButton(ns('GeneNet'), 'Generate Network', icon=icon("rocket"), class="btn-success btn-run"),
-        uiOutput(ns('repeatTimes')),
-        uiOutput(ns('MCSteps')),
-        uiOutput(ns('jaccardCutoff')),
+
+        tags$hr(),
+        bsCollapsePanel("Advanced Options",
+            tagList(
+              uiOutput(ns('repeatTimes')),
+              uiOutput(ns('MCSteps')),
+              uiOutput(ns('jaccardCutoff'))
+            ), style="info"
+          ),        
+          
+        #uiOutput(ns('repeatTimes')),
+        #uiOutput(ns('MCSteps')),
+        #uiOutput(ns('jaccardCutoff')),
         uiOutput(ns('SearchBM')),
         uiOutput(ns('FDRCutoff')),
         uiOutput(ns('MetaDCN'))

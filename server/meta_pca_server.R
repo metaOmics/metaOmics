@@ -61,12 +61,12 @@ meta_pca_server <- function(input, output,session) {
             }
             png(paste(DB.load.working.dir(db),"/metaPCA/metaPCA_tuning_lambda.png",sep=""))  
             par(mfrow=c(1,1), mar=c(5, 5, 2, 4))
-            plot(na.omit(scree) ~ num.nonzero[1:length(na.omit(scree))], type='o',ylab="Proportion of Increased Explained Variance",xlab="The number of non-penalized features",cex.lab=2,lwd=2,cex.axis=1.5)
+            plot(na.omit(scree) ~ num.nonzero[1:length(na.omit(scree))], type='o',ylab="Proportion of Increased Explained Variance",xlab="The number of non-penalized features",cex.lab=1.5,lwd=2,cex.axis=1.3)
             abline(h=0.1,col='red',lwd=2)
             dev.off()
 
             output$tuningPlot <- renderPlot({
-                plot(na.omit(scree) ~ num.nonzero[1:length(na.omit(scree))], type='o',ylab="Proportion of Increased Explained Variance",xlab="The number of non-penalized features",cex.lab=2,lwd=2,cex.axis=1.5)
+                plot(na.omit(scree) ~ num.nonzero[1:length(na.omit(scree))], type='o',ylab="Proportion of Increased Explained Variance",xlab="The number of non-penalized features",cex.lab=1.5,lwd=2,cex.axis=1.3)
                 abline(h=0.1,col='red',lwd=2)            
             })
             optimalLambda <-  sequence[sum(scree> 0.1, na.rm=TRUE)]
@@ -113,7 +113,7 @@ meta_pca_server <- function(input, output,session) {
                     ,ylim=c(min(acoord[,2])-1.5, max(acoord[,2])+1.5)
                     ,xlim=c(min(acoord[,1])-1, max(acoord[,1])+1),main=names(DB$transpose)[i])
                 points(acoord[,1], acoord[,2], col=as.numeric(alabel), cex=1)
-                legend('topright',legend=levels(alabel),col=unique(as.numeric(alabel)),pch=1)
+                legend('topright',legend=levels(alabel),col=unique(sort(as.numeric(alabel))),pch=1)
             }
             dev.off()
             sendSuccessMessage(session, "Meta PCA complete.")

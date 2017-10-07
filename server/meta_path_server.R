@@ -337,7 +337,6 @@ meta_path_server <- function(input, output, session) {
     selectInput(ns("covariate"), "Covariate:", c(None="None", clinical.options))
   })
 
-
   output$method.opt <- renderUI({
       selectizeInput(ns('method'), "Software:", MAPE.all)
   })
@@ -416,7 +415,7 @@ meta_path_server <- function(input, output, session) {
     if (!is.null(MAPE$result)) {
       left <- 0
       if (MAPE$result$method == MAPE.MAPE) {
-        left <- sum(MAPE$result$summary[input$kappa.method] <= input$q_cutoff)
+        left <- sum(MAPE$result$summary[paste(input$kappa.method,"FDR",sep="_")] <= input$q_cutoff)
       } else {
         left <- sum(MAPE$result$summary["q_value_meta"] <= input$q_cutoff)
       }

@@ -27,7 +27,7 @@ blob/master/metaOmics_turtorial.pdf",target="_blank"),
         bsCollapse(id="meta_de-advanced",
           bsCollapsePanel("Advanced Options",
             tagList(
-              radioButtons(ns("advanced.method"), "Use complete options",
+             radioButtons(ns("advanced.method"), "Use complete options",
                            c(Yes=T, No=F), F, inline=T),
               radioButtons(ns("parametric"), 'Parametric', inline=T,
                 c(No=F, Yes=T), T),

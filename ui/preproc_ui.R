@@ -52,10 +52,11 @@ preproc_ui <- function(id, label= "preprocessing data") {
           )
         ),
         tags$hr(),
-
+        
         ##########################
         # Tranforming Data       #
-        ##########################
+        ##########################        
+        
         h4("Preprocessing"),
         bsCollapse(id="preproc-uplaod-clinical",
           bsCollapsePanel("Annotate / Impute / Replicate",
