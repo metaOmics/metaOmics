@@ -9,7 +9,7 @@ meta_dcn_ui <- function(id, label = "MetaNetwork") {
           tags$hr(),
           bsCollapsePanel("About", "This MetaNetwork panel serves as an UI for MetaNetwork package.
  MetaNetwork aims at differential network detection and combines multiple studies to identify stable and accurate differential co-expression modules between disease conditions across studies. It includes three steps to get differentially co-expressed networks: generate network, search for basic modules, and assemble supermodules.",
-                   a(strong("Tutorials"), href="https://github.com/metaOmic/tutorial/
+                   a(strong("Tutorials"), href="https://github.com/metaOmics/tutorial/
 blob/master/metaOmics_turtorial.pdf",target="_blank"),
                                style = "primary"),
          tags$hr(),             

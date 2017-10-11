@@ -8,7 +8,7 @@ A graphical user interface to facilitate the application of meta analysis on -Om
 ## How to start the app
 First, clone the project
 ```
-git clone https://github.com/metaOmic/metaOmics
+git clone https://github.com/metaOmics/metaOmics
 ```
 
 * in R (suppose the application directory is "C:/program/software/metaOmics")
@@ -19,7 +19,7 @@ shiny::runApp('metaOmics', port=9987, launch.browser=T)
 ```
 ## Where to find the tutorial 
 ```
-https://github.com/metaOmic/tutorial/blob/master/metaOmics_turtorial.pdf
+https://github.com/metaOmics/tutorial/blob/master/metaOmics_turtorial.pdf
 ```
 
 ## How to start the documentation

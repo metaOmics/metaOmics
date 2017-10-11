@@ -11,7 +11,7 @@ meta_path_ui <- function(id, label = "MetaPath") {
 clustering with statistically valid text mining is included in the package to
 reduce pathway redundancy to condense knowledge and increase interpretability
 of clustering results.",
-                                                a(strong("Tutorials"),     href="https://github.com/metaOmic/tutorial/
+                                                a(strong("Tutorials"),     href="https://github.com/metaOmics/tutorial/
 blob/master/metaOmics_turtorial.pdf",target="_blank"),
                                                 style = "primary"),      
                     tags$hr(),

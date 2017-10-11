@@ -9,7 +9,7 @@ meta_de_ui <- function(id, label = "MetaDE") {
           tags$hr(),
           bsCollapsePanel("About", "This MetaDE panel serves as an UI for MetaDE package.
  MetaDE package implements 12 major meta-analysis methods for differential expression analysis falling into 3 main categories: combining p-values, combining effect sizes and others. It allows  the input of either microarray (continuous intensity) or RNA-seq data (count) for individual study analysis. In addition, it also incorporates a downstream pathway analysis for functional annotation of the identified DE genes.",
-                   a(strong("Tutorials"), href="https://github.com/metaOmic/tutorial/
+                   a(strong("Tutorials"), href="https://github.com/metaOmics/tutorial/
 blob/master/metaOmics_turtorial.pdf",target="_blank"),
                                style = "primary"),
          tags$hr(),      

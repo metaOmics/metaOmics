@@ -12,7 +12,7 @@ meta_clust_ui <- function(id, label = "MetaClust") {
 Starting with multiple studies, we could run MetaSparseKmeans with pre-specified number of clusters (K) and gene selection tuning parameter (Wbounds).
 If you are not sure about what are good K and Wbounds, please try Tune K and Tune Wbounds panel.
 Details are in ",
-                                                a(strong("Tutorials"),     href="https://github.com/metaOmic/tutorial/
+                                                a(strong("Tutorials"),     href="https://github.com/metaOmics/tutorial/
 blob/master/metaOmics_turtorial.pdf",target="_blank"),
                                                 style = "primary"),
                                 bsCollapsePanel("Tune K (optional)",

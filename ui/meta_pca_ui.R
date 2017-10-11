@@ -9,7 +9,7 @@ meta_pca_ui <- function(id, label = "MetaPCA") {
                      tags$hr(),                     
                      bsCollapsePanel("About", "This MetaPCA panel serves as an UI for MetaPCA package.
  MetaPCA aims to combine multiple omics datasets of identical or similar biological hypothesis and perform simultaneous dimensional reduction in all studies. The results show improved accuracy, robustness and better interpretation among all studies.",
-                   a(strong("Tutorials"), href="https://github.com/metaOmic/tutorial/
+                   a(strong("Tutorials"), href="https://github.com/metaOmics/tutorial/
 blob/master/metaOmics_turtorial.pdf",target="_blank"),
                                style = "primary"),
                      tags$hr(),  

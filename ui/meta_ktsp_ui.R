@@ -9,7 +9,7 @@ meta_ktsp_ui <- function(id, label = "MetaPredict") {
                      tags$hr(),
                     bsCollapsePanel("About", "This MetaPredict panel serves as an UI for MetaPredict package.
   The MetaPredict is a  meta-analysis version of the TSP algorithm that combines multiple transcriptomic studies to build a prediction model and shows improved prediction accuracy as compared to single study analysis.",
-                   a(strong("Tutorials"), href="https://github.com/metaOmic/tutorial/
+                   a(strong("Tutorials"), href="https://github.com/metaOmics/tutorial/
 blob/master/metaOmics_turtorial.pdf",target="_blank"),
                                style = "primary"),
                     tags$hr(),

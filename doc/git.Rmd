@@ -6,7 +6,7 @@ output: html_document
 
 ### Getting the project
 ```
-git clone https://github.com/metaOmic/metaOmics
+git clone https://github.com/metaOmics/metaOmics
 ```
 
 ### commit
@@ -60,9 +60,9 @@ git push origin metaClust
 
 # Prepare Package for GitHub
 1. Add these file to your package folder
-  - [.gitignore](https://raw.githubusercontent.com/metaOmic/preproc/master/.gitignore)
+  - [.gitignore](https://raw.githubusercontent.com/metaOmics/preproc/master/.gitignore)
     This file tells git what to ignore when tracking the repository.
-  - [.Rbuildignore](https://raw.githubusercontent.com/metaOmic/preproc/master/.Rbuildignore)
+  - [.Rbuildignore](https://raw.githubusercontent.com/metaOmics/preproc/master/.Rbuildignore)
     This file tells R what to ignore when building packages. This file it reponsible for ignoring the .git folder that will result in an error when checking R packages.
 2. Create a git repository
    - `git init`
@@ -70,4 +70,4 @@ git push origin metaClust
    - `git commit -m"initial commit"`
 3. Now you can not check the package folder directly, as the `.git` contain executable file that will raise error. You need to build it first, then check the .tar.gz file. The file won't contain `.git` as we ignored it in `.Rbuildignore` file
 4. If the check is successful, ask the administrator of Github to create a team for you, and create a repository under that team for your package. Then add you as the administrator of that team, so that you can push, pull to your repository on GitHub.
-5. Push the repository on to GitHub, preferably add a `README.md` to guide the installation process, like this: [README.md](https://github.com/metaOmic/preproc/blob/master/README.md)
+5. Push the repository on to GitHub, preferably add a `README.md` to guide the installation process, like this: [README.md](https://github.com/metaOmics/preproc/blob/master/README.md)

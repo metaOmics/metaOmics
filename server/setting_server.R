@@ -46,7 +46,7 @@ setting_server <- function(input, output, session) {
           }
         }
         sendInfoMessage(session,paste("installing", pkg, "from Github"))
-        devtools::install_github(paste("metaOmic", pkg, sep="/"),force=T)
+        devtools::install_github(paste("metaOmics", pkg, sep="/"),force=T)
         
         PACKAGES$installed <- installed.packages()[,"Package"]
         

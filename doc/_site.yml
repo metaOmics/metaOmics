@@ -1,6 +1,6 @@
-name: "metaOmic Documentation"
+name: "metaOmics Documentation"
 navbar:
-  title: "metaOmic Documentation"
+  title: "metaOmics Documentation"
   left:
     - text: "Home"
       icon: fa-home

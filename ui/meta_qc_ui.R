@@ -12,7 +12,7 @@ meta_qc_ui <- function(id, label = "MetaQC") {
           tags$hr(),
           bsCollapsePanel("About", "This MetaQC panel serves as an UI for MetaQC package.
  MetaQC package provides an objective and quantitative tool to help determine the inclusion/exclusion of studies for meta-analysis. More specifically, MetaQC provides users with six quantitative quality control (QC) measures: including IQC, EQC, AQCg, CQCg, AQCp and CQCp.  In addition, visualization plots and summarization tables are generated using principal component analysis (PCA) biplots and standardized mean ranks (SMR) to assist in visualization and decision.",
-                   a(strong("Tutorials"), href="https://github.com/metaOmic/tutorial/
+                   a(strong("Tutorials"), href="https://github.com/metaOmics/tutorial/
 blob/master/metaOmics_turtorial.pdf",target="_blank"),
                                style = "primary"),
          tags$hr(),                

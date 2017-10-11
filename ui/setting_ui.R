@@ -7,7 +7,7 @@ setting_ui <- function(id, label = "global settings") {
     fluidRow(
       img(src='pic.png',align="left",height = '280px', width = '380px'),
       p("MetaOmics is an interactive software with graphical user interface (GUI) for genomic meta-analysis implemented using R shiny. Many state of art meta analysis tools are available in this software, including MetaQC for quality control, MetaDE for differential expression analysis, MetaPath for pathway enrichment analysis, MetaNetwork for differential co-expression network analysis, MetaPredict for classification analysis, MetaClust for sparse clustering analysis, MetaPCA for principal component analysis."), 
-      p("Our tool is available for download on github: ",a(strong("MetaOmics."), href="https://github.com/metaOmic/metaOmics",target="_blank"), "For detailed implementation of each tool, please refer to our ",a(strong("Tutorials."), href="https://github.com/metaOmic/tutorial/
+      p("Our tool is available for download on github: ",a(strong("MetaOmics."), href="https://github.com/metaOmics/metaOmics",target="_blank"), "For detailed implementation of each tool, please refer to our ",a(strong("Tutorials."), href="https://github.com/metaOmics/tutorial/
 blob/master/metaOmics_turtorial.pdf",target="_blank")), 
       p("MetaOmics is developed and maintained by ", a("Dr. George Tseng's group ",href="http://tsenglab.biostat.pitt.edu",target="_blank"),"from the Department of Biostatistics, University of Pittsburgh."),
       style="text-indent: 25px; font-size: 20px"),

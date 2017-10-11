@@ -13,7 +13,7 @@ A graphical user interface to facilitate the application of meta analysis on -Om
 ### How to start the app
 First, clone the project
 ```
-git clone https://github.com/metaOmic/metaOmics
+git clone https://github.com/metaOmics/metaOmics
 ```
 
 if the directory of the app is `metaOmics`,
