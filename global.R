@@ -17,7 +17,7 @@ if(GLOBAL.network) {
     biocLite("AnnotationDbi")
   }
   if (!("preproc" %in% installed)) {
-    devtools::install_github("metaOmic/preproc")
+    devtools::install_github("metaOmics/preproc")
   }
 }
 
