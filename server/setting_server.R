@@ -9,6 +9,10 @@ setting_server <- function(input, output, session) {
     output.id <- paste("opt", pkg, sep=".")
     log.id <- paste("log", pkg, sep=".")
     output[[output.id]] <- renderUI({
+    	
+       if (TOOLSET.de %in% PACKAGES$installed ==F && TOOLSET.path %in% PACKAGES$installed)
+      PACKAGES$installed <- PACKAGES$installed[-grep(TOOLSET.path,PACKAGES$installed,fixed=T)]
+	
       PACKAGES$installed
       if (supported) {
         if (installed(pkg)) {
@@ -42,9 +46,13 @@ setting_server <- function(input, output, session) {
           }
         }
         sendInfoMessage(session,paste("installing", pkg, "from Github"))
-        devtools::install_github(paste("metaOmic", pkg, sep="/"))
+        devtools::install_github(paste("metaOmics", pkg, sep="/"),force=T)
         
         PACKAGES$installed <- installed.packages()[,"Package"]
+        
+         if (TOOLSET.de %in% PACKAGES$installed ==F && TOOLSET.path %in% PACKAGES$installed)
+        PACKAGES$installed <- PACKAGES$installed[-grep(TOOLSET.path,PACKAGES$installed,fixed=T)]
+        
         sendSuccessMessage(session, paste(pkg, "installed"))
         sendSuccessMessage(session, MSG.installed, unique=T)
       }, session)
@@ -112,16 +120,22 @@ setting_server <- function(input, output, session) {
     )
   })
 
-  check.pkg(TOOLSET.de, 'Meta DE', 
+  check.pkg(TOOLSET.qc, 'MetaQC', 
+    cran.dep=c("survival", "combinat"),
+    bioconductor.dep=c("multtest","survival")
+  )
+
+  check.pkg(TOOLSET.de, 'MetaDE', 
     cran.dep=c("survival", "combinat"),
     bioconductor.dep=c("limma", "cluster", "samr", "edgeR", "DESeq2", "impute", "Biobase")
   )
-
-  check.pkg(TOOLSET.clust, 'Meta Clust', cran.dep=c("cluster"))
-  check.pkg(TOOLSET.path, 'Meta PATH',
+  check.pkg(TOOLSET.path, 'MetaPath',
 	    cran.dep=c("gplots", "ggplot2", "shape"),
 	    bioconductor.dep=c("Biobase", "GSEABase", "genefilter", "impute", "ConsensusClusterPlus", "irr", "cluster", "AnnotationDbi", "Rgraphviz"))
-  check.pkg(TOOLSET.pca, 'Meta PCA', supported=F)
-  check.pkg(TOOLSET.ktsp, 'Meta KTSP', supported=F)
+  check.pkg(TOOLSET.dcn, 'MetaNetwork', cran.dep=c("igraph", "snow", "snowfall"), 
+    bioconductor.dep=c("genefilter"))
+  check.pkg(TOOLSET.ktsp, 'MetaPredict', cran.dep=c("doMC"))    
+  check.pkg(TOOLSET.clust, 'MetaClust', cran.dep=c("cluster"))
+  check.pkg(TOOLSET.pca, 'MetaPCA', cran.dep=c("PMA"),bioconductor.dep=c("impute"))
 
 }

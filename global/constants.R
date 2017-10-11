@@ -1,11 +1,13 @@
 DB.dir <- "data"
 
+TOOLSET.qc    <- "MetaQC" 
 TOOLSET.de    <- "MetaDE"
-TOOLSET.clust <- "MetaSparseKmeans"
 TOOLSET.path  <- "MetaPath"
-TOOLSET.pca   <- "MetaPCA"
+TOOLSET.dcn  <- "MetaDCN"
 TOOLSET.ktsp  <- "MetaKTSP"
-TOOLSET.all <- c(TOOLSET.de, TOOLSET.clust, TOOLSET.path, TOOLSET.pca, TOOLSET.ktsp) 
+TOOLSET.clust <- "MetaSparseKmeans"
+TOOLSET.pca   <- "metaPCA"
+TOOLSET.all <- c(TOOLSET.qc, TOOLSET.de,  TOOLSET.path, TOOLSET.dcn,  TOOLSET.ktsp, TOOLSET.clust, TOOLSET.pca ) 
 
 select.noDefault <- list(
   placeholder = 'Choose from below',
@@ -47,16 +49,16 @@ names(META.all) <- c(
   "minP with one sided correction",
   "Fisher",
   "Fisher with one sided correction",
-  "AW Fisher",
-  "roP",
-  "roP with one sided correction",
+  "AW Fisher*",
+  "rOP*",
+  "rOP with one sided correction",
   "Stouffer",
   "Stouffer one sided correction",
   "Sum of Rank",
   "Product of Rank",
   "minMCC (Multi-class Correlation)",
   "FEM (Fixed Effect Model)",
-  "REM (Random Effect Model)",
+  "REM (Random Effect Model)*",
   "Rank Product"
 )
 
@@ -72,6 +74,9 @@ IND.edgeR     <- "edgeR"
 IND.DESeq2    <- "DESeq2"
 IND.pearsonr  <- "pearsonr"
 IND.spearmanr <- "spearmanr"
+IND.continuous <- "continuous"
+IND.discrete <- "discrete"
+IND.type <- c(IND.continuous,IND.discrete)
 IND.all <- c(IND.limma, IND.sam, IND.limmaVoom, IND.edgeR, IND.DESeq2, IND.pearsonr, IND.spearmanr)
 names(IND.all) <- c("LIMMA (Linear Model for Microarrray data)", "SAM (Significance Analysis of Microarrays)", "voom method in limma", "edgeR", "DESeq2", "pearson correlation", "spearman correlation")
 
@@ -161,8 +166,8 @@ names(GENESET.all) <- c(
 
 MAPE.CPI <- "CPI"
 MAPE.MAPE <- "MAPE"
-MAPE.all <- c(MAPE.CPI, MAPE.MAPE)
-names(MAPE.all) <- c("CPI (Comparative Pathway Integrator)", "MAPE (Meta Analysis Pathway Enrichment)")
+MAPE.all <- c(MAPE.MAPE, MAPE.CPI)
+names(MAPE.all) <- c("MAPE (Meta Analysis Pathway Enrichment)", "CPI (Comparative Pathway Integrator)")
 
 ENRICHMENT.KS <- "KS"
 ENRICHMENT.fisher <- "Fisher's exact"

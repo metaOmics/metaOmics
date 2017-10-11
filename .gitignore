@@ -73,8 +73,7 @@ vignettes/*.pdf
 *.knit.md
 
 # App database
-/data
-!/data/example
+/data/studies
 .Database
 
 # Temporari files
@@ -82,3 +81,6 @@ vignettes/*.pdf
 
 # doc
 doc/_site
+
+# mac .DS_Store
+.DS_Store

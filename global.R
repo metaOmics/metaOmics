@@ -1,20 +1,10 @@
 # This file will be executed prior to app startup to setup the necessary environment
 GLOBAL.network <- T
 tryCatch({
-  source("https://bioconductor.org/biocLite.R")
+  source("http://bioconductor.org/biocLite.R")
 }, error=function(error){
   GLOBAL.network <<- F
 })
-
-# Try again with http if https fail
-if (GLOBAL.network == F) {
-  tryCatch({
-    source("http://bioconductor.org/biocLite.R")
-    GLOBAL.network <<- T
-  }, error=function(error){
-    GLOBAL.network <<- F
-  })
-}
 
 if(GLOBAL.network) {
   installed <- installed.packages()[,"Package"]
@@ -27,7 +17,7 @@ if(GLOBAL.network) {
     biocLite("AnnotationDbi")
   }
   if (!("preproc" %in% installed)) {
-    devtools::install_github("metaOmic/preproc")
+    devtools::install_github("metaOmics/preproc")
   }
 }
 

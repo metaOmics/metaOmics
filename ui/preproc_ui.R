@@ -24,7 +24,7 @@ preproc_ui <- function(id, label= "preprocessing data") {
                   c(None='', 'Double Quote'='"', 'Single Quote'="'"), '"'
                 ),
                 radioButtons(ns("log"), 'Log tranforming data', inline=T,
-                  c('Yes'=T, 'No'=F), T 
+                  c('Yes'=T, 'No'=F), F 
                 ),
                 tags$hr()
               ),
@@ -52,10 +52,11 @@ preproc_ui <- function(id, label= "preprocessing data") {
           )
         ),
         tags$hr(),
-
+        
         ##########################
         # Tranforming Data       #
-        ##########################
+        ##########################        
+        
         h4("Preprocessing"),
         bsCollapse(id="preproc-uplaod-clinical",
           bsCollapsePanel("Annotate / Impute / Replicate",

@@ -67,7 +67,7 @@ preproc_server <- function(input, output, session) {
         STUDY$ori <- ReadExpr(inFile$datapath, name=inFile$name, dtype=DTYPE.microarray,
           header=input$header, sep=input$data.sep, quote=input$data.quote, log=input$log)
       }, error=function(error) {
-        sendErrorMessage(session, MSG.file.corrupted)
+        sendErrorMessage(session, error$message)
       })
       done(session)
     } else if (STUDY$action == STUDY.select.from.db) {

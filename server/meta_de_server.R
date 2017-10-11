@@ -1,5 +1,6 @@
 meta_de_server <- function(input, output, session) {
   library(MetaDE)
+  data(pathways) ###
 
   ns <- NS("meta_de")
 
@@ -7,7 +8,22 @@ meta_de_server <- function(input, output, session) {
 
     study <- DB$active
     n <- length(study@datasets)
-    opt <- list(ind.method=rep(IND.limma, n), covariate=NULL, rth=NULL, select.group=NULL , ref.level=NULL, REM.type=NULL)
+    opt <- list(ind.method=rep(IND.limma, n), data.type=rep(IND.continuous,n),
+    covariate=NULL, rth=NULL, select.group=NULL , ref.level=NULL, REM.type=NULL)
+
+    opt$size.min <- input$size.min 
+    opt$size.max <- input$size.max 
+
+    opt$pathway <- c() 
+    for (pathway in input$pathway) {
+      opt$pathway <- c(opt$pathway, get(pathway))
+    }
+    opt$enrichment  <- input$enrichment
+
+    if (input$enrichment == ENRICHMENT.fisher) {
+      opt$DEgene.number <- input$DEgene.number
+      opt$p.cut <- input$p.cut 
+    }
 
     opt$data <- study@datasets
     opt$clin.data <- study@clinicals
@@ -27,6 +43,14 @@ meta_de_server <- function(input, output, session) {
       else
         opt$REM.type <- input$REM.type
     }
+    
+    opt$paired <- unlist(lapply(1:n, function(index) {
+      tag.id <- paste("paired", index, sep="")
+      if (length(input[[tag.id]]) == 0)
+        F
+      else
+        input[[tag.id]] == T
+    }))
 
     if (input$meta.type == META.TYPE.p) {
       opt$ind.method <- unlist(lapply(1:n, function(index) {
@@ -36,16 +60,23 @@ meta_de_server <- function(input, output, session) {
         else
           input[[tag.id]]
       }))
-    } else if (input$meta.type == META.TYPE.effect) {
-      opt$paired <- unlist(lapply(1:n, function(index) {
-        tag.id <- paste("paired", index, sep="")
+        
+    } 
+        
+    if(input[["mixed"]]==T){
+      opt$mixed <- input[["mixed"]]      
+      opt$mix.type <- unlist(lapply(1:n, function(index) {
+        tag.id <- paste("type", index, sep="")
         if (length(input[[tag.id]]) == 0)
-          F
+          IND.continuous
         else
-          input[[tag.id]] == T
-      }))
-    }
-
+          input[[tag.id]]
+      }))     	
+    } else{
+        opt$mixed <- F
+        opt$mix.type <- rep(opt$data.type,n)   
+    } 	
+    
     resp <- input$resp.type
     clinical.options <- names(DB$active@clinicals[[1]])
     labels <- DB$active@clinicals[[1]][,clinical.options[1]]
@@ -91,11 +122,11 @@ meta_de_server <- function(input, output, session) {
       opt$covariate <- input$covariate
     }
 
-    if (length(input$parametric) > 0)
+    #if (length(input$parametric) > 0)
       opt$parametric <- (input$parametric == T)
-    if (length(input$tail) > 0)
+    #if (length(input$tail) > 0)
       opt$tail <- input$tail
-    if (length(input$nperm) == 0)
+    #if (length(input$nperm) == 0)
       opt$nperm <- input$nperm
 
     tmp <- opt
@@ -116,7 +147,7 @@ meta_de_server <- function(input, output, session) {
   ##########################
   validate <- function() {
     if(length(DB$active) == 0 )
-      warning(MSG.no.active)
+      warning(MSG.no.active)   	      
   }
 
   ##########################
@@ -125,8 +156,11 @@ meta_de_server <- function(input, output, session) {
   observeEvent(input$tabChange, {
     DB$active <- DB.load.active(db)
     DB$working.dir <- DB.load.working.dir(db)
+    DB$transpose <- lapply(DB$active@datasets,t)
+    #print(DB$active@dtype)
+    #print(head(DB$active@datasets[[1]]))
   })
-
+    
   observeEvent(input$run, {
     wait(session, "running meta DE, should be soon")
     try({
@@ -135,8 +169,8 @@ meta_de_server <- function(input, output, session) {
       } else {
         DE$result <- do.call(MetaDE, getOption(input))
       }
-      DE$summary <- summary.meta(DE$result, input$meta.method)
-      dir.path <- paste(DB.load.working.dir(db), "Meta DE", sep="/")
+      DE$summary <- summary.meta(DE$result, input$meta.method, input$resp.type)
+      dir.path <- paste(DB.load.working.dir(db), "MetaDE", sep="/")
       if (!file.exists(dir.path)) dir.create(dir.path)
       file.path <- paste(dir.path, "summary.csv", sep="/")
       write.csv(DE$summary, file=file.path)
@@ -165,10 +199,49 @@ meta_de_server <- function(input, output, session) {
     , deleteFile=TRUE)
     done(session)
   })
-
+  
+  observeEvent(input$runpath, {	
+    wait(session, "running pathway analysis, should be soon")
+    try({
+      if(is.null(DE$result)) stop("You need to run DE analysis first")
+      meta.p  <- DE$result$meta.analysis$pval
+      pathway <- getOption(input)$pathway
+      enrichment <- getOption(input)$enrichment
+      p.cut <- getOption(input)$p.cut      
+      DEgene.number <- getOption(input)$DEgene.number
+      size.min <- getOption(input)$size.min       
+      size.max <- getOption(input)$size.max     
+      DE$pathresult <- PathAnalysis(meta.p=meta.p,pathway=pathway,
+                              enrichment=enrichment,p.cut=p.cut,
+                              DEgene.number=DEgene.number,
+                              size.min=size.min, size.max=size.max)           
+      dir.path <- paste(DB.load.working.dir(db), "MetaDE", sep="/")
+      if (!file.exists(dir.path)) dir.create(dir.path)
+      file.path <- paste(dir.path, "pathway.summary.csv", sep="/")
+      write.csv(DE$pathresult, file=file.path)
+      sendSuccessMessage(session, paste("pathway summary file written to", file.path))
+    }, session)
+    done(session)
+  })    
+###  
+  
   ##########################
   # Render output/UI       #
   ##########################
+          
+  output$summaryTable <- renderTable({
+        if(!is.null(DB$active)){
+            table <- matrix(NA, length(DB$active@datasets), 2 )
+            colnames(table) <- c("#Genes","#Samples")
+            rownames(table) <- names(DB$transpose)
+            for (i in 1:length(DB$transpose)){
+                table[i,2] <- dim(DB$transpose[[i]])[1]
+                table[i,1] <- dim(DB$transpose[[i]])[2]
+            }
+            return(table)
+        }
+    })
+  
   output$meta.type.opt <- renderUI({
     meta.type <- input$meta.type
     if (meta.type == META.TYPE.p) {
@@ -186,12 +259,18 @@ meta_de_server <- function(input, output, session) {
     }
   })
 
+#  output$meta.p.opt <- renderUI({
+#    if(input$meta.type == META.TYPE.p && length(input$advanced.method) > 0) {
+#      if (input$advanced.method)
+#        selectizeInput(ns("meta.method"), "Meta Method", as.list(META.p.all))
+#      else
+#        selectizeInput(ns("meta.method"), "Meta Method", as.list(META.p.core))
+#    }
+#  })
+
   output$meta.p.opt <- renderUI({
-    if(input$meta.type == META.TYPE.p && length(input$advanced.method) > 0) {
-      if (input$advanced.method)
+    if(input$meta.type == META.TYPE.p) {
         selectizeInput(ns("meta.method"), "Meta Method", as.list(META.p.all))
-      else
-        selectizeInput(ns("meta.method"), "Meta Method", as.list(META.p.core))
     }
   })
 
@@ -214,21 +293,35 @@ meta_de_server <- function(input, output, session) {
     study <- DB$active
     if (!is.null(study)) {
       study.names <- names(study@datasets)
-      if (input$meta.type == META.TYPE.p) {
-        bsCollapsePanel("Setting Individual Study Method",
+       if (input$meta.type == META.TYPE.p) {
+         bsCollapse(
+          bsCollapsePanel("Setting Individual Data Type",
+           lapply(seq_along(study.names), function(index) {
+            tag.id <- ns(paste("type", index, sep=""))
+            selectizeInput(tag.id, study.names[index], IND.type)
+          })
+        ),
+         bsCollapsePanel("Setting Individual Study Method",
           lapply(seq_along(study.names), function(index) {
             tag.id <- ns(paste("ind", index, sep=""))
             selectizeInput(tag.id, study.names[index], IND.all)
-          }), style="primary"
-        )
-      } else if (input$meta.type == META.TYPE.effect) {
+          })
+        ),
+          bsCollapsePanel("Setting Individual Study Paired Option",
+                        lapply(seq_along(study.names), function(index) {
+                          tag.id <- ns(paste("paired", index, sep=""))
+                          radioButtons(tag.id, paste(study.names[index], "paired?"),
+                                       c(Yes=T, No=F), F, inline=T)
+                        })
+        ))
+      } else {
         bsCollapsePanel("Setting Individual Study Paired Option",
-          lapply(seq_along(study.names), function(index) {
-            tag.id <- ns(paste("paired", index, sep=""))
-            radioButtons(tag.id, paste(study.names[index], "paired?"),
-                         c(Yes=T, No=F), F, inline=T)
-          }), style="primary"
-        )
+                        lapply(seq_along(study.names), function(index) {
+                          tag.id <- ns(paste("paired", index, sep=""))
+                          radioButtons(tag.id, paste(study.names[index], "paired?"),
+                                       c(Yes=T, No=F), F, inline=T)
+                        })
+        )        
       }
     }
   })
@@ -274,8 +367,7 @@ meta_de_server <- function(input, output, session) {
       } else if (input$resp.type == RESP.multi.class) {
         tagList(
           selectizeInput(ns("group.label"), "Group Labels:", labels, 
-                         multiple=T, options = select.noDefault),
-          selectInput(ns("control.label"), "Control Label:", labels)
+                         multiple=T, options = select.noDefault)
         )
       }
     }, session)
@@ -318,4 +410,33 @@ meta_de_server <- function(input, output, session) {
     }
   })
 
+  output$enrichment.opt <- renderUI({
+     if (input$enrichment == ENRICHMENT.fisher) {
+          tagList(
+           numericInput(ns("p.cut"), "p-value cutoff", NULL),
+           textOutput(ns("geneLeft.path"), container=div),
+           numericInput(ns("DEgene.number"), "number of DE genes", NULL)
+          )
+    }
+  })
+  
+  output$geneLeft.path <- renderText({
+    if (!is.null(DE$summary)) {
+      count <- sum(DE$summary$pval <= input$p.cut)
+      paste(count, "genes are selected for pathway analysis \n")
+    }
+  })
+  
+
+  output$downloadPathwayCsv <- downloadHandler(
+    filename=function(){"pathway.result.csv"},
+    content=function(file) {
+      write.csv(DE$pathresult, file=file)
+    }
+  )
+
+  output$pathresult <- DT::renderDataTable(DT::datatable({
+    DE$pathresult
+  }))
+    
 }
