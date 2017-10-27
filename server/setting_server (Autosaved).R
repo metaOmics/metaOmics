@@ -137,5 +137,5 @@ setting_server <- function(input, output, session) {
   check.pkg(TOOLSET.ktsp, 'MetaPredict', cran.dep=c("doMC"))    
   check.pkg(TOOLSET.clust, 'MetaClust', cran.dep=c("cluster"))
   check.pkg(TOOLSET.pca, 'MetaPCA', cran.dep=c("doMC","PMA"),bioconductor.dep=c("impute"))
-
+	
 }
