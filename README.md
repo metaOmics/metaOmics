@@ -1,11 +1,20 @@
 # metaOmics
 A graphical user interface to facilitate the application of meta analysis on -Omics study
 
-## Requirement
+## How to run from docker image
+```
+docker pull metaomics/app
+docker run --rm --name metaOmics -p 3838:3838 metaomics/app
+```
+Then goto your web browser on [http://127.0.0.1:3838/metaOmics/](http://127.0.0.1:3838/metaOmics/).
+For more information, refer to [docker page](https://hub.docker.com/r/metaomics/app/).
+
+## How to start the app
+
+#### Requirement
 * R >= 3.3.1
 * Shiny >= 0.13.2
 
-## How to start the app
 First, clone the project
 ```
 git clone https://github.com/metaOmics/metaOmics
@@ -40,3 +49,4 @@ R -e "rmarkdown::run(shiny_args=list(port=9988, launch.browser=T))"
 ```R
 Sys.getenv("RSTUDIO_PANDOC")
 ```
+
