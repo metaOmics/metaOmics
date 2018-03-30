@@ -3,6 +3,8 @@ meta_pca_ui <- function(id, label = "MetaPCA") {
     tabPanel("MetaPCA", value=id,
              sidebarLayout(
                  sidebarPanel(
+                   h3("MetaPCA"),
+                   tags$hr(),
                      h4("Summary Table"),
                      br(),br(),
                      tableOutput(ns("summaryTable")),
@@ -12,6 +14,9 @@ meta_pca_ui <- function(id, label = "MetaPCA") {
                    a(strong("Tutorials"), href="https://github.com/metaOmics/tutorial/
 blob/master/metaOmics_turtorial.pdf",target="_blank"),
                                style = "primary"),
+          bsCollapsePanel("Glossary", strong("PCA"), " principal component analysis", br(),
+                                   style = "default"),
+                   
                      tags$hr(),  
                      bsCollapsePanel("Advanced Options",
                        tagList(

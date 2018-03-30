@@ -3,6 +3,8 @@ meta_dcn_ui <- function(id, label = "MetaNetwork") {
   tabPanel("MetaNetwork", value=id,
     sidebarLayout(
       sidebarPanel(
+        h3("MetaNetwork"),
+        tags$hr(),
          h4("Summary Table"),
           br(),br(),
           tableOutput(ns("summaryTable")),
@@ -10,8 +12,11 @@ meta_dcn_ui <- function(id, label = "MetaNetwork") {
           bsCollapsePanel("About", "This MetaNetwork panel serves as an UI for MetaNetwork package.
  MetaNetwork aims at differential network detection and combines multiple studies to identify stable and accurate differential co-expression modules between disease conditions across studies. It includes three steps to get differentially co-expressed networks: generate network, search for basic modules, and assemble supermodules.",
                    a(strong("Tutorials"), href="https://github.com/metaOmics/tutorial/
-blob/master/metaOmics_turtorial.pdf",target="_blank"),
+blob/master/metaOmics_turtorial.pdf",target="_blank"), br(),
+                   em("Suggested gene size to start with: "), strong("<500"),
                                style = "primary"),
+        bsCollapsePanel("Glossary", strong("DCN"), " differentially co-expressed networks", br(),
+                        style = "default"),
          tags$hr(),             
         uiOutput(ns('caseName')),
         uiOutput(ns('controlName')),

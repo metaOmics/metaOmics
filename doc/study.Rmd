@@ -6,8 +6,7 @@ output: html_document
 
 ### Slots
 * name: name of the study
-* dtype: data type of the study, should be one of: microarray, RNAseq-count, RNAseq-FPKM, 
-  continuous, discrete.
+* dtype: data type of the study, should be one of: microarray, RNAseq-FPKM/RPKM/TPM, RNAseq-count.
 * ntype: numeric nature of the study, should be one of: continuous, discrete.
 * stype: study type, should be one of: single, multiple
 * datasets: a list of dataset matrix

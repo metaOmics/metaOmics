@@ -3,6 +3,8 @@ meta_clust_ui <- function(id, label = "MetaClust") {
     tabPanel("MetaClust", value=id,
              sidebarLayout(
                  sidebarPanel(
+                   h3("MetaClust"),
+                   tags$hr(),
                      h4("Summary Table"),
                      br(),br(),
                      tableOutput(ns("summaryTable")),

@@ -188,6 +188,7 @@ meta_path_server <- function(input, output, session) {
     try({
       MAPE$result <- do.call(MAPE2.0, getOption(input))
       dir.path <- DB$working
+      MAPE$result$summary<-signif(MAPE$result$summary,digits=4) #= Peng =#
       saveRDS(MAPE$result, file=paste(dir.path, "result.rds", sep="/"))
       write.csv(MAPE$result$summary, file=paste(dir.path, "summary.csv", sep="/"))
       sendSuccessMessage(session,

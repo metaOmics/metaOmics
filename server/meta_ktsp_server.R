@@ -16,8 +16,8 @@ meta_ktsp_server <- function(input, output,session) {
         
     } 
     updateSelectizeInput(session, "twoLabels", label="Please select TWO labels to cluster", choices = NULL, server = TRUE)
-    updateSelectizeInput(session, "trainStudy", label = "Please select studies for training", choices = NULL, server = TRUE)
-    updateSelectizeInput(session, "testStudy", label = "Please select ONE study for testing", choices = NULL, server = TRUE)    
+    updateSelectizeInput(session, "trainStudy", label = "Please select studies for training (for a total of m studies, training data should be m-1 studies)", choices = NULL, server = TRUE)
+    updateSelectizeInput(session, "testStudy", label = "Please select only ONE study for testing", choices = NULL, server = TRUE)    
 
     observeEvent(input$tabChange, {
         try({
@@ -32,8 +32,8 @@ meta_ktsp_server <- function(input, output,session) {
                     labelLevels <- levels(as.factor( unlist(DB$active@clinicals[[i]]) ))
             }
             updateSelectizeInput(session, "twoLabels", label="Please select TWO labels to cluster", choices = labelLevels, server = TRUE)
-            updateSelectizeInput(session, "trainStudy", label = "Please select studies for training", choices = names(DB$transpose), server = TRUE)
-            updateSelectizeInput(session, "testStudy", label = "Please select ONE study for testing", choices = names(DB$transpose), server = TRUE)    
+            updateSelectizeInput(session, "trainStudy", label = "Please select studies for training (for a total of m studies, training data should be m-1 studies)", choices = names(DB$transpose), server = TRUE)
+            updateSelectizeInput(session, "testStudy", label = "Please select only ONE study for testing", choices = names(DB$transpose), server = TRUE)    
         }, session)
 
         
@@ -133,12 +133,15 @@ meta_ktsp_server <- function(input, output,session) {
 
             output$voPlot <- renderPlot({
                 plot(2:input$kMax, tspobj$VO,type="l",xlab="K",ylab="VO")
-                tmpInterval <- max(tspobj$VO) - min(tspobj$VO)
+                tmpInterval <- max(tspobj$VO[which(is.finite(tspobj$VO))]) - min(tspobj$VO[which(is.finite(tspobj$VO))])
                 arrows(x0=K, y0= min(tspobj$VO) + 0.75*tmpInterval, y1=min(tspobj$VO) + 0.95*tmpInterval, code=2,  length=.2,lwd=3,col=colors()[472]) 
+                text(K, min(tspobj$VO) + 0.68*tmpInterval, paste("K=",K,sep=""))
             })
+            output$voExplain <- renderText({ "The recommended K is the K maximizing variance optimization (VO) t statistics"})
+            
             trainedFlag<-1
             
-            sendSuccessMessage(session, paste("MetaPredict model trained. Recommended K updated to be", K, sep=""))
+            sendSuccessMessage(session, paste("MetaPredict model trained. Recommended K updated to be ", K, sep=""))
 
 
                 observeEvent(input$ktspTest, {
@@ -201,17 +204,19 @@ meta_ktsp_server <- function(input, output,session) {
                 output$confusionTable <- renderTable({})
             } else {
                 output$confusionTitle <- renderText({"Confusion Table"})
+                cells<-matrix(NA,2,2)
+                colnames(cells) <- paste("Original",input$twoLabels,sep="_")
+                rownames(cells) <- paste("Predicted",input$twoLabels,sep="_")
+                finalResult <- as.matrix(finalResult)
+                cells[1,1] <- length(which( (finalResult[,2]==input$twoLabels[1]) & (finalResult[,3]==input$twoLabels[1]) ))
+                cells[1,2] <- length(which( (finalResult[,2]==input$twoLabels[2]) & (finalResult[,3]==input$twoLabels[1]) ))
+                cells[2,1] <- length(which( (finalResult[,2]==input$twoLabels[1]) & (finalResult[,3]==input$twoLabels[2]) ))
+                cells[2,2] <- length(which( (finalResult[,2]==input$twoLabels[2]) & (finalResult[,3]==input$twoLabels[2]) ))
                 output$confusionTable <- renderTable({
-                    cells<-matrix(NA,2,2)
-                    colnames(cells) <- paste("Original",input$twoLabels,sep="_")
-                    rownames(cells) <- paste("Predicted",input$twoLabels,sep="_")
-                    finalResult <- as.matrix(finalResult)
-                    cells[1,1] <- length(which( (finalResult[,2]==input$twoLabels[1]) & (finalResult[,3]==input$twoLabels[1]) ))
-                    cells[1,2] <- length(which( (finalResult[,2]==input$twoLabels[2]) & (finalResult[,3]==input$twoLabels[1]) ))
-                    cells[2,1] <- length(which( (finalResult[,2]==input$twoLabels[1]) & (finalResult[,3]==input$twoLabels[2]) ))
-                    cells[2,2] <- length(which( (finalResult[,2]==input$twoLabels[2]) & (finalResult[,3]==input$twoLabels[2]) ))
-                return(cells)    
-            })            
+                  return(cells)
+                })
+                output$confusionSens <- renderText({ paste("Sensitivity = ", cells[1,1], "/", (cells[1,1] + cells[1,2]), " = ", cells[1,1]/(cells[1,1] + cells[1,2]), sep="")})
+                output$confusionSpec <- renderText({ paste("Specificity = ", cells[2,2], "/", (cells[2,1] + cells[2,2]), " = ", cells[2,2]/(cells[2,1] + cells[2,2]), sep="")})
        }
             sendSuccessMessage(session, paste("Meta KTSP prediction completed. Predicted cluster labels are save under ", DB.load.working.dir(db),"/metaKTSP",sep=""))
         }, session)

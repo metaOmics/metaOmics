@@ -4,6 +4,8 @@ meta_qc_ui <- function(id, label = "MetaQC") {
   tabPanel("MetaQC", value=id,
     sidebarLayout(
       sidebarPanel(
+        h3("MetaQC"),
+        tags$hr(),
 #       uiOutput(ns("srcSelect")),
 #       radioButtons(ns("useExample"), 'Use Example Dataset:', inline=T,c(Yes=T, No=F), T),
           h4("Summary Table"),

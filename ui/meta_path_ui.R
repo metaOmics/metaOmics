@@ -3,6 +3,8 @@ meta_path_ui <- function(id, label = "MetaPath") {
   tabPanel("MetaPath", value=id,
     sidebarLayout(
       sidebarPanel(
+        h3("MetaPath"),
+        tags$hr(),
                    h4("Summary Table"),
                    br(),br(),
                    tableOutput(ns("summaryTable")),
@@ -13,7 +15,10 @@ reduce pathway redundancy to condense knowledge and increase interpretability
 of clustering results.",
                                                 a(strong("Tutorials"),     href="https://github.com/metaOmics/tutorial/
 blob/master/metaOmics_turtorial.pdf",target="_blank"),
-                                                style = "primary"),      
+                                                style = "primary"),     
+        bsCollapsePanel("Glossary", strong("CDF"), " cumulative density function", br(),
+                        style = "default"),
+        
                     tags$hr(),
           radioButtons(ns("mixed"),"mixed data types?",c(No=F,Yes=T), F, inline=T),       
         bsCollapsePanel("Response Type", 
