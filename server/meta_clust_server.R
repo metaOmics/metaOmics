@@ -143,8 +143,10 @@ meta_clust_server <- function(input, output,session) {
         try({
             validate()
             set.seed(15213)
-            res = MetaSpaKmeans(x=DB$transpose,K=input$k,wbounds=input$wBounds, method=input$methods, sampleSizeAdjust=input$sizeAdj)
-            
+            res = MetaSparseKmeans(x=DB$transpose,K=input$k,wbounds=input$wBounds, sampleSizeAdjust=input$sizeAdj)
+            #res = MetaSparseKmeans(x=DB$transpose,K=input$k,wbounds=input$wBounds, method=input$methods, sampleSizeAdjust=input$sizeAdj)
+            ## Caleb, remove methods option.
+			
             ## output gene list
             geneList <- res$ws
             write.csv(geneList,paste( DB.load.working.dir(db),"/metaClust/geneList.csv",sep=""))
