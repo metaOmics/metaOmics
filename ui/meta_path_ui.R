@@ -17,6 +17,7 @@ of clustering results.",
 blob/master/metaOmics_turtorial.pdf",target="_blank"),
                                                 style = "primary"),     
         bsCollapsePanel("Glossary", strong("CDF"), " cumulative density function", br(),
+                        strong("FDR"), " False Discovery Rate", 
                         style = "default"),
         
                     tags$hr(),

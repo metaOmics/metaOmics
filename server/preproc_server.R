@@ -87,7 +87,7 @@ preproc_server <- function(input, output, session) {
     }
   }, label="setting STUDY$ori from file upload or selection")
 
-  # watch for change in STUDY$preview to update meda data
+  # watch for change in STUDY$preview to update meta data
   observeEvent(STUDY$preview, {
     study <- STUDY$preview
     updateTextInput(session, "studyName", value=study@name)
@@ -117,7 +117,7 @@ preproc_server <- function(input, output, session) {
         missing.count <- sum(unlist(lapply(study@datasets, function(x) sum(is.na(x)))))
         if (missing.count == 0) {
           output$impute.opt <- renderUI({
-            tags$p("Congratuations! There is no missing values :)")
+            tags$p("Congratulations! There is no missing values :)")
           })
         } else {
           if (length(input$impute) == 0) {
@@ -134,7 +134,7 @@ preproc_server <- function(input, output, session) {
         gene.symbols <- rownames(study@datasets[[1]])
         if (length(unique(gene.symbols)) == length(gene.symbols)) {
           output$replicate.opt <- renderUI({
-            tags$p("Congratuations! There is no replicated gene symbols :)")
+            tags$p("Congratulations! There is no replicated gene symbols :)")
           })
         } else {
           if (length(input$replicate) == 0) {
@@ -161,7 +161,7 @@ preproc_server <- function(input, output, session) {
   observeEvent(input$saveStudy, {
     try({
       if (is.null(STUDY$preview))
-        stop(MSG.datasetInput.noinput)
+        stop(MSG.datasetInput.noinput)       
       study <- STUDY$preview
       study@name  <- input$studyName
       study@dtype <- input$dtype

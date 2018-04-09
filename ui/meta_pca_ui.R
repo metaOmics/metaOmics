@@ -15,6 +15,8 @@ meta_pca_ui <- function(id, label = "MetaPCA") {
 blob/master/metaOmics_turtorial.pdf",target="_blank"),
                                style = "primary"),
           bsCollapsePanel("Glossary", strong("PCA"), " principal component analysis", br(),
+                                      strong("SSC"), " sum of squared cosine", br(),
+                                      strong("SV"), " sum of variance",
                                    style = "default"),
                    
                      tags$hr(),  

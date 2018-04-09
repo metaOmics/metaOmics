@@ -10,12 +10,14 @@ meta_dcn_ui <- function(id, label = "MetaNetwork") {
           tableOutput(ns("summaryTable")),
           tags$hr(),
           bsCollapsePanel("About", "This MetaNetwork panel serves as an UI for MetaNetwork package.
- MetaNetwork aims at differential network detection and combines multiple studies to identify stable and accurate differential co-expression modules between disease conditions across studies. It includes three steps to get differentially co-expressed networks: generate network, search for basic modules, and assemble supermodules.",
+ MetaNetwork aims at differential network detection and combines multiple studies to identify stable and accurate differential co-expression modules between disease conditions across studies. It includes three steps to get differentially co-expressed networks: generate network, search for basic modules, and assemble supermodules. We use the correlation to quantify the co-expression level. High correlation in a gene module, either positive or negative, means the genes inside this module are functionally related, which may indicate they are controlled by the same transcriptional regulatory program, or member of the same pathway.",
                    a(strong("Tutorials"), href="https://github.com/metaOmics/tutorial/
 blob/master/metaOmics_turtorial.pdf",target="_blank"), br(),
                    em("Suggested gene size to start with: "), strong("<500"),
                                style = "primary"),
         bsCollapsePanel("Glossary", strong("DCN"), " differentially co-expressed networks", br(),
+                                    strong("FDR"), " False Discovery Rate", br(),
+                                    strong("MC"), "  Monte Carlo",
                         style = "default"),
          tags$hr(),             
         uiOutput(ns('caseName')),

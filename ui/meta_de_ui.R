@@ -15,7 +15,9 @@ meta_de_ui <- function(id, label = "MetaDE") {
 blob/master/metaOmics_turtorial.pdf",target="_blank"),
                                style = "primary"),
         bsCollapsePanel("Glossary", strong("AW Fisher"), " adaptively-weighted Fisher", br(),
-                        strong("DE analysis"), " differential expression analysis",
+                        strong("DE analysis"), " differential expression analysis", br(),
+                        strong("FDR"), " False Discovery Rate", br(),
+                        strong("rOP"), " rth ordered p-value",
                         style = "default"),
         
          tags$hr(),      
