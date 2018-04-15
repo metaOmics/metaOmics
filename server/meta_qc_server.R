@@ -75,6 +75,8 @@ meta_qc_server <- function(input, output,session) {
 
    try({
       QC$result <- suppressWarnings(do.call(MetaQC, getOption(input)))
+      QC$result$scoreTable <- signif(QC$result$scoreTable,digits=4) #= Peng =#
+      QC$result$SMR <- signif(QC$result$SMR,digits=4) #= Peng =#
       print(QC$result$scoreTable)
       dir.path <- paste(DB.load.working.dir(db), "MetaQC", sep="/")
       if (!file.exists(dir.path)) dir.create(dir.path)
