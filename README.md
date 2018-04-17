@@ -6,7 +6,11 @@ A graphical user interface to facilitate the application of meta analysis on -Om
 docker pull metaomics/app
 docker run --rm --name metaOmics -p 3838:3838 metaomics/app
 ```
+
 Then goto your web browser on [http://127.0.0.1:3838/metaOmics/](http://127.0.0.1:3838/metaOmics/).
+
+Do note that docker is a container application that restart afresh everytime you restart the application. So expert knowledge is required to mount internal data directory out in order to persist work progress. If you just want to try out MetaOmics, docker is a great place to start. If you really use this software in your daily work, it is recommended that you read more detailed instruction on our docker page.
+
 For more information, refer to [docker page](https://hub.docker.com/r/metaomics/app/).
 
 ## How to start the app
