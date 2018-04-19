@@ -145,7 +145,7 @@ meta_path_server <- function(input, output, session) {
     opt$summary <- result$summary
     opt$software <- result$method
     opt$pathway <- result$pathway
-    opt$max_k <- 20
+    #opt$max_k <- 20, now the default is 10
     dir.path <- paste(DB$working, "clustering diagnostics", sep="/")
     if (!file.exists(dir.path)) dir.create(dir.path)
     opt$output_dir <- dir.path
@@ -209,12 +209,12 @@ meta_path_server <- function(input, output, session) {
     })
     
     output$consensus <- renderImage({
-      img.src <- paste(DB$working, "clustering diagnostics", "consensus021.png", sep="/")
+      img.src <- paste(DB$working, "clustering diagnostics", "consensus011.png", sep="/")
       list(src=img.src, contentType='image/png', alt="consensus plot")
     })
 
     output$delta <- renderImage({
-      img.src <- paste(DB$working, "clustering diagnostics", "consensus022.png", sep="/")
+      img.src <- paste(DB$working, "clustering diagnostics", "consensus012.png", sep="/")
       list(src=img.src, contentType='image/png', alt="delta area plot")
     })
     done(session)
