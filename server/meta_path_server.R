@@ -240,7 +240,7 @@ meta_path_server <- function(input, output, session) {
     print(img.src)
     output$heatmap <- renderImage(              
      list(src=img.src, contentType='image/png', alt="heatmap of clusters")
-     )           
+     )
     done(session)
   })
   
