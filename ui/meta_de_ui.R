@@ -3,6 +3,8 @@ meta_de_ui <- function(id, label = "MetaDE") {
   tabPanel("MetaDE", value=id,
     sidebarLayout(
       sidebarPanel(
+        h3("MetaDE"),
+        tags$hr(),
           h4("Summary Table"),
           br(),br(),
           tableOutput(ns("summaryTable")),
@@ -12,6 +14,12 @@ meta_de_ui <- function(id, label = "MetaDE") {
                    a(strong("Tutorials"), href="https://github.com/metaOmics/tutorial/
 blob/master/metaOmics_turtorial.pdf",target="_blank"),
                                style = "primary"),
+        bsCollapsePanel("Glossary", strong("AW Fisher"), " adaptively-weighted Fisher", br(),
+                        strong("DE analysis"), " differential expression analysis", br(),
+                        strong("FDR"), " False Discovery Rate", br(),
+                        strong("rOP"), " rth ordered p-value",
+                        style = "default"),
+        
          tags$hr(),      
         selectizeInput(ns("meta.type"), "Meta Method Type", as.list(META.TYPE.all)),
         uiOutput(ns("meta.type.opt")),

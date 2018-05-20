@@ -170,6 +170,8 @@ meta_de_server <- function(input, output, session) {
         DE$result <- do.call(MetaDE, getOption(input))
       }
       DE$summary <- summary.meta(DE$result, input$meta.method, input$resp.type)
+      index <- unlist(lapply(DE$summary, is.numeric))
+      DE$summary[,index] <-signif(DE$summary[,index],digits=4) #= Peng =#
       dir.path <- paste(DB.load.working.dir(db), "MetaDE", sep="/")
       if (!file.exists(dir.path)) dir.create(dir.path)
       file.path <- paste(dir.path, "summary.csv", sep="/")
@@ -216,6 +218,7 @@ meta_de_server <- function(input, output, session) {
                               DEgene.number=DEgene.number,
                               size.min=size.min, size.max=size.max)           
       dir.path <- paste(DB.load.working.dir(db), "MetaDE", sep="/")
+      DE$pathresult <-signif(DE$pathresult,digits=4) #= Peng =#
       if (!file.exists(dir.path)) dir.create(dir.path)
       file.path <- paste(dir.path, "pathway.summary.csv", sep="/")
       write.csv(DE$pathresult, file=file.path)

@@ -7,6 +7,8 @@ preproc_ui <- function(id, label= "preprocessing data") {
         # Choosing / Upload Data #
         ##########################
         h4("Data"),
+                        tags$hr(),
+        tags$p(strong("For RNA-seq studies, MetaOmics allows input of both raw count data and continuous data (e.g. FPKM/RPKM/TPM). For MetaDE and MetaPath modules, the count data is recommended for better statistical power and accuracy. For the other modules, the meta-analysis methods will require continuous data input.")),
         bsCollapse(id="preproc-data",
           bsCollapsePanel("Choosing/Upload Expression Data",
             tagList(

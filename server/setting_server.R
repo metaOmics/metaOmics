@@ -86,10 +86,13 @@ setting_server <- function(input, output, session) {
     },
     handlerExpr = {
       if (input$directory > 0) {
-        path = choose.dir(default = readDirectoryInput(session, 'directory'))
+          path = choose.dir(default = readDirectoryInput(session, 'directory'))
+		  path <- path[length(path)] ## to fix the Apple bug
+  #        path = choose.dir(default = "~/") # Ark fix
 	if(is.na(path)) {
 	  sendErrorMessage(session, MSG.no.working.dir)
-	} else {
+  } else {
+#      path = "~/" #Ark fix
           updateDirectoryInput(session, 'directory', value = path)
           DB.set.working.dir(db, path)
           output$working.dir <- renderText({DB.load.working.dir(db)})
