@@ -27,7 +27,7 @@ meta_de_server <- function(input, output, session) {
 
     opt$data <- study@datasets
     opt$clin.data <- study@clinicals
-    opt$data.type <- study@dtype
+    opt$data.type <- study@ntype
     method <- input$meta.method
     opt$meta.method <- method
     if (method == META.roP || method == META.roP.OC) {

@@ -13,7 +13,7 @@ meta_path_server <- function(input, output, session) {
      
       opt$arraydata <- DB$active@datasets
       opt$clinical.data <- DB$active@clinicals
-      opt$data.type <- DB$active@dtype
+      opt$data.type <- DB$active@ntype
 
     if (length(input$method) > 0) {
       method <- input$method
