@@ -6,6 +6,7 @@ preproc_server <- function(input, output, session) {
   ##########################
   DB   <- reactiveValues(names=DB.ls(db))
   STUDY <- reactiveValues(action="", update=0, ori=NULL, preview=NULL, clinicals=NULL)
+  GEO <- reactiveValues(name=NULL,expr=NULL,pheno=NULL) ##
 
   ##########################
   # Validation             #
@@ -29,9 +30,59 @@ preproc_server <- function(input, output, session) {
   ##########################
   # watch for tab change, get the newest list of all data
   observeEvent(input$tabChange, {DB$names <- DB.ls(db)}, 
-               label="tab change")
-  # watch for expression file upload
+               label="tab change")  
+               
+#  # retrieve GEO dataset
+#  observeEvent(input$retrieveGEOData, {
+#  	if (!is.null(input$geo)) {
+#    wait(session, "Retrieving GEO data, should be soon")
+#    try({
+#    	    number <- length(GEO)
+#        gset <- getGEO(input$geo, GSEMatrix =TRUE,getGPL=F,destdir = tempdir())
+#        gset <- gset[[1]]
+#        geo.expr <- exprs(gset)    	
+#        geo.pheno <- pData(phenoData(gset))
+#    	    GEO[[number +1]] <- geo.expr
+#    	    names(GEO)[number+1] <- input$geo
+      
+#     sendSuccessMessage(session, paste(input$geo," data retrieved from GEO database"), unique=T)
+#               
+#     }, session)
+#    }
+#    done(session)
+#  }) ##
   
+  # download geo data 
+  observeEvent(input$downloadGEOData, {
+  	if (!is.null(input$geo)) {
+    wait(session, "Downloading GEO data, should be soon")
+    try({
+        gset <- getGEO(input$geo, GSEMatrix =TRUE,getGPL=F,destdir = tempdir())
+        gset <- gset[[1]]
+        geo.expr <- exprs(gset)    	
+        geo.pheno <- pData(phenoData(gset))
+        GEO$name <- input$geo   	        	   
+    	    GEO$expr <- geo.expr
+    	    GEO$pheno <- geo.pheno
+                
+      geo.dir.path <- paste(DB.load.working.dir(db), "GEO", sep="/")
+      if (!file.exists(geo.dir.path)) dir.create(geo.dir.path)
+      
+      write.csv(geo.expr, file=paste(geo.dir.path,"/",input$geo,"_expr.csv",sep=""))
+      write.csv(geo.pheno, file=paste(geo.dir.path,"/",input$geo,"_pheno.csv",sep=""))
+      
+     sendSuccessMessage(session, paste(input$geo," data retrieved from GEO database and downloaded to local directory"), unique=T)
+     
+     }, session)
+    }
+    done(session)  	
+  }) ##
+  
+#  observe({
+#  	 updateSelectizeInput(session, 'study', server = T, choices = names(GEO),selected=tail(names(GEO),1))
+#  })
+                                            
+  # watch for expression file upload  
   observeEvent(c(input$header, input$data.sep, input$data.quote,
                  input$log, input$exprfile), {
     if (!is.null(input$exprfile)) {
@@ -40,7 +91,7 @@ preproc_server <- function(input, output, session) {
       updateSelectizeInput(session, "study", selected="")
       STUDY$clinicals <- NULL
     }
-  }, label="expression file upload")
+  }, label="expression file upload")  
   # watch for clinical file upload
   observeEvent(c(input$clinical.sep, input$clinical.quote, input$clinical), {
     if (!is.null(input$clinical)) {
@@ -48,6 +99,20 @@ preproc_server <- function(input, output, session) {
       STUDY$update <- STUDY$update + 1
     }
   }, label="clinical file upload")
+  # watch for GEO study selection
+  observeEvent(c(input$useGEO, input$logGEO), {
+    if (input$useGEO ==T){
+    	    if(input$logGEO==T) {
+          try({	
+      	   dat <- isolate(GEO$expr)
+      	   dat[dat <= 0] <- 0.001
+      	   GEO$expr <- log2(dat) 
+         },session)
+        }    	  
+      STUDY$action <- STUDY.select.from.geo
+      STUDY$update <- STUDY$update + 1
+    }
+  }, label="use GEO study") ##
   # watch for study selection
   observeEvent(input$study, {
     if (input$study %in% DB$names) {
@@ -56,8 +121,8 @@ preproc_server <- function(input, output, session) {
       session$sendCustomMessage(type="resetFile", message="#preproc-exprfile")
       session$sendCustomMessage(type="resetFile", message="#preproc-clinical")
     }
-  }, label="select study from database")
-
+  }, label="select study from database") 
+  
   # Setting study from file type
   observeEvent(STUDY$update, {
     if (STUDY$action == STUDY.expression.upload) {
@@ -70,6 +135,16 @@ preproc_server <- function(input, output, session) {
         sendErrorMessage(session, error$message)
       })
       done(session)
+    } else if (STUDY$action == STUDY.select.from.geo) {
+      tryCatch({STUDY$ori <- new("Study",
+                        name= isolate(GEO$name),
+                        dtype=DTYPE.microarray, 
+                        datasets = list(GEO$expr), 
+                        clinicals = list(GEO$pheno));
+                STUDY$clinicals <- list(GEO$pheno)        
+                    }, error=function(error) {
+        sendErrorMessage(session, error$message)
+      }) ##  
     } else if (STUDY$action == STUDY.select.from.db) {
       STUDY$ori <- DB.load(db, input$study)[[1]]
       STUDY$clinicals <- STUDY$ori@clinicals
@@ -186,10 +261,10 @@ preproc_server <- function(input, output, session) {
     # update annotation to gene symbol, since saved study shouldn't be annotated
     updateSelectizeInput(session, "id.type", selected=ID.TYPE.geneSymbol)
   }, label="update selected study")
-
+  
   ##########################
   # Render output/UI       #
-  ##########################
+  ##########################    
   # data title
   output$studyName <- renderText({ paste(input$studyName, "Summary") })
   # summary

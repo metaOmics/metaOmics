@@ -10,6 +10,15 @@ preproc_ui <- function(id, label= "preprocessing data") {
                         tags$hr(),
         tags$p(strong("For RNA-seq studies, MetaOmics allows input of both raw count data and continuous data (e.g. FPKM/RPKM/TPM). For MetaDE and MetaPath modules, the count data is recommended for better statistical power and accuracy. For the other modules, the meta-analysis methods will require continuous data input.")),
         bsCollapse(id="preproc-data",
+          bsCollapsePanel("Download GEO dataset (optional)",
+                textInput(ns("geo"), "GSE ID", ""
+                ),
+                #actionButton(ns('retrieveGEOData'), 'Retrieve GEO data', icon=icon("Retrieve"), class="btn-success"
+                #),
+              actionButton(ns('downloadGEOData'), "Download GEO data", icon=icon("Download"), class="btn-success"
+            ), 
+            tags$p("For the direct use of GEO datasets, we suggest users perform standard preprocessing on the downloaded datasets before using in the MetaOmics software"),style="primary"
+          ), ##
           bsCollapsePanel("Choosing/Upload Expression Data",
             tagList(
               fileInput(ns("exprfile"), 'Choose CSV File',
@@ -31,8 +40,15 @@ preproc_ui <- function(id, label= "preprocessing data") {
                 tags$hr()
               ),
               selectizeInput(ns("study"), "Or use existing datasets", DB.ls(db),
-                options = select.noDefault
-              )
+                options = select.noDefault),
+              #, selectizeInput(ns("geo.study"), "Or use GEO datasets", NULL,
+              #  options = list(create = TRUE)) 
+              #,textInput(ns("geo.study"), "GSE ID")
+                 radioButtons(ns("useGEO"), 'Directly use the downloaded GEO dataset', inline=T,
+                   c('No'=F,'Yes'=T), F),
+                  radioButtons(ns("logGEO"), 'Log tranforming GEO data', inline=T,
+                    c('No'=F,'Yes'=T), F 
+                ) ###            
             ), style="primary"
           ),
           bsCollapsePanel("Upload Clinical Data",

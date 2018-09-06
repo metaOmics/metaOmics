@@ -17,6 +17,7 @@ select.noDefault <- list(
 STUDY.expression.upload = "uploadExpression"
 STUDY.clinical.upload   = "uploadClinical"
 STUDY.select.from.db    = "selectStudy"
+STUDY.select.from.geo = "selectGEO" ##
 
 META.TYPE.p <- "p"
 META.TYPE.effect <- "effect"

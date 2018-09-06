@@ -11,7 +11,7 @@ setting_ui <- function(id, label = "global settings") {
 blob/master/metaOmics_turtorial.pdf",target="_blank")), 
       p("MetaOmics is developed and maintained by ", a("Dr. George Tseng's group ",href="http://tsenglab.biostat.pitt.edu",target="_blank"),"from the Department of Biostatistics, University of Pittsburgh."),
       p("We recommend users to use R 3.3 to implement our tool. If you are using R 3.4, you may encounter errors in installing dependencies of the modules. You can manually install the dependencies by running the following commands in R:"),
-      p(em("install.packages(c('GSA','combinat', 'samr', 'survival', 'cluster', 'gplots', 'ggplot2', 'irr', 'shape', 'snow', 'snowfall', 'igraph', 'doMC', 'PMA')); source('https://bioconductor.org/biocLite.R') ; biocLite(c('multtest', 'Biobase', 'edgeR', 'DESeq2', 'impute', 'limma', 'AnnotationDbi', 'ConsensusClusterPlus', 'genefilter', 'GSEABase', 'Rgraphviz'))")),
+      p(em("install.packages(c('GSA','combinat', 'samr', 'survival', 'cluster', 'gplots', 'ggplot2', 'irr', 'shape', 'snow', 'snowfall', 'igraph', 'doMC', 'PMA')); source('https://bioconductor.org/biocLite.R') ; biocLite(c('multtest', 'Biobase', 'edgeR', 'DESeq2', 'impute', 'limma', 'AnnotationDbi', 'ConsensusClusterPlus', 'genefilter', 'GSEABase', 'Rgraphviz','GEOquery'))")),
       p("For Windows, users need to run the following command in R to install the package 'doMC':"),
       p(em("install.packages('doMC', repos='http://R-Forge.R-project.org')")),
       style="text-indent: 25px; font-size: 20px"),

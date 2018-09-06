@@ -16,12 +16,16 @@ if(GLOBAL.network) {
   if (!("AnnotationDbi" %in% installed)) {
     biocLite("AnnotationDbi")
   }
+  if (!("GEOquery" %in% installed)) {
+    biocLite("GEOquery")
+  }
   if (!("preproc" %in% installed)) {
     devtools::install_github("metaOmics/preproc")
   }
 }
 
 library(preproc)
+library(GEOquery)
 library(shiny)
 library(shinyBS)
 
