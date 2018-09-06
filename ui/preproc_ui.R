@@ -17,7 +17,7 @@ preproc_ui <- function(id, label= "preprocessing data") {
                 #),
               actionButton(ns('downloadGEOData'), "Download GEO data", icon=icon("Download"), class="btn-success"
             ), 
-            tags$p("For the direct use of GEO datasets, we suggest users perform standard preprocessing on the downloaded datasets before using in the MetaOmics software"),style="primary"
+            tags$p("For the direct use of GEO datasets, we suggest users carefully scan through the downloaded data and check the quality in advance before using in the MetaOmics software"),style="primary"
           ), ##
           bsCollapsePanel("Choosing/Upload Expression Data",
             tagList(
