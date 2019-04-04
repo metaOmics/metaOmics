@@ -20,7 +20,9 @@ if(GLOBAL.network) {
     biocLite("GEOquery")
   }
   if (!("preproc" %in% installed)) {
-    devtools::install_github("metaOmics/preproc")
+    #devtools::install_github("metaOmics/preproc")
+    remotes::install_url("https://github.com/metaOmics/preproc/archive/master.zip",
+                install_opt="--no-multiarch")
   }
 }
 
