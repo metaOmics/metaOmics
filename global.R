@@ -1,7 +1,9 @@
 # This file will be executed prior to app startup to setup the necessary environment
 GLOBAL.network <- T
 tryCatch({
-  source("http://bioconductor.org/biocLite.R")
+  if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager", repos='http://cran.us.r-project.org')
+  #source("http://bioconductor.org/biocLite.R")
 }, error=function(error){
   GLOBAL.network <<- F
 })
@@ -14,15 +16,17 @@ if(GLOBAL.network) {
     }
   }
   if (!("AnnotationDbi" %in% installed)) {
-    biocLite("AnnotationDbi")
+    #biocLite("AnnotationDbi")
+	BiocManager::install("AnnotationDbi", update = FALSE)
   }
   if (!("GEOquery" %in% installed)) {
-    biocLite("GEOquery")
+    #biocLite("GEOquery")
+	BiocManager::install("GEOquery", update = FALSE)
   }
   if (!("preproc" %in% installed)) {
     #devtools::install_github("metaOmics/preproc")
     remotes::install_url("https://github.com/metaOmics/preproc/archive/master.zip",
-                install_opt="--no-multiarch")
+                install_opt="--no-multiarch", upgrade="never")
   }
 }
 
